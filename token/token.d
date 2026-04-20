@@ -1,4 +1,4 @@
-module token;
+module token.token;
 
 import std;
 

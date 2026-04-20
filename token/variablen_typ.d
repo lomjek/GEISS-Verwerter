@@ -14,7 +14,9 @@ enum VariablenTyp
 
 	FARBE,
 
-	AUSDRUCK
+	AUSDRUCK,
+
+	LISTE
 }
 
 string[VariablenTyp] variablenTyp_strings;
@@ -34,4 +36,6 @@ static this()
 	variablenTyp_strings[VariablenTyp.FARBE] = "farbe";
 
 	variablenTyp_strings[VariablenTyp.AUSDRUCK] = "ausdruck";
+
+	variablenTyp_strings[VariablenTyp.LISTE] = "liste";
 }

@@ -2,7 +2,7 @@ module inerpreter;
 
 import std;
 import leser;
-import token;
+import token.token;
 
 // @ {} [] # \ || != ~
 
