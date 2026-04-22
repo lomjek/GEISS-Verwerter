@@ -22,6 +22,11 @@ void main(string[] args)
         {
             return;
         }
+        else if (repl_linie == "clear")
+        {
+            write("\x1b[2J\x1b[H");
+            continue;
+        }
 
         writeln(repl_linie);
 
