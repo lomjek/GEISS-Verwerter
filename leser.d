@@ -195,7 +195,6 @@ private Variable als_wert_zahl(dchar[] wort)
 
 private Variable als_wert(dchar[] wort)
 {
-	wort = wort.strip;
 	if (wort.ist_string == Verifizierung.ja)
 	{
 		return als_wert_string(wort);
@@ -208,20 +207,55 @@ private Variable als_wert(dchar[] wort)
 	return Variable(VariablenTyp.INVALID, null);
 }
 
+// MARK: operatoren
+private bool ist_operator(dchar[] wort)
+{
+	if (wort.length > 1)
+	{
+		return false;
+	}
+	dchar op_char = wort[0];
+
+	foreach (dchar chr; operatoren_chars.byValue)
+	{
+		if (chr == op_char)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+private OperatorenTyp als_operator(dchar[] wort)
+{
+	if (wort.length > 1)
+	{
+		return OperatorenTyp.INVALID;
+	}
+
+	dchar chr = wort[0];
+
+	foreach (OperatorenTyp op, dchar op_char; operatoren_chars)
+	{
+		if (op_char == chr)
+		{
+			return op;
+		}
+	}
+
+	return OperatorenTyp.INVALID;
+}
+
 // MARK: lese_linie
 Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 {
+	// Mache Platz vor und nach den Operatoren, damit sie aufgetrennt werden
 	foreach (op; EnumMembers!OperatorenTyp)
 	{
 		dchar[] to_convert = [' ', operatoren_chars[op], ' '];
 		linie = replaceAll(linie, operatoren_chars[op],
 			to_convert);
 	}
-
-	const dchar[2] DOUBLE_SPACE = [' ', ' '];
-	linie = replaceAll(linie, cast(dchar[]) "  ".dchar_from_string, " ".dchar_from_string);
-
-	writeln(linie);
 
 	Token[] token_liste;
 	dchar[][] wort_liste = linie.split(" ");
@@ -230,9 +264,19 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 	foreach (dchar[] wort; wort_liste)
 	{
+		wort = wort.strip;
+
 		wort = wort_präfix ~ wort;
 		wort_präfix = [];
 
+		// Clean up
+		if (wort.length == 0)
+		{
+			wort_präfix = [];
+			continue;
+		}
+
+		// VariablenTypen
 		if (wort.ist_vt == Verifizierung.ja)
 		{
 			VariablenTyp* vt = new VariablenTyp;
@@ -273,6 +317,18 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 		else if (wort.ist_wert == Verifizierung.nicht_ganz)
 		{
 			wort_präfix = wort ~ " ";
+		}
+
+		if (wort.ist_operator)
+		{
+			wort_präfix = [];
+			OperatorenTyp* op_typ = new OperatorenTyp;
+			*op_typ = wort.als_operator;
+
+			writeln(*op_typ);
+
+			token_liste ~= Token(Token_Typ.operator, op_typ);
+			continue;
 		}
 	}
 

@@ -2,6 +2,8 @@ module token.operatoren;
 
 enum OperatorenTyp
 {
+	INVALID,
+
 	PLUS,
 	MINUS,
 	MAL,
@@ -28,6 +30,8 @@ dchar[OperatorenTyp] operatoren_chars;
 
 static this()
 {
+	operatoren_chars[OperatorenTyp.INVALID] = '\0';
+
 	operatoren_chars[OperatorenTyp.PLUS] = '+';
 	operatoren_chars[OperatorenTyp.MINUS] = '-';
 	operatoren_chars[OperatorenTyp.MAL] = '*';
