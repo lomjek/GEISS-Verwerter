@@ -1,6 +1,10 @@
 module repl;
 
-import std;
+import std.stdio : readln, writeln, write;
+import std.string : strip;
+
+import ext.string : dchar_from_string;
+
 import inerpreter;
 
 // @ {} [] # \ || != ~
@@ -16,7 +20,7 @@ void main(string[] args)
     while (true)
     {
         print_prompt();
-        string repl_linie = readln().strip;
+        dchar[] repl_linie = readln().strip.dchar_from_string;
 
         if (repl_linie == "exit")
         {

@@ -1,21 +1,21 @@
 module token.schlüsselwörter;
 
+import ext.string : dchar_from_string;
+
 // @ {} [] # \ || != ~
 
 enum SchlüsselWort
 {
 	INVALID,
 
-	rück_pfeil,
-	pro,
-	der
+	PRO,
+	DER
 }
 
-string[SchlüsselWort] schlüsselWort_dict;
+dchar[][SchlüsselWort] schlüsselWort_dict;
 
 static this()
 {
-	schlüsselWort_dict[SchlüsselWort.rück_pfeil] = "<-";
-	schlüsselWort_dict[SchlüsselWort.pro] = "pro";
-	schlüsselWort_dict[SchlüsselWort.der] = "der";
+	schlüsselWort_dict[SchlüsselWort.PRO] = "pro".dchar_from_string;
+	schlüsselWort_dict[SchlüsselWort.DER] = "der".dchar_from_string;
 }

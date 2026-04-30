@@ -1,5 +1,7 @@
 module token.variablen_typ;
 
+import ext.string : dchar_from_string;
+
 // @ {} [] # \ || != ~
 
 enum VariablenTyp
@@ -19,23 +21,23 @@ enum VariablenTyp
 	LISTE
 }
 
-string[VariablenTyp] variablenTyp_strings;
-string[] typ_präfixe = [
-	"ganze",
-	"natürliche"
+dchar[][VariablenTyp] variablenTyp_strings;
+dchar[][] typ_präfixe = [
+	['g', 'a', 'n', 'z', 'e'],
+	['n', 'a', 't', 'ü', 'r', 'l', 'i', 'c', 'h', 'e']
 ];
 
 static this()
 {
-	variablenTyp_strings[VariablenTyp.ZAHL] = "zahl";
-	variablenTyp_strings[VariablenTyp.GANZE_ZAHL] = "ganze_zahl";
-	variablenTyp_strings[VariablenTyp.NATÜRLICHE_ZAHL] = "natürliche_zahl";
+	variablenTyp_strings[VariablenTyp.ZAHL] = "zahl".dchar_from_string;
+	variablenTyp_strings[VariablenTyp.GANZE_ZAHL] = "ganze_zahl".dchar_from_string;
+	variablenTyp_strings[VariablenTyp.NATÜRLICHE_ZAHL] = "natürliche_zahl".dchar_from_string;
 
-	variablenTyp_strings[VariablenTyp.WAHRHEIT] = "wahrheit";
+	variablenTyp_strings[VariablenTyp.WAHRHEIT] = "wahrheit".dchar_from_string;
 
-	variablenTyp_strings[VariablenTyp.FARBE] = "farbe";
+	variablenTyp_strings[VariablenTyp.FARBE] = "farbe".dchar_from_string;
 
-	variablenTyp_strings[VariablenTyp.AUSDRUCK] = "ausdruck";
+	variablenTyp_strings[VariablenTyp.AUSDRUCK] = "ausdruck".dchar_from_string;
 
-	variablenTyp_strings[VariablenTyp.LISTE] = "liste";
+	variablenTyp_strings[VariablenTyp.LISTE] = "liste".dchar_from_string;
 }

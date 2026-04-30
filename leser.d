@@ -2,10 +2,13 @@ module leser;
 
 import std;
 
+import ext.string;
+
 import token.token;
 import token.schlüsselwörter;
 import token.variablen_typ;
 import token.variable;
+import token.operatoren;
 
 // @ {} [] # \ || != ~
 
@@ -17,9 +20,9 @@ private enum Verifizierung
 }
 
 // MARK: Schüsselwort 
-private Verifizierung ist_sw(string wort)
+private Verifizierung ist_sw(dchar[] wort)
 {
-	foreach (SchlüsselWort swort, string wert; schlüsselWort_dict)
+	foreach (SchlüsselWort swort, dchar[] wert; schlüsselWort_dict)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -30,9 +33,9 @@ private Verifizierung ist_sw(string wort)
 	return Verifizierung.nein;
 }
 
-private SchlüsselWort als_sw(string wort)
+private SchlüsselWort als_sw(dchar[] wort)
 {
-	foreach (SchlüsselWort swort, string wert; schlüsselWort_dict)
+	foreach (SchlüsselWort swort, dchar[] wert; schlüsselWort_dict)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -44,9 +47,9 @@ private SchlüsselWort als_sw(string wort)
 }
 
 // MARK: VariablenTyp
-private Verifizierung ist_vt(string wort)
+private Verifizierung ist_vt(dchar[] wort)
 {
-	foreach (VariablenTyp typ, string wert; variablenTyp_strings)
+	foreach (VariablenTyp typ, dchar[] wert; variablenTyp_strings)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -54,7 +57,7 @@ private Verifizierung ist_vt(string wort)
 		}
 	}
 
-	foreach (string präfix; typ_präfixe)
+	foreach (dchar[] präfix; typ_präfixe)
 	{
 		if (präfix.strip == wort.strip)
 		{
@@ -66,9 +69,9 @@ private Verifizierung ist_vt(string wort)
 	return Verifizierung.nein;
 }
 
-private VariablenTyp als_vt(string wort)
+private VariablenTyp als_vt(dchar[] wort)
 {
-	foreach (VariablenTyp typ, string wert; variablenTyp_strings)
+	foreach (VariablenTyp typ, dchar[] wert; variablenTyp_strings)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -80,11 +83,13 @@ private VariablenTyp als_vt(string wort)
 }
 
 // MARK: wert
-const static string[4] string_delims = ["\\'", "\\\"", "'", "\""];
+dchar[][] string_delims = [
+	['\\', '\''], ['\\', '"'], ['\''], ['"']
+];
 
-private Verifizierung ist_string(string wort)
+private Verifizierung ist_string(dchar[] wort)
 {
-	foreach (string delim; string_delims)
+	foreach (dchar[] delim; string_delims)
 	{
 		if (wort.strip.startsWith(delim) && wort.length == delim.length)
 		{
@@ -104,7 +109,7 @@ private Verifizierung ist_string(string wort)
 	return Verifizierung.nein;
 }
 
-private bool ist_zahl(string wort)
+private bool ist_zahl(dchar[] wort)
 {
 	wort = wort.strip;
 	try
@@ -118,7 +123,7 @@ private bool ist_zahl(string wort)
 	}
 }
 
-private Verifizierung ist_wert(string wort)
+private Verifizierung ist_wert(dchar[] wort)
 {
 	if (wort.ist_zahl)
 	{
@@ -137,7 +142,7 @@ private Verifizierung ist_wert(string wort)
 	return Verifizierung.nein;
 }
 
-private Variable als_wert_string(string wort)
+private Variable als_wert_string(dchar[] wort)
 {
 	if ((wort.startsWith("'") && wort.endsWith("'")) || (wort.startsWith('"') && wort.endsWith('"')))
 	{
@@ -149,13 +154,13 @@ private Variable als_wert_string(string wort)
 		wort = wort[2 .. $ - 2];
 	}
 
-	string* str = (new string[](wort.length)).ptr;
+	dchar[]* str = (new dchar[][](wort.length)).ptr;
 	*str = wort;
 	writeln(*str);
 	return Variable(VariablenTyp.AUSDRUCK, str);
 }
 
-private Variable als_wert_zahl(string wort)
+private Variable als_wert_zahl(dchar[] wort)
 {
 	try
 	{
@@ -188,7 +193,7 @@ private Variable als_wert_zahl(string wort)
 	}
 }
 
-private Variable als_wert(string wort)
+private Variable als_wert(dchar[] wort)
 {
 	wort = wort.strip;
 	if (wort.ist_string == Verifizierung.ja)
@@ -204,17 +209,29 @@ private Variable als_wert(string wort)
 }
 
 // MARK: lese_linie
-Token[] lese_linie(string linie, uint* fehlermeldungen)
+Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 {
+	foreach (op; EnumMembers!OperatorenTyp)
+	{
+		dchar[] to_convert = [' ', operatoren_chars[op], ' '];
+		linie = replaceAll(linie, operatoren_chars[op],
+			to_convert);
+	}
+
+	const dchar[2] DOUBLE_SPACE = [' ', ' '];
+	linie = replaceAll(linie, cast(dchar[]) "  ".dchar_from_string, " ".dchar_from_string);
+
+	writeln(linie);
+
 	Token[] token_liste;
-	string[] wort_liste = linie.split(" ");
+	dchar[][] wort_liste = linie.split(" ");
 
-	string wort_präfix = "";
+	dchar[] wort_präfix;
 
-	foreach (string wort; wort_liste)
+	foreach (dchar[] wort; wort_liste)
 	{
 		wort = wort_präfix ~ wort;
-		wort_präfix = "";
+		wort_präfix = [];
 
 		if (wort.ist_vt == Verifizierung.ja)
 		{
@@ -233,7 +250,7 @@ Token[] lese_linie(string linie, uint* fehlermeldungen)
 
 		if (wort.ist_sw == Verifizierung.ja)
 		{
-			wort_präfix = "";
+			wort_präfix = [];
 			SchlüsselWort* sw = new SchlüsselWort;
 
 			*sw = wort.als_sw;
@@ -244,7 +261,7 @@ Token[] lese_linie(string linie, uint* fehlermeldungen)
 
 		if (wort.ist_wert == Verifizierung.ja)
 		{
-			wort_präfix = "";
+			wort_präfix = [];
 			Variable* var = new Variable;
 			*var = als_wert(wort);
 
