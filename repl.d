@@ -22,13 +22,13 @@ void main(string[] args)
         print_prompt();
         dchar[] repl_linie = [];
         readln(repl_linie);
-        repl_linie.strip;
+        repl_linie = repl_linie.strip;
 
-        if (repl_linie == "exit")
+        if (repl_linie == "exit".dchar_from_string)
         {
             return;
         }
-        else if (repl_linie == "clear")
+        else if (repl_linie == "clear".dchar_from_string)
         {
             write("\x1b[2J\x1b[H");
             continue;
