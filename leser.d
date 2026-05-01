@@ -82,7 +82,7 @@ private VariablenTyp als_vt(dchar[] wort)
 	return VariablenTyp.INVALID;
 }
 
-// MARK: wert
+// MARK: Wert - ist?
 dchar[][] string_delims = [
 	['\\', '\''], ['\\', '"'], ['\''], ['"']
 ];
@@ -123,25 +123,34 @@ private bool ist_zahl(dchar[] wort)
 	}
 }
 
+private bool ist_wahrheit(dchar[] wort)
+{
+	if (wort == "wahr"d || wort == "falsch"d)
+	{
+		return true;
+	}
+	return false;
+}
+
 private Verifizierung ist_wert(dchar[] wort)
 {
 	if (wort.ist_zahl)
 	{
 		return Verifizierung.ja;
 	}
-
-	if (wort.ist_string == Verifizierung.ja)
+	else if (wort.ist_string == Verifizierung.nein)
+	{
+		return wort.ist_string;
+	}
+	else if (wort.ist_wahrheit)
 	{
 		return Verifizierung.ja;
-	}
-	else if (wort.ist_string == Verifizierung.nicht_ganz)
-	{
-		return Verifizierung.nicht_ganz;
 	}
 
 	return Verifizierung.nein;
 }
 
+//MARK: Wert - als!
 private Variable als_wert_string(dchar[] wort)
 {
 	if ((wort.startsWith("'") && wort.endsWith("'")) || (wort.startsWith('"') && wort.endsWith('"')))
@@ -192,6 +201,24 @@ private Variable als_wert_zahl(dchar[] wort)
 	}
 }
 
+private Variable als_wert_wahrheit(dchar[] wort)
+{
+	bool* wahr;
+	if (wort == "wahr"d)
+	{
+		*wahr = true;
+	}
+	else if (wort == "falsch"d)
+	{
+		*wahr = false;
+	}
+	else
+	{
+		return Variable(VariablenTyp.INVALID, null);
+	}
+	return Variable(VariablenTyp.WAHRHEIT, wahr);
+}
+
 private Variable als_wert(dchar[] wort)
 {
 	if (wort.ist_string == Verifizierung.ja)
@@ -200,7 +227,7 @@ private Variable als_wert(dchar[] wort)
 	}
 	else if (wort.ist_zahl)
 	{
-
+		return als_wert_zahl(wort);
 	}
 
 	return Variable(VariablenTyp.INVALID, null);
