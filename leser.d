@@ -154,9 +154,8 @@ private Variable als_wert_string(dchar[] wort)
 		wort = wort[2 .. $ - 2];
 	}
 
-	dchar[]* str = (new dchar[][](wort.length)).ptr;
-	*str = wort;
-	writeln(*str);
+	dchar[]* str = (new dchar[][1]).ptr;
+	*str = wort.dup;
 	return Variable(VariablenTyp.AUSDRUCK, str);
 }
 
@@ -272,7 +271,6 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 		// Clean up
 		if (wort.length == 0)
 		{
-			wort_präfix = [];
 			continue;
 		}
 
@@ -283,7 +281,6 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 			*vt = wort.als_vt;
 			token_liste ~= Token(Token_Typ.var_typ, vt);
-			writeln(wort.als_vt);
 			continue;
 		}
 		else if (wort.ist_vt == Verifizierung.nicht_ganz)
@@ -294,24 +291,19 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 		if (wort.ist_sw == Verifizierung.ja)
 		{
-			wort_präfix = [];
 			SchlüsselWort* sw = new SchlüsselWort;
 
 			*sw = wort.als_sw;
 			token_liste ~= Token(Token_Typ.schlussel_wort, sw);
-			writeln(wort.als_sw);
 			continue;
 		}
 
 		if (wort.ist_wert == Verifizierung.ja)
 		{
-			wort_präfix = [];
 			Variable* var = new Variable;
 			*var = als_wert(wort);
 
 			token_liste ~= Token(Token_Typ.wert, var);
-
-			writeln(als_wert(wort));
 			continue;
 		}
 		else if (wort.ist_wert == Verifizierung.nicht_ganz)
@@ -321,18 +313,21 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 		if (wort.ist_operator)
 		{
-			wort_präfix = [];
 			OperatorenTyp* op_typ = new OperatorenTyp;
 			*op_typ = wort.als_operator;
-
-			writeln(*op_typ);
 
 			token_liste ~= Token(Token_Typ.operator, op_typ);
 			continue;
 		}
+
+		// If none of the above treat as variable name
+		dchar[]* v_name = (new dchar[][1]).ptr;
+		*v_name = wort.dup;
+		token_liste ~= Token(Token_Typ.var_name, v_name);
 	}
 
-	writeln(token_liste);
+	debug write("Token Liste: ");
+	debug writeln(token_liste);
 
 	return token_liste;
 }

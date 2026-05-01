@@ -24,6 +24,9 @@ enum OperatorenTyp
 
 	PUNKT,
 	KOMMA,
+
+	NEUE_LINIE,
+	ANFANG_LINIE,
 }
 
 dchar[OperatorenTyp] operatoren_chars;
@@ -52,4 +55,7 @@ static this()
 
 	operatoren_chars[OperatorenTyp.PUNKT] = '.';
 	operatoren_chars[OperatorenTyp.KOMMA] = ',';
+
+	operatoren_chars[OperatorenTyp.NEUE_LINIE] = '\n';
+	operatoren_chars[OperatorenTyp.ANFANG_LINIE] = '\r';
 }

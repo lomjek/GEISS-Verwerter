@@ -20,7 +20,9 @@ void main(string[] args)
     while (true)
     {
         print_prompt();
-        dchar[] repl_linie = readln().strip.dchar_from_string;
+        dchar[] repl_linie = [];
+        readln(repl_linie);
+        repl_linie.strip;
 
         if (repl_linie == "exit")
         {

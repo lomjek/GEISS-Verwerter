@@ -25,17 +25,6 @@ dchar[] replaceAll(dchar[] input, dchar to_replace, dchar[] with_replace)
 	return result;
 }
 
-dchar[] replaceAll(dchar[] input, dchar[] to_replace, dchar[] with_replace)
-{
-	while (canFind(input, to_replace))
-	{
-		long found_pos = input.indexOf(to_replace);
-		writeln(found_pos);
-		input = input.remove(found_pos);
-	}
-	return input;
-}
-
 dchar[] dchar_from_string(string input)
 {
 	dchar[] output;
