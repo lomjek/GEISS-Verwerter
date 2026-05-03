@@ -21,6 +21,12 @@ enum VariablenTyp
 	LISTE
 }
 
+const VariablenTyp[] ZAHLEN_TYPEN = [
+	VariablenTyp.GANZE_ZAHL,
+	VariablenTyp.NATÜRLICHE_ZAHL,
+	VariablenTyp.ZAHL
+];
+
 dchar[][VariablenTyp] variablenTyp_strings;
 dchar[][] typ_präfixe = [
 	['g', 'a', 'n', 'z', 'e'],
