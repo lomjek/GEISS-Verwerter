@@ -9,7 +9,7 @@ import glied.glied;
 
 class Wert_Glied : Glied
 {
-	Variable wert;
+	private Variable wert;
 
 	this(Variable neuer_wert)
 	{
@@ -19,6 +19,11 @@ class Wert_Glied : Glied
 	override public Variable verwerte()
 	{
 		return wert;
+	}
+
+	public VariablenTyp typ()
+	{
+		return wert.typ;
 	}
 
 	override public void schreibe_baum()

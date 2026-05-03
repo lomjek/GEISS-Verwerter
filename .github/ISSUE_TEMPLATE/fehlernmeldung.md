@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**Beschreuoben Sie den Fehler**
+**Beschreiben Sie den Fehler**
 Was ist passiert?
 Was sollte passieren?
 
