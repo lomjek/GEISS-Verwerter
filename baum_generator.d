@@ -12,6 +12,18 @@ import glied.operation_glied;
 import std.algorithm : remove, canFind;
 import std.stdio : writeln, write;
 
+private enum Operation_priorities
+{
+	INVALID,
+
+	SETZE_VARIABLE,
+
+	PLUS_MINUS,
+	MAL_DURCH,
+	HOCH,
+
+}
+
 Glied generiere_baum(Token[] token_liste)
 {
 	Glied[] glieder_liste = [];
@@ -41,9 +53,45 @@ Glied generiere_baum(Token[] token_liste)
 	debug writeln(glieder_liste);
 
 	ulong arr_length = glieder_liste.length;
-	for (ulong i = 0; i < arr_length; i++)
+	while (arr_length > 1)
 	{
-		Glied glied = glieder_liste[i];
+		// Finde die Anwendung mit max. Prioriäten;
+		Operation_priorities max_priority_operation = Operation_priorities.INVALID;
+		ulong max_priority_index = 0;
+		for (ulong i = 0; i < arr_length; i++)
+		{
+			if (glieder_liste[i].classinfo == OperationGlied.classinfo)
+			{
+				OperationGlied opg = cast(OperationGlied) glieder_liste[i];
+				if (opg.populated)
+					continue;
+
+				if ([OperatorenTyp.PLUS, OperatorenTyp.MINUS]
+					.canFind(opg.operationenTyp) &&
+					max_priority_operation < Operation_priorities.PLUS_MINUS)
+				{
+					max_priority_operation = Operation_priorities.PLUS_MINUS;
+					max_priority_index = i;
+				}
+				else if ([OperatorenTyp.MAL, OperatorenTyp.GETEILT]
+					.canFind(opg.operationenTyp) &&
+					max_priority_operation < Operation_priorities.MAL_DURCH)
+				{
+					max_priority_operation = Operation_priorities.MAL_DURCH;
+					max_priority_index = i;
+				}
+				else if (opg.operationenTyp == OperatorenTyp.HOCH &&
+					max_priority_operation < Operation_priorities.HOCH)
+				{
+					max_priority_operation = Operation_priorities.HOCH;
+					max_priority_index = i;
+				}
+			}
+		}
+
+		Glied glied = glieder_liste[max_priority_index];
+
+		debug writeln(max_priority_index, max_priority_operation);
 
 		if (glied.classinfo == Wert_Glied.classinfo)
 		{
@@ -54,26 +102,20 @@ Glied generiere_baum(Token[] token_liste)
 		{
 			OperationGlied op_glied = cast(OperationGlied) glied;
 
-			if (i > 0 && i < (arr_length - 1))
+			if (max_priority_index > 0 && max_priority_index < (arr_length - 1))
 			{
-				Glied gl1 = glieder_liste[i - 1];
-				Glied gl2 = glieder_liste[i + 1];
-				if ((gl1.classinfo == Wert_Glied.classinfo) &&
-					(gl2.classinfo == Wert_Glied.classinfo))
-				{
-					op_glied.werte ~= gl1;
-					op_glied.werte ~= gl2;
+				Glied gl1 = glieder_liste[max_priority_index - 1];
+				Glied gl2 = glieder_liste[max_priority_index + 1];
+				// Falls die Operationen nicht immer die zwei Objekte daneben einnehmen sollen, muss hier ein if  Block hin
+				op_glied.werte ~= gl1;
+				op_glied.werte ~= gl2;
+				op_glied.populated = true;
 
-					glieder_liste[i] = op_glied;
-					glieder_liste = glieder_liste.remove(i + 1);
-					glieder_liste = glieder_liste.remove(i - 1);
-					arr_length -= 2;
-					continue;
-				}
-				else
-				{
-					writeln("Fehler? : Parse Operationen Glied und nicht zwei Werte nebenan.");
-				}
+				glieder_liste[max_priority_index] = op_glied;
+				glieder_liste = glieder_liste.remove(max_priority_index + 1);
+				glieder_liste = glieder_liste.remove(max_priority_index - 1);
+				arr_length -= 2;
+				continue;
 			}
 		}
 	}

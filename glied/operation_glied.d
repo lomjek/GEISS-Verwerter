@@ -12,11 +12,13 @@ import std.array : join, array;
 import std.algorithm.searching : canFind;
 import std.algorithm : map;
 import std.conv : to;
+import std.math.exponential : pow;
 
 class OperationGlied : Glied
 {
 	public OperatorenTyp operationenTyp;
 	public Glied[] werte;
+	public bool populated = false;
 
 	override void schreibe_baum()
 	{
@@ -93,7 +95,10 @@ class OperationGlied : Glied
 				{
 					resultat *= momentaner_wert;
 				}
-
+				else if (operationenTyp == OperatorenTyp.HOCH)
+				{
+					resultat = pow(resultat, momentaner_wert);
+				}
 			}
 
 			double* heap_resultat = new double;

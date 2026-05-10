@@ -33,6 +33,10 @@ void main(string[] args)
             write("\x1b[2J\x1b[H");
             continue;
         }
+        else if (repl_linie == null || repl_linie.length == 0)
+        {
+            continue;
+        }
 
         writeln(repl_linie);
 
