@@ -114,7 +114,7 @@ private bool ist_zahl(dchar[] wort)
 	wort = wort.strip;
 	try
 	{
-		to!int(wort);
+		to!uint(wort);
 		return true;
 	}
 	catch (ConvException e)
@@ -172,19 +172,10 @@ private Variable als_wert_zahl(dchar[] wort)
 {
 	try
 	{
-		int zahl = to!int(wort);
-		if (zahl >= 0)
-		{
-			uint* num = new uint;
-			*num = to!uint(zahl);
-			return Variable(VariablenTyp.NATÜRLICHE_ZAHL, num);
-		}
-		else
-		{
-			int* num = new int;
-			*num = zahl;
-			return Variable(VariablenTyp.GANZE_ZAHL, num);
-		}
+		int zahl = to!uint(wort);
+		uint* num = new uint;
+		*num = to!uint(zahl);
+		return Variable(VariablenTyp.NATÜRLICHE_ZAHL, num);
 	}
 	catch (ConvException e)
 	{
@@ -360,36 +351,18 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 			Variable naher = *cast(Variable*) token_liste[i + 1].wert;
 
 			if ((operator == OperatorenTyp.PUNKT) &&
-				(vorher.typ == VariablenTyp.GANZE_ZAHL ||
-					vorher.typ == VariablenTyp.NATÜRLICHE_ZAHL) &&
-				(naher.typ == VariablenTyp.GANZE_ZAHL ||
-					naher.typ == VariablenTyp.NATÜRLICHE_ZAHL))
+				(vorher.typ == VariablenTyp.NATÜRLICHE_ZAHL) &&
+				(naher.typ == VariablenTyp.NATÜRLICHE_ZAHL))
 			{
 				double deizimahlzahl;
 
-				if (vorher.typ == VariablenTyp.GANZE_ZAHL)
-				{
-					int tmp = *cast(int*) vorher.wert;
-					deizimahlzahl = tmp.to!double;
-				}
-				else if (vorher.typ == VariablenTyp.NATÜRLICHE_ZAHL)
-				{
-					uint tmp = *cast(uint*) vorher.wert;
-					deizimahlzahl = tmp.to!double;
-				}
+				uint tmp = *cast(uint*) vorher.wert;
+				deizimahlzahl = tmp.to!double;
 
-				if (naher.typ == VariablenTyp.GANZE_ZAHL)
-				{
-					int tmp = *cast(int*) naher.wert;
-					double tmp_2 = tmp / (tmp.to!string.length).to!double;
-					deizimahlzahl += tmp_2;
-				}
-				else if (naher.typ == VariablenTyp.NATÜRLICHE_ZAHL)
-				{
-					uint tmp = *cast(uint*) naher.wert;
-					double tmp_2 = tmp / (tmp.to!string.length).to!double;
-					deizimahlzahl += tmp_2;
-				}
+				uint tmp_2 = *cast(uint*) naher.wert;
+				double tmp_3 = tmp_2 / pow(10, (tmp_2.to!string.length)).to!double;
+				deizimahlzahl += tmp_3;
+
 				double* deizimahlzahl_heap = new double;
 				*deizimahlzahl_heap = deizimahlzahl;
 				Variable* heap_var = new Variable(VariablenTyp.ZAHL, deizimahlzahl_heap);

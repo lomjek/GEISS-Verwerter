@@ -16,7 +16,7 @@ import std.conv : to;
 class OperationGlied : Glied
 {
 	public OperatorenTyp operationenTyp;
-	public Wert_Glied[] werte;
+	public Glied[] werte;
 
 	override void schreibe_baum()
 	{
@@ -34,12 +34,13 @@ class OperationGlied : Glied
 
 	override Variable verwerte()
 	{
-		VariablenTyp[] vt_liste = werte.map!(x => x.typ).array;
+		VariablenTyp[] vt_liste = werte.map!(werte => werte.verwerte.typ).array;
 		bool all_numbers = true;
 		foreach (VariablenTyp vtyp; vt_liste)
 		{
 			if (!ZAHLEN_TYPEN.canFind(vtyp))
 			{
+				write(vtyp);
 				all_numbers = false;
 			}
 		}
@@ -48,7 +49,7 @@ class OperationGlied : Glied
 		{
 			double resultat = 0.0;
 			bool first_pass = true;
-			foreach (Wert_Glied wert; werte)
+			foreach (Glied wert; werte)
 			{
 				double momentaner_wert = 0.0;
 				Variable momentane_verwertung = wert.verwerte();
@@ -94,6 +95,10 @@ class OperationGlied : Glied
 				}
 
 			}
+
+			double* heap_resultat = new double;
+			*heap_resultat = resultat;
+			return Variable(VariablenTyp.ZAHL, heap_resultat);
 		}
 		// Handle other cases
 		return Variable(VariablenTyp.INVALID, null);
