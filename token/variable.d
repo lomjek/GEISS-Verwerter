@@ -1,9 +1,9 @@
 module token.variable;
 
-import token.variablen_typ;
+import variablen.wert_typ;
 
 struct Variable
 {
-	VariablenTyp typ;
+	WertTyp typ;
 	void* wert;
 }

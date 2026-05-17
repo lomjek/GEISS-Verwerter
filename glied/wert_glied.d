@@ -3,7 +3,8 @@ module glied.wert_glied;
 import std.stdio : write;
 
 import token.variable;
-import token.variablen_typ;
+
+import variablen.wert_typ;
 
 import glied.glied;
 
@@ -21,7 +22,7 @@ class Wert_Glied : Glied
 		return wert;
 	}
 
-	public VariablenTyp typ()
+	public WertTyp typ()
 	{
 		return wert.typ;
 	}
@@ -29,25 +30,25 @@ class Wert_Glied : Glied
 	override public void schreibe_baum()
 	{
 		//Ausdruck
-		if (wert.typ == VariablenTyp.AUSDRUCK)
+		if (wert.typ == WertTyp.AUSDRUCK)
 		{
 			write(*cast(dchar[]*) this.wert.wert);
 		}
 		//Zahlen
-		else if (wert.typ == VariablenTyp.NATÜRLICHE_ZAHL)
+		else if (wert.typ == WertTyp.NATÜRLICHE_ZAHL)
 		{
 			write(*cast(uint*) this.wert.wert);
 		}
-		else if (wert.typ == VariablenTyp.GANZE_ZAHL)
+		else if (wert.typ == WertTyp.GANZE_ZAHL)
 		{
 			write(*cast(int*) this.wert.wert);
 		}
-		else if (wert.typ == VariablenTyp.ZAHL)
+		else if (wert.typ == WertTyp.ZAHL)
 		{
 			write(*cast(double*) this.wert.wert);
 		}
 		//Wahrheit
-		else if (wert.typ == VariablenTyp.WAHRHEIT)
+		else if (wert.typ == WertTyp.WAHRHEIT)
 		{
 			write(*cast(bool*) this.wert.wert);
 		}

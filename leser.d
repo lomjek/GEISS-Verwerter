@@ -6,9 +6,10 @@ import ext.string;
 
 import token.token;
 import token.schlüsselwörter;
-import token.variablen_typ;
 import token.variable;
 import token.operatoren;
+
+import variablen.wert_typ;
 
 // @ {} [] # \ || != ~
 
@@ -46,10 +47,10 @@ private SchlüsselWort als_sw(dchar[] wort)
 	return SchlüsselWort.INVALID;
 }
 
-// MARK: VariablenTyp
+// MARK: WertTyp
 private Verifizierung ist_vt(dchar[] wort)
 {
-	foreach (VariablenTyp typ, dchar[] wert; variablenTyp_strings)
+	foreach (WertTyp typ, dchar[] wert; variablenTyp_strings)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -69,9 +70,9 @@ private Verifizierung ist_vt(dchar[] wort)
 	return Verifizierung.nein;
 }
 
-private VariablenTyp als_vt(dchar[] wort)
+private WertTyp als_vt(dchar[] wort)
 {
-	foreach (VariablenTyp typ, dchar[] wert; variablenTyp_strings)
+	foreach (WertTyp typ, dchar[] wert; variablenTyp_strings)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -79,7 +80,7 @@ private VariablenTyp als_vt(dchar[] wort)
 		}
 	}
 
-	return VariablenTyp.INVALID;
+	return WertTyp.INVALID;
 }
 
 // MARK: Wert - ist?
@@ -165,7 +166,7 @@ private Variable als_wert_string(dchar[] wort)
 
 	dchar[]* str = (new dchar[][1]).ptr;
 	*str = wort.dup;
-	return Variable(VariablenTyp.AUSDRUCK, str);
+	return Variable(WertTyp.AUSDRUCK, str);
 }
 
 private Variable als_wert_zahl(dchar[] wort)
@@ -175,11 +176,11 @@ private Variable als_wert_zahl(dchar[] wort)
 		int zahl = to!uint(wort);
 		uint* num = new uint;
 		*num = to!uint(zahl);
-		return Variable(VariablenTyp.NATÜRLICHE_ZAHL, num);
+		return Variable(WertTyp.NATÜRLICHE_ZAHL, num);
 	}
 	catch (ConvException e)
 	{
-		return Variable(VariablenTyp.INVALID, null);
+		return Variable(WertTyp.INVALID, null);
 	}
 }
 
@@ -196,9 +197,9 @@ private Variable als_wert_wahrheit(dchar[] wort)
 	}
 	else
 	{
-		return Variable(VariablenTyp.INVALID, null);
+		return Variable(WertTyp.INVALID, null);
 	}
-	return Variable(VariablenTyp.WAHRHEIT, wahr);
+	return Variable(WertTyp.WAHRHEIT, wahr);
 }
 
 private Variable als_wert(dchar[] wort)
@@ -212,7 +213,7 @@ private Variable als_wert(dchar[] wort)
 		return als_wert_zahl(wort);
 	}
 
-	return Variable(VariablenTyp.INVALID, null);
+	return Variable(WertTyp.INVALID, null);
 }
 
 // MARK: operatoren
@@ -286,7 +287,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 		// VariablenTypen
 		if (wort.ist_vt == Verifizierung.ja)
 		{
-			VariablenTyp* vt = new VariablenTyp;
+			WertTyp* vt = new WertTyp;
 
 			*vt = wort.als_vt;
 			token_liste ~= Token(Token_Typ.var_typ, vt);
@@ -351,8 +352,8 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 			Variable naher = *cast(Variable*) token_liste[i + 1].wert;
 
 			if ((operator == OperatorenTyp.PUNKT) &&
-				(vorher.typ == VariablenTyp.NATÜRLICHE_ZAHL) &&
-				(naher.typ == VariablenTyp.NATÜRLICHE_ZAHL))
+				(vorher.typ == WertTyp.NATÜRLICHE_ZAHL) &&
+				(naher.typ == WertTyp.NATÜRLICHE_ZAHL))
 			{
 				double deizimahlzahl;
 
@@ -365,7 +366,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 				double* deizimahlzahl_heap = new double;
 				*deizimahlzahl_heap = deizimahlzahl;
-				Variable* heap_var = new Variable(VariablenTyp.ZAHL, deizimahlzahl_heap);
+				Variable* heap_var = new Variable(WertTyp.ZAHL, deizimahlzahl_heap);
 				token_liste[i - 1] = Token(Token_Typ.wert, heap_var);
 				token_liste = token_liste.remove(i);
 				token_liste = token_liste.remove(i);
@@ -427,40 +428,40 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 			if (op_typ == OperatorenTyp.MINUS)
 			{
-				if (var.typ == VariablenTyp.NATÜRLICHE_ZAHL)
+				if (var.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
 					uint oldValue = *cast(uint*) var.wert;
 					int* newValue = new int;
 
 					*newValue = cast(int) oldValue * -1;
 
-					token_liste[i].wert = new Variable(VariablenTyp.GANZE_ZAHL, newValue);
+					token_liste[i].wert = new Variable(WertTyp.GANZE_ZAHL, newValue);
 					token_liste = token_liste.remove(i - 1);
 
 					length--;
 					i--;
 				}
-				else if (var.typ == VariablenTyp.GANZE_ZAHL)
+				else if (var.typ == WertTyp.GANZE_ZAHL)
 				{
 					int oldValue = *cast(int*) var.wert;
 					int* newValue = new int;
 
 					*newValue = cast(int) oldValue * -1;
 
-					token_liste[i].wert = new Variable(VariablenTyp.GANZE_ZAHL, newValue);
+					token_liste[i].wert = new Variable(WertTyp.GANZE_ZAHL, newValue);
 					token_liste = token_liste.remove(i - 1);
 
 					length--;
 					i--;
 				}
-				else if (var.typ == VariablenTyp.ZAHL)
+				else if (var.typ == WertTyp.ZAHL)
 				{
 					double oldValue = *cast(double*) var.wert;
 					double* newValue = new double;
 
 					*newValue = cast(double) oldValue * -1;
 
-					token_liste[i].wert = new Variable(VariablenTyp.ZAHL, newValue);
+					token_liste[i].wert = new Variable(WertTyp.ZAHL, newValue);
 					token_liste = token_liste.remove(i - 1);
 
 					length--;

@@ -5,7 +5,8 @@ import glied.wert_glied;
 
 import token.operatoren;
 import token.variable;
-import token.variablen_typ;
+
+import variablen.wert_typ;
 
 import std.stdio : write, writeln;
 import std.array : join, array;
@@ -36,9 +37,9 @@ class OperationGlied : Glied
 
 	override Variable verwerte()
 	{
-		VariablenTyp[] vt_liste = werte.map!(werte => werte.verwerte.typ).array;
+		WertTyp[] vt_liste = werte.map!(werte => werte.verwerte.typ).array;
 		bool all_numbers = true;
-		foreach (VariablenTyp vtyp; vt_liste)
+		foreach (WertTyp vtyp; vt_liste)
 		{
 			if (!ZAHLEN_TYPEN.canFind(vtyp))
 			{
@@ -56,17 +57,17 @@ class OperationGlied : Glied
 				double momentaner_wert = 0.0;
 				Variable momentane_verwertung = wert.verwerte();
 
-				if (momentane_verwertung.typ == VariablenTyp.NATÜRLICHE_ZAHL)
+				if (momentane_verwertung.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
 					uint tmp = *cast(uint*) momentane_verwertung.wert;
 					momentaner_wert = tmp.to!double;
 				}
-				else if (momentane_verwertung.typ == VariablenTyp.GANZE_ZAHL)
+				else if (momentane_verwertung.typ == WertTyp.GANZE_ZAHL)
 				{
 					int tmp = *cast(int*) momentane_verwertung.wert;
 					momentaner_wert = tmp.to!double;
 				}
-				else if (momentane_verwertung.typ == VariablenTyp.ZAHL)
+				else if (momentane_verwertung.typ == WertTyp.ZAHL)
 				{
 					momentaner_wert = *cast(double*) momentane_verwertung.wert;
 				}
@@ -103,10 +104,10 @@ class OperationGlied : Glied
 
 			double* heap_resultat = new double;
 			*heap_resultat = resultat;
-			return Variable(VariablenTyp.ZAHL, heap_resultat);
+			return Variable(WertTyp.ZAHL, heap_resultat);
 		}
 		// Handle other cases
-		return Variable(VariablenTyp.INVALID, null);
+		return Variable(WertTyp.INVALID, null);
 	}
 
 	this(OperatorenTyp op_typ)
