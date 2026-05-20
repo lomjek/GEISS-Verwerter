@@ -28,7 +28,7 @@ class Wert_Glied : Glied
 	override public void schreibe_baum()
 	{
 		//Ausdruck
-		if (wert.typ == WertTyp.AUSDRUCK)
+		if (wert.typ == WertTyp.TEXT)
 		{
 			write(*cast(dchar[]*) this.wert.wert);
 		}

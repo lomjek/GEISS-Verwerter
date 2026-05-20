@@ -164,9 +164,9 @@ private Wert als_wert_string(dchar[] wort)
 		wort = wort[2 .. $ - 2];
 	}
 
-	dchar[]* str = (new dchar[][1]).ptr;
-	*str = wort.dup;
-	return Wert(WertTyp.AUSDRUCK, str);
+	dstring* str = new dstring;
+	*str = wort;
+	return Wert(WertTyp.TEXT, str);
 }
 
 private Wert als_wert_zahl(dchar[] wort)

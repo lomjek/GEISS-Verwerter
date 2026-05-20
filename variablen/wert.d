@@ -22,7 +22,7 @@ enum WertTyp
 
 	FARBE,
 
-	AUSDRUCK,
+	TEXT,
 
 	LISTE
 }
@@ -49,7 +49,7 @@ static this()
 
 	variablenTyp_strings[WertTyp.FARBE] = "farbe".dchar_from_string;
 
-	variablenTyp_strings[WertTyp.AUSDRUCK] = "ausdruck".dchar_from_string;
+	variablenTyp_strings[WertTyp.TEXT] = "text".dchar_from_string;
 
 	variablenTyp_strings[WertTyp.LISTE] = "liste".dchar_from_string;
 }

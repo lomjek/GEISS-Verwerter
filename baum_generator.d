@@ -25,7 +25,7 @@ private enum Operation_priorities
 
 }
 
-Glied generiere_baum(Token[] token_liste)
+Glied[] generiere_baum(Token[] token_liste, uint* fehler)
 {
 	Glied[] glieder_liste = [];
 
@@ -63,22 +63,26 @@ Glied generiere_baum(Token[] token_liste)
 	if (offene_klammern != 0)
 	{
 		writeln("FEHLER: Nicht alle Klammern sind zu!");
-		return new InvalidGlied();
+		*fehler += 1000;
+		return null;
 	}
 	if (offene_eckige_klammern != 0)
 	{
 		writeln("FEHLER: Nicht alle eckigen Klammern sind zu!");
-		return new InvalidGlied();
+		*fehler += 1100;
+		return null;
 	}
 	if (offene_spitze_klammern != 0)
 	{
 		writeln("FEHLER: Nicht alle spitze Klammern sind zu!");
-		return new InvalidGlied();
+		*fehler += 1200;
+		return null;
 	}
 	if (offene_geschwungene_klammern != 0)
 	{
 		writeln("FEHLER: Nicht alle geschwungenen Klammern sind zu!");
-		return new InvalidGlied();
+		*fehler += 1300;
+		return null;
 	}
 	//endregion
 
@@ -175,5 +179,5 @@ Glied generiere_baum(Token[] token_liste)
 	debug glieder_liste[0].schreibe_baum;
 	debug write("\n");
 
-	return glieder_liste[0];
+	return glieder_liste;
 }
