@@ -6,18 +6,19 @@ import variablen.wert;
 
 abstract class Glied
 {
-	abstract Wert verwerte();
-	abstract void schreibe_baum();
+	abstract public Wert verwerte(uint bereich);
+	abstract public void schreibe_baum();
 }
 
 class InvalidGlied : Glied
 {
-    override Wert verwerte(){
-        return Wert(WertTyp.INVALID, null);
-    }
+	override public Wert verwerte(uint bereich)
+	{
+		return Wert(WertTyp.INVALID, null);
+	}
 
-    override void schreibe_baum()
-    {
-        write("INVALID");
-    }
+	override public void schreibe_baum()
+	{
+		write("INVALID");
+	}
 }

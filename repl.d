@@ -2,6 +2,7 @@ module repl;
 
 import std.stdio : readln, writeln, write;
 import std.string : strip;
+import std.conv : to;
 
 import ext.string : dchar_from_string;
 
@@ -40,6 +41,8 @@ void main(string[] args)
 
         writeln(repl_linie);
 
-        uint fehler = interpretiere_repl_linie(repl_linie);
+        dstring repl_dstring = repl_linie.to!dstring;
+
+        uint fehler = interpretiere_repl_linie(repl_dstring);
     }
 }

@@ -21,9 +21,9 @@ private enum Verifizierung
 }
 
 // MARK: Schüsselwort 
-private Verifizierung ist_sw(dchar[] wort)
+private Verifizierung ist_sw(dstring wort)
 {
-	foreach (SchlüsselWort swort, dchar[] wert; schlüsselWort_dict)
+	foreach (SchlüsselWort swort, dstring wert; schlüsselWort_dict)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -34,9 +34,9 @@ private Verifizierung ist_sw(dchar[] wort)
 	return Verifizierung.nein;
 }
 
-private SchlüsselWort als_sw(dchar[] wort)
+private SchlüsselWort als_sw(dstring wort)
 {
-	foreach (SchlüsselWort swort, dchar[] wert; schlüsselWort_dict)
+	foreach (SchlüsselWort swort, dstring wert; schlüsselWort_dict)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -48,9 +48,9 @@ private SchlüsselWort als_sw(dchar[] wort)
 }
 
 // MARK: WertTyp
-private Verifizierung ist_vt(dchar[] wort)
+private Verifizierung ist_vt(dstring wort)
 {
-	foreach (WertTyp typ, dchar[] wert; variablenTyp_strings)
+	foreach (WertTyp typ, dstring wert; wertTypString)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -58,7 +58,7 @@ private Verifizierung ist_vt(dchar[] wort)
 		}
 	}
 
-	foreach (dchar[] präfix; typ_präfixe)
+	foreach (dstring präfix; typ_präfixe)
 	{
 		if (präfix.strip == wort.strip)
 		{
@@ -70,9 +70,9 @@ private Verifizierung ist_vt(dchar[] wort)
 	return Verifizierung.nein;
 }
 
-private WertTyp als_vt(dchar[] wort)
+private WertTyp als_vt(dstring wort)
 {
-	foreach (WertTyp typ, dchar[] wert; variablenTyp_strings)
+	foreach (WertTyp typ, dstring wert; wertTypString)
 	{
 		if (wort.strip == wert.strip)
 		{
@@ -84,13 +84,13 @@ private WertTyp als_vt(dchar[] wort)
 }
 
 // MARK: Wert - ist?
-dchar[][] string_delims = [
-	['\\', '\''], ['\\', '"'], ['\''], ['"']
+dstring[] string_delims = [
+	"\\\'"d, "\\\""d, "\'"d, "\""d
 ];
 
-private Verifizierung ist_string(dchar[] wort)
+private Verifizierung ist_string(dstring wort)
 {
-	foreach (dchar[] delim; string_delims)
+	foreach (dstring delim; string_delims)
 	{
 		if (wort.strip.startsWith(delim) && wort.length == delim.length)
 		{
@@ -110,7 +110,7 @@ private Verifizierung ist_string(dchar[] wort)
 	return Verifizierung.nein;
 }
 
-private bool ist_zahl(dchar[] wort)
+private bool ist_zahl(dstring wort)
 {
 	wort = wort.strip;
 	try
@@ -124,7 +124,7 @@ private bool ist_zahl(dchar[] wort)
 	}
 }
 
-private bool ist_wahrheit(dchar[] wort)
+private bool ist_wahrheit(dstring wort)
 {
 	if (wort == "wahr"d || wort == "falsch"d)
 	{
@@ -133,7 +133,7 @@ private bool ist_wahrheit(dchar[] wort)
 	return false;
 }
 
-private Verifizierung ist_wert(dchar[] wort)
+private Verifizierung ist_wert(dstring wort)
 {
 	if (wort.ist_zahl)
 	{
@@ -152,7 +152,7 @@ private Verifizierung ist_wert(dchar[] wort)
 }
 
 //MARK: Wert - als!
-private Wert als_wert_string(dchar[] wort)
+private Wert als_wert_string(dstring wort)
 {
 	if ((wort.startsWith("'") && wort.endsWith("'")) || (wort.startsWith('"') && wort.endsWith('"')))
 	{
@@ -164,12 +164,11 @@ private Wert als_wert_string(dchar[] wort)
 		wort = wort[2 .. $ - 2];
 	}
 
-	dstring* str = new dstring;
-	*str = wort;
+	dstring* str = new dstring(wort);
 	return Wert(WertTyp.TEXT, str);
 }
 
-private Wert als_wert_zahl(dchar[] wort)
+private Wert als_wert_zahl(dstring wort)
 {
 	try
 	{
@@ -184,7 +183,7 @@ private Wert als_wert_zahl(dchar[] wort)
 	}
 }
 
-private Wert als_wert_wahrheit(dchar[] wort)
+private Wert als_wert_wahrheit(dstring wort)
 {
 	bool* wahr;
 	if (wort == "wahr"d)
@@ -202,7 +201,7 @@ private Wert als_wert_wahrheit(dchar[] wort)
 	return Wert(WertTyp.WAHRHEIT, wahr);
 }
 
-private Wert als_wert(dchar[] wort)
+private Wert als_wert(dstring wort)
 {
 	if (wort.ist_string == Verifizierung.ja)
 	{
@@ -217,7 +216,7 @@ private Wert als_wert(dchar[] wort)
 }
 
 // MARK: operatoren
-private bool ist_operator(dchar[] wort)
+private bool ist_operator(dstring wort)
 {
 	if (wort.length > 1)
 	{
@@ -235,7 +234,7 @@ private bool ist_operator(dchar[] wort)
 	return false;
 }
 
-private OperatorenTyp als_operator(dchar[] wort)
+private OperatorenTyp als_operator(dstring wort)
 {
 	if (wort.length > 1)
 	{
@@ -256,24 +255,24 @@ private OperatorenTyp als_operator(dchar[] wort)
 }
 
 // MARK: lese_linie
-Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
+Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 {
 	// Mache Platz vor und nach den Operatoren, damit sie aufgetrennt werden
 	foreach (op; EnumMembers!OperatorenTyp)
 	{
-		dchar[] to_convert = [' ', operatoren_chars[op], ' '];
+		dstring to_convert = [' ', operatoren_chars[op], ' '];
 		linie = replaceAll(linie, operatoren_chars[op],
 			to_convert);
 	}
 
 	Token[] token_liste;
-	dchar[][] wort_liste = linie.split(" ");
+	dstring[] wort_liste = linie.split(" ");
+	ulong wort_liste_length = wort_liste.length;
+	dstring wort_präfix;
 
-	dchar[] wort_präfix;
-
-	foreach (dchar[] wort; wort_liste)
+	for (ulong i = 0; i < wort_liste_length; i++)
 	{
-		wort = wort.strip;
+		dstring wort = wort_liste[i].strip;
 
 		wort = wort_präfix ~ wort;
 		wort_präfix = [];
@@ -296,6 +295,15 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 		else if (wort.ist_vt == Verifizierung.nicht_ganz)
 		{
 			wort_präfix = wort ~ "_";
+			if (i < wort_liste_length - 1)
+			{
+				dstring neues_wort = wort_liste[i + 1];
+				if (neues_wort != "zahl"d)
+				{
+					*fehlermeldungen = 10;
+					return token_liste;
+				}
+			}
 			continue;
 		}
 
@@ -331,7 +339,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 		}
 
 		// If none of the above treat as variable name
-		dchar[]* v_name = (new dchar[][1]).ptr;
+		dstring* v_name = (new dstring[1]).ptr;
 		*v_name = wort.dup;
 		token_liste ~= Token(Token_Typ.var_name, v_name);
 	}
@@ -341,6 +349,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 	ulong length = token_liste.length;
 
+	//MARK: Aufräumen
 	for (uint i = 1; i < length - 1; i++) // Der erste Durchgang Zieht die Kommazahlen wieder zusammen.
 	{
 		if (token_liste[i - 1].typ == Token_Typ.wert &&

@@ -12,10 +12,7 @@ enum SchlüsselWort
 	DER
 }
 
-dchar[][SchlüsselWort] schlüsselWort_dict;
-
-static this()
-{
-	schlüsselWort_dict[SchlüsselWort.PRO] = "pro".dchar_from_string;
-	schlüsselWort_dict[SchlüsselWort.DER] = "der".dchar_from_string;
-}
+immutable dstring[SchlüsselWort] schlüsselWort_dict = [
+	SchlüsselWort.PRO: "pro"d,
+	SchlüsselWort.DER: "der"d
+];

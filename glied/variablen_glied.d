@@ -6,7 +6,7 @@ import glied.glied;
 
 class Setze_Variable_Glied : Glied
 {
-	override public Wert verwerte()
+	override public Wert verwerte(uint bereich)
 	{
 		return Wert(WertTyp.INVALID, null);
 

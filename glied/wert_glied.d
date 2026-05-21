@@ -15,7 +15,7 @@ class Wert_Glied : Glied
 		wert = neuer_wert;
 	}
 
-	override public Wert verwerte()
+	override public Wert verwerte(uint bereich)
 	{
 		return wert;
 	}

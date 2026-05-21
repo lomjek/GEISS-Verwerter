@@ -25,6 +25,25 @@ dchar[] replaceAll(dchar[] input, dchar to_replace, dchar[] with_replace)
 	return result;
 }
 
+dstring replaceAll(dstring input, dchar to_replace, dstring with_replace)
+{
+	dchar[] result;
+
+	for (int i = 0; i < input.length; i++)
+	{
+		if (input[i] == to_replace)
+		{
+			result ~= with_replace;
+		}
+		else
+		{
+			result ~= input[i];
+		}
+	}
+
+	return result.to!dstring;
+}
+
 dchar[] dchar_from_string(string input)
 {
 	dchar[] output;

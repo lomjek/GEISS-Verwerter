@@ -7,6 +7,7 @@ import operatoren;
 import glied.glied;
 import glied.wert_glied;
 import glied.operation_glied;
+import glied.block_glied;
 
 import variablen.wert;
 
@@ -25,7 +26,7 @@ private enum Operation_priorities
 
 }
 
-Glied[] generiere_baum(Token[] token_liste, uint* fehler)
+Glied generiere_baum(Token[] token_liste, uint* fehler)
 {
 	Glied[] glieder_liste = [];
 
@@ -179,5 +180,8 @@ Glied[] generiere_baum(Token[] token_liste, uint* fehler)
 	debug glieder_liste[0].schreibe_baum;
 	debug write("\n");
 
-	return glieder_liste;
+	BlockGlied bgl = new BlockGlied();
+	bgl.aktionen = glieder_liste;
+
+	return bgl;
 }

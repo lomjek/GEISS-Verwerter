@@ -33,23 +33,23 @@ const WertTyp[] ZAHLEN_TYPEN = [
 	WertTyp.ZAHL
 ];
 
-dchar[][WertTyp] variablenTyp_strings;
-dchar[][] typ_präfixe = [
-	['g', 'a', 'n', 'z', 'e'],
-	['n', 'a', 't', 'ü', 'r', 'l', 'i', 'c', 'h', 'e']
+dstring[WertTyp] wertTypString = [
+	WertTyp.INVALID: "invalid"d,
+
+	WertTyp.ZAHL: "zahl"d,
+	WertTyp.GANZE_ZAHL: "gzahl"d,
+	WertTyp.NATÜRLICHE_ZAHL: "nzahl"d,
+
+	WertTyp.WAHRHEIT: "wahrheit"d,
+
+	WertTyp.FARBE: "farbe"d,
+
+	WertTyp.TEXT: "text"d,
+
+	WertTyp.LISTE: "liste"d
 ];
 
-static this()
-{
-	variablenTyp_strings[WertTyp.ZAHL] = "zahl".dchar_from_string;
-	variablenTyp_strings[WertTyp.GANZE_ZAHL] = "ganze_zahl".dchar_from_string;
-	variablenTyp_strings[WertTyp.NATÜRLICHE_ZAHL] = "natürliche_zahl".dchar_from_string;
-
-	variablenTyp_strings[WertTyp.WAHRHEIT] = "wahrheit".dchar_from_string;
-
-	variablenTyp_strings[WertTyp.FARBE] = "farbe".dchar_from_string;
-
-	variablenTyp_strings[WertTyp.TEXT] = "text".dchar_from_string;
-
-	variablenTyp_strings[WertTyp.LISTE] = "liste".dchar_from_string;
-}
+immutable dstring[dstring] typ_präfixe = [
+	"ganze"d: "zahl"d,
+	"natürliche"d: "zahl"d
+];
