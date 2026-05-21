@@ -35,16 +35,7 @@ uint interpretiere_repl_linie(dstring repl_linie)
 		writeln(error);
 	}
 
-	auto resultat = baum.verwerte;
+	auto resultat = baum.verwerte(0);
 
-	write("Rückgabewert: ");
-	if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
-		writeln(*cast(uint*) resultat.wert);
-	else if (resultat.typ == WertTyp.GANZE_ZAHL)
-		writeln(*cast(int*) resultat.wert);
-	else if (resultat.typ == WertTyp.ZAHL)
-		writeln(*cast(double*) resultat.wert);
-	else
-		writeln(resultat.typ);
 	return 0;
 }

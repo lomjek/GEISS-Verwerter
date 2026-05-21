@@ -26,6 +26,11 @@ private enum Operation_priorities
 
 }
 
+private uint get_op_prio_length()
+{
+	return Operation_priorities.max - Operation_priorities.min + 1;
+}
+
 Glied generiere_baum(Token[] token_liste, uint* fehler)
 {
 	Glied[] glieder_liste = [];
@@ -110,10 +115,12 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 	debug writeln(glieder_liste);
 
 	ulong arr_length = glieder_liste.length;
-	while (arr_length > 1)
+	uint klammern_offen = 0;
+
+	while (arr_length > 1) // Muss vermutlich geändert werden.
 	{
 		// Finde die Anwendung mit max. Prioriäten;
-		Operation_priorities max_priority_operation = Operation_priorities.INVALID;
+		ulong max_priority_operation = 0;
 		ulong max_priority_index = 0;
 		for (ulong i = 0; i < arr_length; i++)
 		{
@@ -123,22 +130,40 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 				if (opg.populated)
 					continue;
 
+				if (opg.operationenTyp == OperatorenTyp.KLAMMER_AUF)
+				{
+					klammern_offen++;
+					glieder_liste = glieder_liste.remove(i);
+					arr_length--;
+					continue;
+				}
+				else if (opg.operationenTyp == OperatorenTyp.KLAMMER_ZU)
+				{
+					klammern_offen--;
+					glieder_liste = glieder_liste.remove(i);
+					arr_length--;
+					continue;
+				}
+
+				uint priority_addition = (klammern_offen * get_op_prio_length);
+
 				if ([OperatorenTyp.PLUS, OperatorenTyp.MINUS]
 					.canFind(opg.operationenTyp) &&
-					max_priority_operation < Operation_priorities.PLUS_MINUS)
+					max_priority_operation < (
+						Operation_priorities.PLUS_MINUS + priority_addition))
 				{
 					max_priority_operation = Operation_priorities.PLUS_MINUS;
 					max_priority_index = i;
 				}
 				else if ([OperatorenTyp.MAL, OperatorenTyp.GETEILT]
 					.canFind(opg.operationenTyp) &&
-					max_priority_operation < Operation_priorities.MAL_DURCH)
+					max_priority_operation < (Operation_priorities.MAL_DURCH + priority_addition))
 				{
 					max_priority_operation = Operation_priorities.MAL_DURCH;
 					max_priority_index = i;
 				}
 				else if (opg.operationenTyp == OperatorenTyp.HOCH &&
-					max_priority_operation < Operation_priorities.HOCH)
+					max_priority_operation < (Operation_priorities.HOCH + priority_addition))
 				{
 					max_priority_operation = Operation_priorities.HOCH;
 					max_priority_index = i;

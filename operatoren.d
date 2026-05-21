@@ -29,33 +29,30 @@ enum OperatorenTyp
 	ANFANG_LINIE,
 }
 
-dchar[OperatorenTyp] operatoren_chars;
+immutable dchar[OperatorenTyp] operatoren_chars = [
+	OperatorenTyp.INVALID: '\0',
 
-static this()
-{
-	operatoren_chars[OperatorenTyp.INVALID] = '\0';
+	OperatorenTyp.PLUS: '+',
+	OperatorenTyp.MINUS: '-',
+	OperatorenTyp.MAL: '*',
+	OperatorenTyp.GETEILT: '/',
+	OperatorenTyp.HOCH: '^',
 
-	operatoren_chars[OperatorenTyp.PLUS] = '+';
-	operatoren_chars[OperatorenTyp.MINUS] = '-';
-	operatoren_chars[OperatorenTyp.MAL] = '*';
-	operatoren_chars[OperatorenTyp.GETEILT] = '/';
-	operatoren_chars[OperatorenTyp.HOCH] = '^';
+	OperatorenTyp.RÜCK_PFEIL: '←',
+	OperatorenTyp.VOR_PFEIL: '→',
 
-	operatoren_chars[OperatorenTyp.RÜCK_PFEIL] = '←';
-	operatoren_chars[OperatorenTyp.VOR_PFEIL] = '→';
+	OperatorenTyp.KLAMMER_AUF: '(',
+	OperatorenTyp.KLAMMER_ZU: ')',
+	OperatorenTyp.ECKIGE_KLAMMER_AUF: '[',
+	OperatorenTyp.ECKIGE_KLAMMER_ZU: ']',
+	OperatorenTyp.SPITZE_KLAMMER_AUF: '<',
+	OperatorenTyp.SPITZE_KLAMMER_ZU: '>',
+	OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF: '{',
+	OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU: '}',
 
-	operatoren_chars[OperatorenTyp.KLAMMER_AUF] = '(';
-	operatoren_chars[OperatorenTyp.KLAMMER_ZU] = ')';
-	operatoren_chars[OperatorenTyp.ECKIGE_KLAMMER_AUF] = '[';
-	operatoren_chars[OperatorenTyp.ECKIGE_KLAMMER_ZU] = ']';
-	operatoren_chars[OperatorenTyp.SPITZE_KLAMMER_AUF] = '<';
-	operatoren_chars[OperatorenTyp.SPITZE_KLAMMER_ZU] = '>';
-	operatoren_chars[OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF] = '{';
-	operatoren_chars[OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU] = '}';
+	OperatorenTyp.PUNKT: '.',
+	OperatorenTyp.KOMMA: ',',
 
-	operatoren_chars[OperatorenTyp.PUNKT] = '.';
-	operatoren_chars[OperatorenTyp.KOMMA] = ',';
-
-	operatoren_chars[OperatorenTyp.NEUE_LINIE] = '\n';
-	operatoren_chars[OperatorenTyp.ANFANG_LINIE] = '\r';
-}
+	OperatorenTyp.NEUE_LINIE: '\n',
+	OperatorenTyp.ANFANG_LINIE: '\r'
+];

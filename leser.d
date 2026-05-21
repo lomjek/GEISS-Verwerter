@@ -164,8 +164,8 @@ private Wert als_wert_string(dstring wort)
 		wort = wort[2 .. $ - 2];
 	}
 
-	dstring* str = new dstring(wort);
-	return Wert(WertTyp.TEXT, str);
+	debug writeln("Fix this!!!");
+	return Wert(WertTyp.INVALID, null);
 }
 
 private Wert als_wert_zahl(dstring wort)
