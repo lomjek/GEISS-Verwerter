@@ -7,7 +7,7 @@ import baum_generator;
 
 import token.token;
 
-import variablen.wert_typ;
+import variablen.wert : WertTyp;
 
 import glied.glied;
 

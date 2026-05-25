@@ -1,16 +1,14 @@
 module glied.variablen_glied;
 
-import token.variable;
-
-import variablen.wert_typ;
+import variablen.wert;
 
 import glied.glied;
 
 class Setze_Variable_Glied : Glied
 {
-	override public Variable verwerte()
+	override public Wert verwerte()
 	{
-		return Variable(WertTyp.INVALID, null);
+		return Wert(WertTyp.INVALID, null);
 
 		// Ich muss mir ein System für Variablen überlegen.
 	}

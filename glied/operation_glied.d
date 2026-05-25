@@ -4,9 +4,8 @@ import glied.glied;
 import glied.wert_glied;
 
 import token.operatoren;
-import token.variable;
 
-import variablen.wert_typ;
+import variablen.wert;
 
 import std.stdio : write, writeln;
 import std.array : join, array;
@@ -35,7 +34,7 @@ class OperationGlied : Glied
 		write("}");
 	}
 
-	override Variable verwerte()
+	override Wert verwerte()
 	{
 		WertTyp[] vt_liste = werte.map!(werte => werte.verwerte.typ).array;
 		bool all_numbers = true;
@@ -55,7 +54,7 @@ class OperationGlied : Glied
 			foreach (Glied wert; werte)
 			{
 				double momentaner_wert = 0.0;
-				Variable momentane_verwertung = wert.verwerte();
+				Wert momentane_verwertung = wert.verwerte();
 
 				if (momentane_verwertung.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
@@ -104,10 +103,10 @@ class OperationGlied : Glied
 
 			double* heap_resultat = new double;
 			*heap_resultat = resultat;
-			return Variable(WertTyp.ZAHL, heap_resultat);
+			return Wert(WertTyp.ZAHL, heap_resultat);
 		}
 		// Handle other cases
-		return Variable(WertTyp.INVALID, null);
+		return Wert(WertTyp.INVALID, null);
 	}
 
 	this(OperatorenTyp op_typ)

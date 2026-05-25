@@ -6,10 +6,9 @@ import ext.string;
 
 import token.token;
 import token.schlüsselwörter;
-import token.variable;
 import token.operatoren;
 
-import variablen.wert_typ;
+import variablen.wert;
 
 // @ {} [] # \ || != ~
 
@@ -152,7 +151,7 @@ private Verifizierung ist_wert(dchar[] wort)
 }
 
 //MARK: Wert - als!
-private Variable als_wert_string(dchar[] wort)
+private Wert als_wert_string(dchar[] wort)
 {
 	if ((wort.startsWith("'") && wort.endsWith("'")) || (wort.startsWith('"') && wort.endsWith('"')))
 	{
@@ -166,25 +165,25 @@ private Variable als_wert_string(dchar[] wort)
 
 	dchar[]* str = (new dchar[][1]).ptr;
 	*str = wort.dup;
-	return Variable(WertTyp.AUSDRUCK, str);
+	return Wert(WertTyp.AUSDRUCK, str);
 }
 
-private Variable als_wert_zahl(dchar[] wort)
+private Wert als_wert_zahl(dchar[] wort)
 {
 	try
 	{
 		int zahl = to!uint(wort);
 		uint* num = new uint;
 		*num = to!uint(zahl);
-		return Variable(WertTyp.NATÜRLICHE_ZAHL, num);
+		return Wert(WertTyp.NATÜRLICHE_ZAHL, num);
 	}
 	catch (ConvException e)
 	{
-		return Variable(WertTyp.INVALID, null);
+		return Wert(WertTyp.INVALID, null);
 	}
 }
 
-private Variable als_wert_wahrheit(dchar[] wort)
+private Wert als_wert_wahrheit(dchar[] wort)
 {
 	bool* wahr;
 	if (wort == "wahr"d)
@@ -197,12 +196,12 @@ private Variable als_wert_wahrheit(dchar[] wort)
 	}
 	else
 	{
-		return Variable(WertTyp.INVALID, null);
+		return Wert(WertTyp.INVALID, null);
 	}
-	return Variable(WertTyp.WAHRHEIT, wahr);
+	return Wert(WertTyp.WAHRHEIT, wahr);
 }
 
-private Variable als_wert(dchar[] wort)
+private Wert als_wert(dchar[] wort)
 {
 	if (wort.ist_string == Verifizierung.ja)
 	{
@@ -213,7 +212,7 @@ private Variable als_wert(dchar[] wort)
 		return als_wert_zahl(wort);
 	}
 
-	return Variable(WertTyp.INVALID, null);
+	return Wert(WertTyp.INVALID, null);
 }
 
 // MARK: operatoren
@@ -284,7 +283,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 			continue;
 		}
 
-		// VariablenTypen
+		// WertTypen
 		if (wort.ist_vt == Verifizierung.ja)
 		{
 			WertTyp* vt = new WertTyp;
@@ -310,7 +309,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 		if (wort.ist_wert == Verifizierung.ja)
 		{
-			Variable* var = new Variable;
+			Wert* var = new Wert;
 			*var = als_wert(wort);
 
 			token_liste ~= Token(Token_Typ.wert, var);
@@ -348,8 +347,8 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 			token_liste[i].typ == Token_Typ.operator)
 		{
 			OperatorenTyp operator = *cast(OperatorenTyp*) token_liste[i].wert;
-			Variable vorher = *cast(Variable*) token_liste[i - 1].wert;
-			Variable naher = *cast(Variable*) token_liste[i + 1].wert;
+			Wert vorher = *cast(Wert*) token_liste[i - 1].wert;
+			Wert naher = *cast(Wert*) token_liste[i + 1].wert;
 
 			if ((operator == OperatorenTyp.PUNKT) &&
 				(vorher.typ == WertTyp.NATÜRLICHE_ZAHL) &&
@@ -366,7 +365,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 				double* deizimahlzahl_heap = new double;
 				*deizimahlzahl_heap = deizimahlzahl;
-				Variable* heap_var = new Variable(WertTyp.ZAHL, deizimahlzahl_heap);
+				Wert* heap_var = new Wert(WertTyp.ZAHL, deizimahlzahl_heap);
 				token_liste[i - 1] = Token(Token_Typ.wert, heap_var);
 				token_liste = token_liste.remove(i);
 				token_liste = token_liste.remove(i);
@@ -382,7 +381,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 		if (token_liste[i].typ == Token_Typ.wert && token_liste[i - 1].typ == Token_Typ
 			.operator)
 		{
-			Variable* var = cast(Variable*) token_liste[i].wert;
+			Wert* var = cast(Wert*) token_liste[i].wert;
 			OperatorenTyp op_typ = *cast(OperatorenTyp*) token_liste[i - 1].wert;
 
 			if (i > 1)
@@ -390,7 +389,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 				if (token_liste[i - 2].typ == Token_Typ.wert)
 				{
 					// Falls der Minusoperator zwischen verschiedenen Typen funktionieren sollte, muss man das hier noch ändern.
-					Variable* var_vorher = cast(Variable*) token_liste[i - 2].wert;
+					Wert* var_vorher = cast(Wert*) token_liste[i - 2].wert;
 					if (ZAHLEN_TYPEN.canFind(var_vorher.typ))
 					{
 						continue;
@@ -435,7 +434,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 					*newValue = cast(int) oldValue * -1;
 
-					token_liste[i].wert = new Variable(WertTyp.GANZE_ZAHL, newValue);
+					token_liste[i].wert = new Wert(WertTyp.GANZE_ZAHL, newValue);
 					token_liste = token_liste.remove(i - 1);
 
 					length--;
@@ -448,7 +447,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 					*newValue = cast(int) oldValue * -1;
 
-					token_liste[i].wert = new Variable(WertTyp.GANZE_ZAHL, newValue);
+					token_liste[i].wert = new Wert(WertTyp.GANZE_ZAHL, newValue);
 					token_liste = token_liste.remove(i - 1);
 
 					length--;
@@ -461,7 +460,7 @@ Token[] lese_linie(dchar[] linie, uint* fehlermeldungen)
 
 					*newValue = cast(double) oldValue * -1;
 
-					token_liste[i].wert = new Variable(WertTyp.ZAHL, newValue);
+					token_liste[i].wert = new Wert(WertTyp.ZAHL, newValue);
 					token_liste = token_liste.remove(i - 1);
 
 					length--;

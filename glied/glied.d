@@ -1,9 +1,9 @@
 module glied.glied;
 
-import token.variable;
+import variablen.wert;
 
 abstract class Glied
 {
-	abstract Variable verwerte();
+	abstract Wert verwerte();
 	abstract void schreibe_baum();
 }

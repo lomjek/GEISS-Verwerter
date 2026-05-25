@@ -2,22 +2,20 @@ module glied.wert_glied;
 
 import std.stdio : write;
 
-import token.variable;
-
-import variablen.wert_typ;
+import variablen.wert;
 
 import glied.glied;
 
 class Wert_Glied : Glied
 {
-	private Variable wert;
+	private Wert wert;
 
-	this(Variable neuer_wert)
+	this(Wert neuer_wert)
 	{
 		wert = neuer_wert;
 	}
 
-	override public Variable verwerte()
+	override public Wert verwerte()
 	{
 		return wert;
 	}

@@ -1,8 +1,14 @@
-module variablen.wert_typ;
+module variablen.wert;
 
 import ext.string : dchar_from_string;
 
-// @ {} [] # \ || != ~
+struct Wert
+{
+	WertTyp typ;
+	void* wert;
+}
+
+// Wert Typ
 
 enum WertTyp
 {
