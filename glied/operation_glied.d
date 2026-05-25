@@ -93,6 +93,11 @@ class OperationGlied : Glied
 		return Wert(WertTyp.ZAHL, heap_resultat);
 	}
 
+	override public bool ist_vollständig()
+	{
+		return populated;
+	}
+
 	this(OperatorenTyp op_typ)
 	{
 		operationenTyp = op_typ;

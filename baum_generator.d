@@ -8,6 +8,7 @@ import glied.glied;
 import glied.wert_glied;
 import glied.operation_glied;
 import glied.block_glied;
+import glied.variablen_glied;
 
 import variablen.wert;
 
@@ -29,6 +30,18 @@ private enum Operation_priorities
 private uint get_op_prio_length()
 {
 	return Operation_priorities.max - Operation_priorities.min + 1;
+}
+
+private bool ist_fertig(Glied[] glieder_liste)
+{
+	foreach (Glied glied; glieder_liste)
+	{
+		if (glied.ist_vollständig == false)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 Glied generiere_baum(Token[] token_liste, uint* fehler)
@@ -92,8 +105,11 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 	}
 	//endregion
 
-	foreach (Token token; token_liste)
+	ulong length = token_liste.length;
+	for (ulong i = 0; i < length; i++)
 	{
+		Token token = token_liste[i];
+
 		if (token.wert == null)
 		{
 			throw new Exception("Es hat keinen wert!!!");
@@ -107,7 +123,28 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 		else if (token.typ == Token_Typ.operator)
 		{
 			OperatorenTyp op_typ = *cast(OperatorenTyp*) token.wert;
-			glieder_liste ~= new OperationGlied(op_typ);
+			if (op_typ == OperatorenTyp.RÜCK_PFEIL)
+			{
+				glieder_liste ~= new Setze_Variable_Glied();
+			}
+			else
+			{
+				glieder_liste ~= new OperationGlied(op_typ);
+			}
+		}
+		else if (token.typ == Token_Typ.var_typ && i + 1 < length &&
+			token_liste[i + 1].typ == Token_Typ.var_name)
+		{
+			dstring var_name = *cast(dstring*) token_liste[i + 1].wert;
+			WertTyp wert_typ = *cast(WertTyp*) token.wert;
+			glieder_liste ~= new Erstelle_Variable_Glied(var_name, wert_typ);
+			token_liste = token_liste.remove(i + 1);
+			length--;
+		}
+		else if (token.typ == Token_Typ.var_name)
+		{
+			dstring var_name = *cast(dstring*) token_liste[i].wert;
+			glieder_liste ~= new Lese_Variable_Glied(var_name);
 		}
 	}
 
@@ -117,18 +154,21 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 	ulong arr_length = glieder_liste.length;
 	uint klammern_offen = 0;
 
-	while (arr_length > 1) // Muss vermutlich geändert werden.
+	while (!glieder_liste.ist_fertig) // Muss vermutlich geändert werden.
 	{
 		// Finde die Anwendung mit max. Prioriäten;
 		ulong max_priority_operation = 0;
 		ulong max_priority_index = 0;
 		for (ulong i = 0; i < arr_length; i++)
 		{
+			if (glieder_liste[i].ist_vollständig)
+				continue;
+
+			uint priority_addition = (klammern_offen * get_op_prio_length);
+
 			if (glieder_liste[i].classinfo == OperationGlied.classinfo)
 			{
 				OperationGlied opg = cast(OperationGlied) glieder_liste[i];
-				if (opg.populated)
-					continue;
 
 				if (opg.operationenTyp == OperatorenTyp.KLAMMER_AUF)
 				{
@@ -145,27 +185,34 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 					continue;
 				}
 
-				uint priority_addition = (klammern_offen * get_op_prio_length);
-
 				if ([OperatorenTyp.PLUS, OperatorenTyp.MINUS]
 					.canFind(opg.operationenTyp) &&
 					max_priority_operation < (
 						Operation_priorities.PLUS_MINUS + priority_addition))
 				{
-					max_priority_operation = Operation_priorities.PLUS_MINUS;
+					max_priority_operation = Operation_priorities.PLUS_MINUS + priority_addition;
 					max_priority_index = i;
 				}
 				else if ([OperatorenTyp.MAL, OperatorenTyp.GETEILT]
 					.canFind(opg.operationenTyp) &&
 					max_priority_operation < (Operation_priorities.MAL_DURCH + priority_addition))
 				{
-					max_priority_operation = Operation_priorities.MAL_DURCH;
+					max_priority_operation = Operation_priorities.MAL_DURCH + priority_addition;
 					max_priority_index = i;
 				}
 				else if (opg.operationenTyp == OperatorenTyp.HOCH &&
 					max_priority_operation < (Operation_priorities.HOCH + priority_addition))
 				{
-					max_priority_operation = Operation_priorities.HOCH;
+					max_priority_operation = Operation_priorities.HOCH + priority_addition;
+					max_priority_index = i;
+				}
+			}
+			else if (glieder_liste[i].classinfo == Setze_Variable_Glied.classinfo)
+			{
+				if (max_priority_operation < (
+						Operation_priorities.SETZE_VARIABLE + priority_addition))
+				{
+					max_priority_operation = Operation_priorities.SETZE_VARIABLE + priority_addition;
 					max_priority_index = i;
 				}
 			}
@@ -200,13 +247,51 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 				continue;
 			}
 		}
-	}
 
-	debug glieder_liste[0].schreibe_baum;
-	debug write("\n");
+		if (glied.classinfo == Setze_Variable_Glied.classinfo)
+		{
+			Setze_Variable_Glied svglied = cast(Setze_Variable_Glied) glied;
+
+			if (max_priority_index < 1)
+				throw new Exception("Der Pfeil kann nicht das erste Ding der Linie sein...");
+
+			if (max_priority_index >= glieder_liste.length)
+				throw new Exception("Der Pfeil kann nicht das letzte Element der Linie sein");
+
+			Glied vorher_glied = glieder_liste[max_priority_index - 1];
+			Glied naher_glied = glieder_liste[max_priority_index + 1];
+
+			if (vorher_glied.classinfo == Erstelle_Variable_Glied.classinfo)
+			{
+				Erstelle_Variable_Glied evg = cast(Erstelle_Variable_Glied) vorher_glied;
+				svglied.var_name = evg.var_name;
+				svglied.assign_wert = naher_glied;
+				glieder_liste = glieder_liste.remove(max_priority_index + 1);
+				arr_length--;
+			}
+			else if (vorher_glied.classinfo == Lese_Variable_Glied.classinfo)
+			{
+				Lese_Variable_Glied lvg = cast(Lese_Variable_Glied) vorher_glied;
+				svglied.var_name = lvg.var_name;
+				svglied.assign_wert = naher_glied;
+
+				glieder_liste = glieder_liste.remove(max_priority_index + 1);
+				glieder_liste = glieder_liste.remove(max_priority_index - 1);
+
+				arr_length -= 2;
+			}
+			else
+			{
+				throw new Exception("Variablennamen unbekannt!");
+			}
+		}
+	}
 
 	BlockGlied bgl = new BlockGlied();
 	bgl.aktionen = glieder_liste;
+
+	debug bgl.schreibe_baum;
+	debug write("\n");
 
 	return bgl;
 }

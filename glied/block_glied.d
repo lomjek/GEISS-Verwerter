@@ -27,14 +27,23 @@ class BlockGlied : Glied
 
 	override public void schreibe_baum()
 	{
-		writeln();
+		bool first = true;
+		write("[BLOCK]{");
+		foreach (Glied aktion; aktionen)
+		{
+			if (!first)
+				write(", ");
+			aktion.schreibe_baum;
+		}
+		write("}");
 	}
 
 	override public Wert verwerte(uint bereich)
 	{
 		foreach (Glied aktion; aktionen)
 		{
-			auto resultat = aktion.verwerte(bereich);
+			Wert resultat = aktion.verwerte(bereich);
+			debug writeln(resultat);
 			write("Rückgabewert: ");
 			if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
 				writeln(*cast(uint*) resultat.wert);
@@ -46,5 +55,10 @@ class BlockGlied : Glied
 				writeln(resultat.typ);
 		}
 		return Wert(WertTyp.INVALID, null);
+	}
+
+	override public bool ist_vollständig()
+	{
+		return true;
 	}
 }

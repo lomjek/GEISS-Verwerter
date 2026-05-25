@@ -33,8 +33,8 @@ const WertTyp[] ZAHLEN_TYPEN = [
 	WertTyp.ZAHL
 ];
 
-dstring[WertTyp] wertTypString = [
-	WertTyp.INVALID: "invalid"d,
+immutable dstring[WertTyp] wertTypString = [
+	WertTyp.INVALID: "variable"d,
 
 	WertTyp.ZAHL: "zahl"d,
 	WertTyp.GANZE_ZAHL: "gzahl"d,

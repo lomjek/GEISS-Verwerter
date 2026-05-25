@@ -4,6 +4,7 @@ import variablen.wert;
 
 enum VariablenTyp
 {
+	INVALID,
 	FIX,
 	VARIABEL,
 	FUNKTION
@@ -11,7 +12,7 @@ enum VariablenTyp
 
 struct Variable
 {
-	dchar[] identifier;
+	dstring identifier;
 	VariablenTyp var_typ;
 	void* wert;
 }

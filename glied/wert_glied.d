@@ -20,9 +20,9 @@ class Wert_Glied : Glied
 		return wert;
 	}
 
-	public WertTyp typ()
+	override public bool ist_vollständig()
 	{
-		return wert.typ;
+		return true;
 	}
 
 	override public void schreibe_baum()

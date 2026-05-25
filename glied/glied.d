@@ -8,6 +8,7 @@ abstract class Glied
 {
 	abstract public Wert verwerte(uint bereich);
 	abstract public void schreibe_baum();
+	abstract public bool ist_vollständig();
 }
 
 class InvalidGlied : Glied
@@ -20,5 +21,10 @@ class InvalidGlied : Glied
 	override public void schreibe_baum()
 	{
 		write("INVALID");
+	}
+
+	override public bool ist_vollständig()
+	{
+		return true;
 	}
 }
