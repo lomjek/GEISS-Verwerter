@@ -1,4 +1,4 @@
-module token.operatoren;
+module operatoren;
 
 enum OperatorenTyp
 {

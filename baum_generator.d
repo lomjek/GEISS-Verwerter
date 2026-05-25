@@ -1,7 +1,8 @@
 module baum_generator;
 
 import token.token;
-import token.operatoren;
+
+import operatoren;
 
 import glied.glied;
 import glied.wert_glied;
@@ -28,7 +29,58 @@ Glied generiere_baum(Token[] token_liste)
 {
 	Glied[] glieder_liste = [];
 
-	//TODO: Schauen, dass alle Blocks geschlossen sind.
+	//region Sind alle Klammern geschlossen?
+	uint offene_klammern = 0;
+	uint offene_eckige_klammern = 0;
+	uint offene_spitze_klammern = 0;
+	uint offene_geschwungene_klammern = 0;
+	foreach (Token token; token_liste)
+	{
+		if (token.typ != Token_Typ.operator)
+		{
+			continue;
+		}
+		OperatorenTyp op_typ = *cast(OperatorenTyp*) token.wert;
+		if (op_typ == OperatorenTyp.KLAMMER_AUF)
+			offene_klammern++;
+		else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_AUF)
+			offene_eckige_klammern++;
+		else if (op_typ == OperatorenTyp.SPITZE_KLAMMER_AUF)
+			offene_spitze_klammern++;
+		else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF)
+			offene_geschwungene_klammern++;
+
+		else if (op_typ == OperatorenTyp.KLAMMER_ZU)
+			offene_klammern--;
+		else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
+			offene_eckige_klammern--;
+		else if (op_typ == OperatorenTyp.SPITZE_KLAMMER_ZU)
+			offene_spitze_klammern--;
+		else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
+			offene_geschwungene_klammern--;
+	}
+
+	if (offene_klammern != 0)
+	{
+		writeln("FEHLER: Nicht alle Klammern sind zu!");
+		return new InvalidGlied();
+	}
+	if (offene_eckige_klammern != 0)
+	{
+		writeln("FEHLER: Nicht alle eckigen Klammern sind zu!");
+		return new InvalidGlied();
+	}
+	if (offene_spitze_klammern != 0)
+	{
+		writeln("FEHLER: Nicht alle spitze Klammern sind zu!");
+		return new InvalidGlied();
+	}
+	if (offene_geschwungene_klammern != 0)
+	{
+		writeln("FEHLER: Nicht alle geschwungenen Klammern sind zu!");
+		return new InvalidGlied();
+	}
+	//endregion
 
 	foreach (Token token; token_liste)
 	{

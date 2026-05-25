@@ -3,7 +3,7 @@ module glied.operation_glied;
 import glied.glied;
 import glied.wert_glied;
 
-import token.operatoren;
+import operatoren;
 
 import variablen.wert;
 

@@ -6,7 +6,8 @@ import ext.string;
 
 import token.token;
 import token.schlüsselwörter;
-import token.operatoren;
+
+import operatoren;
 
 import variablen.wert;
 
