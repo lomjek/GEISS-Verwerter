@@ -4,14 +4,14 @@ import glied.glied;
 
 import variablen.wert;
 
+import ext.prints;
+
 import std.stdio : writeln, write;
 
 // @ {} [] # \ || != ~
 
 enum BlockTypes
 {
-	GLOBAL,
-
 	FALLS_SONST,
 
 	SCHLEIFE_PRO_DER,
@@ -20,11 +20,13 @@ enum BlockTypes
 	FUNKTION
 }
 
-class BlockGlied : Glied
+abstract class BlockGlied : Glied
 {
 	public Glied[] aktionen;
-	BlockTypes typ;
+}
 
+class Programm_BlockGlied : BlockGlied
+{
 	override public void schreibe_baum()
 	{
 		bool first = true;
@@ -34,6 +36,7 @@ class BlockGlied : Glied
 			if (!first)
 				write(", ");
 			aktion.schreibe_baum;
+			first = false;
 		}
 		write("}");
 	}
@@ -42,17 +45,10 @@ class BlockGlied : Glied
 	{
 		foreach (Glied aktion; aktionen)
 		{
-			Wert resultat = aktion.verwerte(bereich);
-			debug writeln(resultat);
+			Wert resultat = aktion.verwerte(0);
 			write("Rückgabewert: ");
-			if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
-				writeln(*cast(uint*) resultat.wert);
-			else if (resultat.typ == WertTyp.GANZE_ZAHL)
-				writeln(*cast(int*) resultat.wert);
-			else if (resultat.typ == WertTyp.ZAHL)
-				writeln(*cast(double*) resultat.wert);
-			else
-				writeln(resultat.typ);
+			schreibe_schön_wert(resultat);
+			writeln("");
 		}
 		return Wert(WertTyp.INVALID, null);
 	}
@@ -60,5 +56,36 @@ class BlockGlied : Glied
 	override public bool ist_vollständig()
 	{
 		return true;
+	}
+}
+
+class Falls_Sonst_BlockGlied : BlockGlied
+{
+	public Glied bedingung;
+	public Glied[] sonst_aktionen;
+
+	override public void schreibe_baum()
+	{
+		write("[FALLS ");
+		bedingung.schreibe_baum();
+		write("]{");
+		bool first = true;
+		foreach (Glied aktion; aktionen)
+		{
+			if (!first)
+				write(", ");
+			aktion.schreibe_baum;
+			first = false;
+		}
+		write("/");
+		first = true;
+		foreach (Glied aktion; aktionen)
+		{
+			if (!first)
+				write(", ");
+			aktion.schreibe_baum;
+			first = false;
+		}
+		write("}");
 	}
 }

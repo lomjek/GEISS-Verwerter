@@ -1,8 +1,7 @@
 module leser;
 
-import std;
-
 import ext.string;
+import ext.prints;
 
 import token.token;
 import token.schlüsselwörter;
@@ -10,6 +9,15 @@ import token.schlüsselwörter;
 import operatoren;
 
 import variablen.wert;
+
+import core.memory;
+import std.algorithm : startsWith, endsWith, remove, canFind;
+import std.string : strip;
+import std.conv : to, ConvException;
+import std.stdio : write, writeln;
+import std.math : pow;
+import std.array : split;
+import std.traits : EnumMembers;
 
 // @ {} [] # \ || != ~
 
@@ -139,7 +147,7 @@ private Verifizierung ist_wert(dstring wort)
 	{
 		return Verifizierung.ja;
 	}
-	else if (wort.ist_string == Verifizierung.nein)
+	else if (wort.ist_string != Verifizierung.nein)
 	{
 		return wort.ist_string;
 	}
@@ -164,8 +172,9 @@ private Wert als_wert_string(dstring wort)
 		wort = wort[2 .. $ - 2];
 	}
 
-	debug writeln("Fix this!!!");
-	return Wert(WertTyp.INVALID, null);
+	dstring* heapSlice = cast(dstring*) GC.malloc(dstring.sizeof);
+	*heapSlice = wort;
+	return Wert(WertTyp.TEXT, heapSlice);
 }
 
 private Wert als_wert_zahl(dstring wort)
@@ -345,7 +354,7 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 	}
 
 	debug write("Token Liste: ");
-	debug writeln(token_liste);
+	debug schreibe_token_liste(token_liste);
 
 	ulong length = token_liste.length;
 
@@ -503,8 +512,8 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 		}
 	}
 
-	debug write("Neue Token Liste:");
-	debug writeln(token_liste);
+	debug write("Neue Token Liste: ");
+	debug schreibe_token_liste(token_liste);
 
 	return token_liste;
 }

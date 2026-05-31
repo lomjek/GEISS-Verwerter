@@ -15,6 +15,8 @@ import variablen.wert;
 import std.algorithm : remove, canFind;
 import std.stdio : writeln, write;
 
+// @ {} [] # \ || != ~
+
 private enum Operation_priorities
 {
 	INVALID,
@@ -287,7 +289,7 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 		}
 	}
 
-	BlockGlied bgl = new BlockGlied();
+	BlockGlied bgl = new Programm_BlockGlied();
 	bgl.aktionen = glieder_liste;
 
 	debug bgl.schreibe_baum;
