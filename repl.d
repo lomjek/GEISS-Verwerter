@@ -5,44 +5,48 @@ import std.string : strip;
 import std.conv : to;
 
 import ext.string : dchar_from_string;
+import ext.prints;
+
+import fehler;
 
 import inerpreter;
 
 // @ {} [] # \ || != ~
 
-void print_prompt()
+void enter_repl_loop()
 {
-    write("\033[35m>>> \033[0m");
-}
+	while (true)
+	{
+		try
+		{
+			print_prompt();
+			dchar[] repl_linie = [];
+			readln(repl_linie);
+			repl_linie = repl_linie.strip;
 
-void main(string[] args)
-{
-    writeln("Hello World");
-    while (true)
-    {
-        print_prompt();
-        dchar[] repl_linie = [];
-        readln(repl_linie);
-        repl_linie = repl_linie.strip;
+			if (repl_linie == "exit".dchar_from_string)
+			{
+				return;
+			}
+			else if (repl_linie == "clear".dchar_from_string)
+			{
+				write("\x1b[2J\x1b[H");
+				continue;
+			}
+			else if (repl_linie == null || repl_linie.length == 0)
+			{
+				continue;
+			}
 
-        if (repl_linie == "exit".dchar_from_string)
-        {
-            return;
-        }
-        else if (repl_linie == "clear".dchar_from_string)
-        {
-            write("\x1b[2J\x1b[H");
-            continue;
-        }
-        else if (repl_linie == null || repl_linie.length == 0)
-        {
-            continue;
-        }
+			dstring repl_dstring = repl_linie.to!dstring;
 
-        writeln(repl_linie);
-
-        dstring repl_dstring = repl_linie.to!dstring;
-
-        uint fehler = interpretiere_repl_linie(repl_dstring);
-    }
+			uint fehler = interpretiere_repl_linie(repl_dstring);
+		}
+		catch (Fehler fehler)
+		{
+			set_pen_trait(TextTrait.fgRed);
+			writeln(fehler.msg);
+			set_pen_trait(TextTrait.reset);
+		}
+	}
 }

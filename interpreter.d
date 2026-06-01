@@ -26,7 +26,7 @@ uint interpretiere_repl_linie(dstring repl_linie)
 		writeln(error);
 	}
 
-	Glied baum = generiere_baum(tokens, &error);
+	Glied baum = generiere_master_baum(tokens, &error);
 
 	if (error != 0)
 	{

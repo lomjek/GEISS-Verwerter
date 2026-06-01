@@ -1,5 +1,7 @@
 module variablen.speicher;
 
+import fehler;
+
 import variablen.variable;
 import variablen.wert;
 
@@ -51,7 +53,7 @@ bool variable_existiert(uint bereich_num, dstring var_name)
 Variable lies_variable(uint bereich_num, dstring var_name)
 {
 	if (bereiche[bereich_num] == null)
-		return Variable("", VariablenTyp.INVALID, null);
+		throw new Variable_Nicht_Existent_Fehler(var_name);
 
 	Bereich bereich = *bereiche[bereich_num];
 
@@ -62,17 +64,17 @@ Variable lies_variable(uint bereich_num, dstring var_name)
 			return var;
 		}
 	}
-	return Variable("", VariablenTyp.INVALID, null);
+	throw new Variable_Nicht_Existent_Fehler(var_name);
 }
 
 void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ, Wert* init_wert)
 {
 	if (bereiche[bereich_num] == null)
-		throw new Exception("Der Bereich für die Variable existiert nicht!");
+		throw new Error("Der Bereich für die Variable existiert nicht!");
 
 	if (variable_existiert(bereich_num, var_name))
 	{
-		throw new Exception("Die Variable gibt es schon...");
+		throw new Variable_Schon_Existent_Fehler(var_name);
 	}
 
 	bereiche[bereich_num].variablen ~= Variable(var_name, var_typ, init_wert);
@@ -81,10 +83,10 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
 void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 {
 	if (bereiche[bereich_num] == null)
-		throw new Exception("Der Bereich für die Variable existiert nicht!");
+		throw new Error("Der Bereich für die Variable existiert nicht!");
 
 	if (!variable_existiert(bereich_num, var_name))
-		throw new Exception("Die Variable existiert nicht in diesem Bereich!");
+		throw new Variable_Nicht_Existent_Fehler(var_name);
 
 	Bereich* bereich = bereiche[bereich_num];
 

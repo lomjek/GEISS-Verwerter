@@ -4,6 +4,8 @@ import token.token;
 
 import operatoren;
 
+import ext.prints;
+
 import glied.glied;
 import glied.wert_glied;
 import glied.operation_glied;
@@ -46,10 +48,8 @@ private bool ist_fertig(Glied[] glieder_liste)
 	return true;
 }
 
-Glied generiere_baum(Token[] token_liste, uint* fehler)
+Programm_BlockGlied generiere_master_baum(Token[] token_liste, uint* fehler)
 {
-	Glied[] glieder_liste = [];
-
 	//region Sind alle Klammern geschlossen?
 	uint offene_klammern = 0;
 	uint offene_eckige_klammern = 0;
@@ -107,6 +107,8 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 	}
 	//endregion
 
+	Glied[] glieder_liste = [];
+
 	ulong length = token_liste.length;
 	for (ulong i = 0; i < length; i++)
 	{
@@ -151,8 +153,25 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 	}
 
 	debug write("Rohe Gliederliste: ");
+	debug set_pen_trait(TextTrait.fgCyan);
 	debug writeln(glieder_liste);
+	debug set_pen_trait(TextTrait.reset);
 
+	Programm_BlockGlied bgl = new Programm_BlockGlied();
+
+	bgl.aktionen = generiere_baum(glieder_liste, fehler);
+
+	debug set_pen_trait(TextTrait.bgCyan);
+	debug set_pen_trait(TextTrait.fgBlack);
+	debug bgl.schreibe_baum;
+	debug set_pen_trait(TextTrait.reset);
+	debug write("\n");
+
+	return bgl;
+}
+
+Glied[] generiere_baum(Glied[] glieder_liste, uint* fehler)
+{
 	ulong arr_length = glieder_liste.length;
 	uint klammern_offen = 0;
 
@@ -289,11 +308,5 @@ Glied generiere_baum(Token[] token_liste, uint* fehler)
 		}
 	}
 
-	BlockGlied bgl = new Programm_BlockGlied();
-	bgl.aktionen = glieder_liste;
-
-	debug bgl.schreibe_baum;
-	debug write("\n");
-
-	return bgl;
+	return glieder_liste;
 }

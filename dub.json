@@ -6,8 +6,8 @@
 	"description": "Ein Intepreter für meine Programmiersprache MÖWE",
 	"license": "LGPL-3.0-or-later",
 	"name": "interpreter",
-	"targetName": "repl.dc",
-	"mainSourceFile": "repl.d",
+	"targetName": "möwe.dc",
+	"mainSourceFile": "app.d",
 	"targetType": "executable",
 	"sourcePaths": [
 		"."

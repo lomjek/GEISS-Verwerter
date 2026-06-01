@@ -80,9 +80,6 @@ class Lese_Variable_Glied : Glied
 	{
 		Variable var = lies_variable(bereich, var_name);
 
-		if (var.var_typ == VariablenTyp.INVALID || var.wert is null)
-			throw new Exception("Die Variable hat keinen Wert");
-
 		Wert wert = *cast(Wert*) var.wert;
 		return wert;
 	}

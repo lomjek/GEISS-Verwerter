@@ -24,6 +24,7 @@ enum TextTrait : string
 	fgMagenta = "\033[35m",
 	fgCyan = "\033[36m",
 	fgWhite = "\033[37m",
+	fgGrey = "\033[90m",
 
 	bgBlack = "\033[40m",
 	bgRed = "\033[41m",
@@ -60,7 +61,7 @@ void schreibe_schön_wert(Wert wert)
 
 debug void schreibe_token_liste(Token[] token_liste)
 {
-	set_pen_trait(TextTrait.fgBlack);
+	set_pen_trait(TextTrait.fgGrey);
 	write("[");
 
 	bool first = true;
@@ -104,3 +105,19 @@ debug void schreibe_token_liste(Token[] token_liste)
 	writeln("]");
 	set_pen_trait(TextTrait.reset);
 }
+
+//region REPL
+void print_prompt()
+{
+	set_pen_trait(TextTrait.fgMagenta);
+	write(">>> ");
+	set_pen_trait(TextTrait.reset);
+}
+
+void print_continuation()
+{
+	set_pen_trait(TextTrait.fgMagenta);
+	write("... ");
+	set_pen_trait(TextTrait.reset);
+}
+//endregion
