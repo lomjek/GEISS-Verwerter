@@ -7,6 +7,7 @@ import token.token;
 import token.schlüsselwörter;
 
 import operatoren;
+import zahl;
 
 import variablen.wert;
 
@@ -118,20 +119,6 @@ private Verifizierung ist_string(dstring wort)
 	return Verifizierung.nein;
 }
 
-private bool ist_zahl(dstring wort)
-{
-	wort = wort.strip;
-	try
-	{
-		to!uint(wort);
-		return true;
-	}
-	catch (ConvException e)
-	{
-		return false;
-	}
-}
-
 private bool ist_wahrheit(dstring wort)
 {
 	if (wort == "wahr"d || wort == "falsch"d)
@@ -179,17 +166,9 @@ private Wert als_wert_string(dstring wort)
 
 private Wert als_wert_zahl(dstring wort)
 {
-	try
-	{
-		int zahl = to!uint(wort);
-		uint* num = new uint;
-		*num = to!uint(zahl);
-		return Wert(WertTyp.NATÜRLICHE_ZAHL, num);
-	}
-	catch (ConvException e)
-	{
-		return Wert(WertTyp.INVALID, null);
-	}
+	NatürlicheZahl* nz = new NatürlicheZahl;
+	*nz = als_zahl(wort);
+	return Wert(WertTyp.NATÜRLICHE_ZAHL, nz);
 }
 
 private Wert als_wert_wahrheit(dstring wort)
@@ -359,43 +338,7 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 	ulong length = token_liste.length;
 
 	//MARK: Aufräumen
-	for (uint i = 1; i < length - 1; i++) // Der erste Durchgang Zieht die Kommazahlen wieder zusammen.
-	{
-		if (token_liste[i - 1].typ == Token_Typ.wert &&
-			token_liste[i + 1].typ == Token_Typ.wert &&
-			token_liste[i].typ == Token_Typ.operator)
-		{
-			OperatorenTyp operator = *cast(OperatorenTyp*) token_liste[i].wert;
-			Wert vorher = *cast(Wert*) token_liste[i - 1].wert;
-			Wert naher = *cast(Wert*) token_liste[i + 1].wert;
-
-			if ((operator == OperatorenTyp.PUNKT) &&
-				(vorher.typ == WertTyp.NATÜRLICHE_ZAHL) &&
-				(naher.typ == WertTyp.NATÜRLICHE_ZAHL))
-			{
-				double deizimahlzahl;
-
-				uint tmp = *cast(uint*) vorher.wert;
-				deizimahlzahl = tmp.to!double;
-
-				uint tmp_2 = *cast(uint*) naher.wert;
-				double tmp_3 = tmp_2 / pow(10, (tmp_2.to!string.length)).to!double;
-				deizimahlzahl += tmp_3;
-
-				double* deizimahlzahl_heap = new double;
-				*deizimahlzahl_heap = deizimahlzahl;
-				Wert* heap_var = new Wert(WertTyp.ZAHL, deizimahlzahl_heap);
-				token_liste[i - 1] = Token(Token_Typ.wert, heap_var);
-				token_liste = token_liste.remove(i);
-				token_liste = token_liste.remove(i);
-				length -= 2;
-			}
-		}
-	}
-
-	length = token_liste.length; // Eigentlich wäre das hier nicht nötig, aber lieber sicher sein.
-
-	for (uint i = 1; i < length; i++) // Der zweite Durchgang beachtet Minuszahlen
+	for (ulong i = 1; i < length; i++) // Der erste Durchgang beachtet Minuszahlen
 	{
 		if (token_liste[i].typ == Token_Typ.wert && token_liste[i - 1].typ == Token_Typ
 			.operator)
@@ -418,7 +361,7 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 
 				if (token_liste[i - 2].typ == Token_Typ.operator)
 				{
-					// Falls das Minus der Teil eines Pfeiles ist, nicht aber einer Liste.
+					// Falls das Minus der Teil eines Pfeiles ist, nicht aber einer Liste. => Ich verändere die Listen sowieso.
 					OperatorenTyp prevOp = *cast(OperatorenTyp*) token_liste[i - 2].wert;
 
 					if (prevOp == OperatorenTyp.SPITZE_KLAMMER_AUF)
@@ -448,12 +391,9 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 			{
 				if (var.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
-					uint oldValue = *cast(uint*) var.wert;
-					int* newValue = new int;
-
-					*newValue = cast(int) oldValue * -1;
-
-					token_liste[i].wert = new Wert(WertTyp.GANZE_ZAHL, newValue);
+					NatürlicheZahl nz = *cast(NatürlicheZahl*) var.wert;
+					GanzeZahl* gz = new GanzeZahl(true, nz.werte);
+					token_liste[i].wert = new Wert(WertTyp.GANZE_ZAHL, gz);
 					token_liste = token_liste.remove(i - 1);
 
 					length--;
@@ -461,29 +401,13 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 				}
 				else if (var.typ == WertTyp.GANZE_ZAHL)
 				{
-					int oldValue = *cast(int*) var.wert;
-					int* newValue = new int;
-
-					*newValue = cast(int) oldValue * -1;
-
-					token_liste[i].wert = new Wert(WertTyp.GANZE_ZAHL, newValue);
-					token_liste = token_liste.remove(i - 1);
-
-					length--;
-					i--;
+					throw new Exception(
+						"Das hatte ich mal implementiert, es sollte aber nie hierhin kommen...");
 				}
 				else if (var.typ == WertTyp.ZAHL)
 				{
-					double oldValue = *cast(double*) var.wert;
-					double* newValue = new double;
-
-					*newValue = cast(double) oldValue * -1;
-
-					token_liste[i].wert = new Wert(WertTyp.ZAHL, newValue);
-					token_liste = token_liste.remove(i - 1);
-
-					length--;
-					i--;
+					throw new Exception(
+						"Das hatte ich mal implementiert, es sollte aber nie hierhin kommen...");
 				}
 			}
 		}
@@ -491,7 +415,54 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 
 	length = token_liste.length; // Eigentlich wäre das hier nicht nötig, aber lieber sicher sein.
 
-	for (uint i = 1; i < length; i++) // Der dritte Durchlauf veränder <- zu Pfeilen.
+	for (ulong i = 1; i < length - 1; i++) // Der zweite Durchgang Zieht die Kommazahlen wieder zusammen.
+	{
+		if (token_liste[i - 1].typ == Token_Typ.wert &&
+			token_liste[i + 1].typ == Token_Typ.wert &&
+			token_liste[i].typ == Token_Typ.operator)
+		{
+			OperatorenTyp operator = *cast(OperatorenTyp*) token_liste[i].wert;
+			Wert vorher = *cast(Wert*) token_liste[i - 1].wert;
+			Wert naher = *cast(Wert*) token_liste[i + 1].wert;
+
+			if (operator == OperatorenTyp.PUNKT)
+			{
+				if (naher.typ != WertTyp.NATÜRLICHE_ZAHL)
+				{
+					writeln("Die Zahl nach dem Komma kann kaum negativ sein...");
+					writeln("Skipping");
+					continue;
+				}
+				NatürlicheZahl naher_nz = *cast(NatürlicheZahl*) naher.wert;
+				Zahl* resultat = new Zahl;
+
+				if (vorher.typ == WertTyp.GANZE_ZAHL)
+				{
+					GanzeZahl vorher_gz = *cast(GanzeZahl*) vorher.wert;
+					*resultat = konstruiere(vorher_gz, naher_nz);
+				}
+				else if (vorher.typ == WertTyp.NATÜRLICHE_ZAHL)
+				{
+					NatürlicheZahl vorher_nz = *cast(NatürlicheZahl*) vorher.wert;
+					*resultat = konstruiere(vorher_nz, naher_nz);
+				}
+
+				Wert* wert = new Wert(WertTyp.ZAHL, resultat);
+				token_liste[i - 1] = Token(Token_Typ.wert, wert);
+				writeln("Als ich es gedingst habe: " ~ (*resultat).als_string);
+
+				token_liste = token_liste.remove(i + 1);
+				token_liste = token_liste.remove(i);
+
+				length -= 2;
+				i -= 2;
+			}
+		}
+	}
+
+	length = token_liste.length; // Eigentlich wäre das hier nicht nötig, aber lieber sicher sein.
+
+	for (ulong i = 1; i < length; i++) // Der dritte Durchlauf veränder <- zu Pfeilen.
 	{
 		if (token_liste[i].typ == Token_Typ.operator &&
 			token_liste[i - 1].typ == Token_Typ.operator)

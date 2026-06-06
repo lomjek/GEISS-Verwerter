@@ -2,6 +2,8 @@ module ext.prints;
 
 import operatoren : OperatorenTyp;
 
+import zahl;
+
 import token.token;
 
 import variablen.wert;
@@ -43,12 +45,22 @@ void set_pen_trait(TextTrait tt)
 
 void schreibe_schön_wert(Wert wert)
 {
+	writeln(wert);
 	if (wert.typ == WertTyp.NATÜRLICHE_ZAHL)
-		write(*cast(uint*) wert.wert);
+	{
+		NatürlicheZahl nz = *cast(NatürlicheZahl*) wert.wert;
+		write(nz.als_string);
+	}
 	else if (wert.typ == WertTyp.GANZE_ZAHL)
-		write(*cast(int*) wert.wert);
+	{
+		GanzeZahl gz = *cast(GanzeZahl*) wert.wert;
+		write(gz.als_string);
+	}
 	else if (wert.typ == WertTyp.ZAHL)
-		write(*cast(double*) wert.wert);
+	{
+		Zahl z = *cast(Zahl*) wert.wert;
+		write(z.als_string);
+	}
 	else if (wert.typ == WertTyp.TEXT)
 	{
 		write("\"");

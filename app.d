@@ -9,7 +9,7 @@ import std.stdio : write, writeln;
 bool repl_mode = false;
 dstring file_name = "";
 
-void main(string[] args)
+int main(string[] args)
 {
 	if (args.length == 1)
 	{
@@ -20,7 +20,9 @@ void main(string[] args)
 		set_pen_trait(TextTrait.reset);
 
 		enter_repl_loop();
+		return 0;
 	}
 
 	writeln("Hier ist leider noch nix!");
+	return 1;
 }

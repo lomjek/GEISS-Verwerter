@@ -7,6 +7,8 @@ import variablen.wert;
 
 import ext.string;
 
+// @ {} [] # \ || != ~
+
 struct Bereich
 {
 	dstring name;
@@ -94,8 +96,23 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 	{
 		if (var.identifier == var_name)
 		{
-			//TODO: Hier muss man noch checken, ob die Variable dynamisch ist, ob der Wert richtig ist, etc, etc...
-			var.wert = neuer_wert;
+			if (var.var_typ == VariablenTyp.FIX)
+			{
+				WertTyp vw_typ = (*cast(Wert*) var.wert).typ;
+				WertTyp nw_typ = (*neuer_wert).typ;
+				if (vw_typ == nw_typ)
+				{
+					var.wert = neuer_wert;
+				}
+				else if (nw_typ == WertTyp.GANZE_ZAHL && vw_typ == WertTyp.ZAHL)
+				{
+
+				}
+				else
+				{
+					throw new Variable_Assign_Typ_Error(var.identifier, vw_typ, nw_typ);
+				}
+			}
 		}
 	}
 }

@@ -2,7 +2,11 @@ module fehler;
 
 import app;
 
+import variablen.wert;
+
 import std.conv : to;
+
+// @ {} [] # \ || != ~
 
 class Fehler : Exception
 {
@@ -41,6 +45,16 @@ class Variable_Schon_Existent_Fehler : VariablenFehler
 	this(dstring variable_name)
 	{
 		dstring msg = "Variable '" ~ variable_name ~ "' gibt es schon!";
+		super(msg);
+	}
+}
+
+class Variable_Assign_Typ_Error : VariablenFehler
+{
+	this(dstring variable_name, WertTyp variable_typ, WertTyp wert_typ)
+	{
+		dstring msg = "Variable '" ~ variable_name ~ "' mit dem Typ " ~ variable_typ.to!dstring ~
+			" kann nicht Wert von Typ " ~ wert_typ.to!dstring ~ " enthalten";
 		super(msg);
 	}
 }
