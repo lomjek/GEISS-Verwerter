@@ -1,7 +1,7 @@
 module fehler;
 
 import app;
-
+import operatoren;
 import variablen.wert;
 
 import std.conv : to;
@@ -23,6 +23,7 @@ class Fehler : Exception
 	}
 }
 
+//MARK: Variablen
 abstract class VariablenFehler : Fehler
 {
 	this(dstring msg, size_t line = __LINE__)
@@ -56,5 +57,24 @@ class Variable_Assign_Typ_Error : VariablenFehler
 		dstring msg = "Variable '" ~ variable_name ~ "' mit dem Typ " ~ variable_typ.to!dstring ~
 			" kann nicht Wert von Typ " ~ wert_typ.to!dstring ~ " enthalten";
 		super(msg);
+	}
+}
+
+//MARK: Typenfehler
+abstract class TypenFehler : Fehler
+{
+	this(dstring msg, size_t linie = __LINE__)
+	{
+		super(msg, linie);
+	}
+}
+
+class Operation_TypenFehler : TypenFehler
+{
+	this(OperatorenTyp op_typ, WertTyp w1_typ, WertTyp w2_typ)
+	{
+		dstring message = "Die Operation " ~ op_typ.to!dstring ~ " kann nicht mit den Typen " ~ w1_typ.to!dstring ~ " und "
+			~ w2_typ.to!dstring ~ "durchegführt werden.";
+		super(message);
 	}
 }

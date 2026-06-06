@@ -1,7 +1,7 @@
 module zahl;
 
 import std.algorithm : max, reverse;
-import std.stdio : write;
+import std.stdio : write, writeln;
 import std.conv : to;
 
 // @ {} [] # \ || != ~
@@ -11,17 +11,55 @@ struct Zahl
 	bool negativ;
 	ulong punkt_position;
 	ubyte[] werte;
+
+	this(GanzeZahl gz)
+	{
+		this.negativ = gz.negativ;
+		this.punkt_position = gz.werte.length;
+		this.werte = gz.werte;
+	}
+
+	this(NatürlicheZahl nz)
+	{
+		this.negativ = false;
+		this.punkt_position = nz.werte.length;
+		this.werte = nz.werte;
+	}
+
+	this(bool negativ, ulong punkt_position, ubyte[] werte)
+	{
+		this.negativ = negativ;
+		this.punkt_position = punkt_position;
+		this.werte = werte;
+	}
 }
 
 struct GanzeZahl
 {
 	bool negativ;
 	ubyte[] werte;
+
+	this(NatürlicheZahl nz)
+	{
+		this.negativ = false;
+		this.werte = nz.werte;
+	}
+
+	this(bool negativ, ubyte[] werte)
+	{
+		this.negativ = negativ;
+		this.werte = werte;
+	}
 }
 
 struct NatürlicheZahl
 {
 	ubyte[] werte;
+
+	this(ubyte[] werte)
+	{
+		this.werte = werte;
+	}
 }
 
 //MARK: PADDING
@@ -49,50 +87,86 @@ private ubyte[] right_pad(ubyte[] num, ulong desired_length)
 	return padded;
 }
 
-//MARK: ADDIERE
-private ubyte[] addiere(ubyte[] a, ubyte[] b)
+//MARK: COMPARE
+private bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
 {
-	// 
-	if (a.length < b.length)
+	if (x.length < y.length)
 	{
-		a = left_pad(a, b.length);
-	}
-	else if (b.length < a.length)
-	{
-		b = left_pad(b, a.length);
+		return false;
 	}
 
-	ubyte[] result = new ubyte[a.length];
-	uint rest = 0;
-
-	for (size_t i = a.length; i > 0; i--)
+	if (x.length > y.length)
 	{
-		uint sum = a[i - 1] + b[i - 1] + rest;
-		result[i - 1] = cast(ubyte)(sum & 0xFF);
-		rest = sum >> 8;
+		return true;
 	}
 
-	if (rest > 0)
+	if (x[$ - 1] > y[$ - 1])
 	{
-		ubyte[] extendedResult = new ubyte[result.length + 1];
-		extendedResult[0] = cast(ubyte) rest;
-		extendedResult[1 .. $] = result;
-		return extendedResult;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+private bool is_equal(ubyte[] x, ubyte[] y)
+{
+	x = left_pad(x, y.length);
+	y = left_pad(y, x.length);
+
+	for (ulong i = 0; i < x.length; i++)
+	{
+		if (x[i] != y[i])
+			return false;
+	}
+	return true;
+}
+
+//MARK: ADDIERE
+private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
+{
+	num1 = reverse(left_pad(num1, num2.length)); // Pad and reverse ubyte array.
+	num2 = reverse(left_pad(num2, num1.length));
+
+	ubyte[] resultat;
+	ubyte überschuss = 0;
+
+	if (num1.length != num2.length)
+	{
+		throw new Error(
+			"Es sollte nie passieren. Beim addieren von zwei Zahlen wurden sie nicht richtig gepaddet.");
 	}
 
-	return result;
+	for (ulong i = 0; i < num1.length; i++)
+	{
+		ushort summe = num1[i] + num2[i] + überschuss;
+		überschuss = cast(ubyte)(summe >> 8); //oberer Byte des ushort, was übertragen wird...
+		resultat ~= cast(ubyte)(summe & 0xFF); // tieferer Byte des ushorts, was an der Stelle eingetragen wird.
+	}
+
+	if (überschuss)
+	{
+		resultat ~= überschuss;
+	}
+
+	return resultat.reverse;
 }
 
 Zahl addiere(Zahl x, Zahl y)
 {
-	if (x.punkt_position == y.punkt_position)
+	ulong segments_after_dot_x = x.werte.length - x.punkt_position;
+	ulong segments_after_dot_y = y.werte.length - y.punkt_position;
+
+	if (segments_after_dot_x == segments_after_dot_y)
 	{
 		GanzeZahl z = addiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte));
 		return Zahl(z.negativ, x.punkt_position, z.werte);
 	}
 
-	ulong segments_after_dot_x = x.werte.length - x.punkt_position;
-	ulong segments_after_dot_y = y.werte.length - y.punkt_position;
+	writeln(segments_after_dot_x);
+	writeln(segments_after_dot_y);
+
 	x.werte = right_pad(x.werte, x.punkt_position + segments_after_dot_y);
 	y.werte = right_pad(y.werte, y.punkt_position + segments_after_dot_x);
 
@@ -100,18 +174,27 @@ Zahl addiere(Zahl x, Zahl y)
 	return Zahl(z.negativ, x.punkt_position, z.werte);
 }
 
-GanzeZahl addiere(GanzeZahl x, GanzeZahl y)
+GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
 {
-	if (x.negativ && y.negativ)
+	if (num1.negativ && num2.negativ)
 	{
-		return GanzeZahl(true, addiere(x.werte, y.werte));
+		return GanzeZahl(true, addiere(num1.werte, num2.werte));
 	}
-	else if (x.negativ == false && y.negativ == false)
+	else if (num1.negativ == false && num2.negativ == false)
 	{
-		return GanzeZahl(false, addiere(x.werte, y.werte));
+		return GanzeZahl(false, addiere(num1.werte, num2.werte));
 	}
 
-	throw new Error("Not implemented");
+	if (num1.negativ && num2.negativ == false)
+	{
+		return subtrahiere(num2, num1);
+	}
+	else if (num1.negativ == false && num2.negativ)
+	{
+		return subtrahiere(num1, num2);
+	}
+
+	throw new Error("Wenn man hier anlangt, weiss ich echt nicht, was passiert ist...");
 }
 
 NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
@@ -120,77 +203,93 @@ NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
 }
 
 //MARK: SUBTRAHIERE
-GanzeZahl subtrahiere(GanzeZahl x, GanzeZahl y)
+Zahl subtrahiere(Zahl x, Zahl y) // x - y
 {
-	if (x.negativ != y.negativ)
+	ulong segments_after_dot_x = x.werte.length - x.punkt_position;
+	ulong segments_after_dot_y = y.werte.length - y.punkt_position;
+
+	if (segments_after_dot_x == segments_after_dot_y)
 	{
-		return GanzeZahl(true, addiere(x.werte, y.werte));
+		GanzeZahl z = subtrahiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte));
+		return Zahl(z.negativ, x.punkt_position, z.werte);
 	}
 
-	ulong len = max(x.werte.length, y.werte.length);
-	ubyte[] xPad = left_pad(x.werte, len);
-	ubyte[] yPad = left_pad(y.werte, len);
+	x.werte = right_pad(x.werte, x.punkt_position + segments_after_dot_y);
+	y.werte = right_pad(y.werte, y.punkt_position + segments_after_dot_x);
 
-	int compare = 0;
-	for (ulong i = 0; i < len; i++)
+	GanzeZahl z = subtrahiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte)); // x - y 
+	ulong punkt_position = z.werte.length - max(segments_after_dot_x, segments_after_dot_y);
+	return Zahl(z.negativ, punkt_position, z.werte);
+}
+
+GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
+{
+	if (minuend.negativ && subtrahend.negativ == false)
 	{
-		if (xPad[i] < yPad[i])
-		{
-			compare = -1;
-			break;
-		}
-		if (xPad[i] > yPad[i])
-		{
-			compare = 1;
-			break;
-		}
+		return GanzeZahl(true, addiere(minuend.werte, subtrahend.werte));
+	}
+	else if (minuend.negativ == false && subtrahend.negativ)
+	{
+		return GanzeZahl(false, addiere(minuend.werte, subtrahend.werte));
+	}
+	else if (minuend.negativ && subtrahend.negativ)
+	{
+		GanzeZahl summe = addiere(minuend, GanzeZahl(false, subtrahend.werte));
+		return GanzeZahl(false, summe.werte);
 	}
 
-	if (compare == 0)
+	ubyte[] min = reverse(left_pad(minuend.werte, subtrahend.werte.length));
+	ubyte[] sub = reverse(left_pad(subtrahend.werte, minuend.werte.length));
+
+	if (is_equal(sub, min))
 	{
-		return GanzeZahl(false, [0]); // Wenn die Zahlen gleich sind
+		return GanzeZahl(false, [0]);
 	}
 
-	ubyte[] a = compare > 0 ? xPad : yPad;
-	ubyte[] b = compare > 0 ? yPad : xPad;
-	bool resNegativ = compare > 0 ? x.negativ : !x.negativ;
+	bool inverted = false;
 
-	ubyte[] result = new ubyte[len];
-	uint borrow = 0;
-
-	for (long i = len - 1; i >= 0; i--)
+	if (is_bigger(sub, min))
 	{
-		int diff = a[i] - b[i] - borrow;
-		if (diff < 0)
+		ubyte[] zwischenspeicher = sub;
+		sub = min;
+		min = zwischenspeicher;
+
+		inverted = true;
+	}
+
+	ubyte[] resultat;
+
+	ushort buffer;
+	ubyte carry_over;
+	for (ulong i = 0; i < sub.length; i++)
+	{
+		buffer = min[i];
+		ushort subtr = cast(ushort)(sub[i] + carry_over);
+
+		if (min[i] < subtr)
 		{
-			diff += 256;
-			borrow = 1;
+			buffer += 0x100; // 0x100 ist die Erste Zahl die grösser ist, als der jetztige buffer;
+			carry_over = 0x1;
 		}
 		else
 		{
-			borrow = 0;
+			carry_over = 0;
 		}
-		result[i] = cast(ubyte) diff;
+
+		resultat ~= cast(ubyte)(buffer - subtr);
 	}
 
-	size_t start = 0;
-	while (start < result.length && result[start] == 0)
-	{
-		start++;
-	}
-	result = result[start .. $];
+	if (carry_over != 0)
+		throw new Exception(
+			"Das carryover sollte null sein, weil ich es ja vorher sonst inverted habe: " ~ carry_over
+				.to!string);
 
-	if (result.length == 0)
-	{
-		result = [0];
-	}
-
-	return GanzeZahl(resNegativ, result);
+	return GanzeZahl(inverted, resultat.reverse);
 }
 
-GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y)
+GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 {
-	return subtrahiere(GanzeZahl(false, x.werte), GanzeZahl(false, y.werte));
+	return subtrahiere(GanzeZahl(x), GanzeZahl(y));
 }
 
 //MARK: API
@@ -307,7 +406,10 @@ string als_string(NatürlicheZahl n)
 
 string als_string(GanzeZahl g)
 {
-	return "-" ~ als_string(NatürlicheZahl(g.werte));
+	if (g.negativ)
+		return "-" ~ als_string(NatürlicheZahl(g.werte));
+	else
+		return als_string(NatürlicheZahl(g.werte));
 }
 
 string als_string(Zahl z)

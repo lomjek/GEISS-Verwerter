@@ -449,13 +449,12 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 
 				Wert* wert = new Wert(WertTyp.ZAHL, resultat);
 				token_liste[i - 1] = Token(Token_Typ.wert, wert);
-				writeln("Als ich es gedingst habe: " ~ (*resultat).als_string);
 
 				token_liste = token_liste.remove(i + 1);
 				token_liste = token_liste.remove(i);
 
 				length -= 2;
-				i -= 2;
+				i--;
 			}
 		}
 	}

@@ -3,7 +3,7 @@ module glied.wert_glied;
 import std.stdio : write;
 
 import variablen.wert;
-
+import zahl;
 import glied.glied;
 
 class Wert_Glied : Glied
@@ -35,15 +35,15 @@ class Wert_Glied : Glied
 		//Zahlen
 		else if (wert.typ == WertTyp.NATÜRLICHE_ZAHL)
 		{
-			write(*cast(uint*) this.wert.wert);
+			write((*cast(NatürlicheZahl*) wert.wert).als_string);
 		}
 		else if (wert.typ == WertTyp.GANZE_ZAHL)
 		{
-			write(*cast(int*) this.wert.wert);
+			write((*cast(GanzeZahl*) wert.wert).als_string);
 		}
 		else if (wert.typ == WertTyp.ZAHL)
 		{
-			write(*cast(double*) this.wert.wert);
+			write((*cast(Zahl*) wert.wert).als_string);
 		}
 		//Wahrheit
 		else if (wert.typ == WertTyp.WAHRHEIT)

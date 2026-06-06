@@ -3,8 +3,11 @@ module glied.operation_glied;
 import glied.glied;
 import glied.wert_glied;
 
-import operatoren;
+import ext.prints;
 
+import operatoren;
+import fehler;
+import zahl;
 import variablen.wert;
 
 import std.stdio : write, writeln;
@@ -36,32 +39,11 @@ class OperationGlied : Glied
 
 	override Wert verwerte(uint bereich)
 	{
-		double resultat = 0.0;
+		Wert resultat = Wert(WertTyp.INVALID, null);
 		bool first_pass = true;
 		foreach (Glied wert; werte)
 		{
-			double momentaner_wert = 0.0;
-			Wert momentane_verwertung = wert.verwerte(bereich);
-
-			if (momentane_verwertung.typ == WertTyp.NATÜRLICHE_ZAHL)
-			{
-				uint tmp = *cast(uint*) momentane_verwertung.wert;
-				momentaner_wert = tmp.to!double;
-			}
-			else if (momentane_verwertung.typ == WertTyp.GANZE_ZAHL)
-			{
-				int tmp = *cast(int*) momentane_verwertung.wert;
-				momentaner_wert = tmp.to!double;
-			}
-			else if (momentane_verwertung.typ == WertTyp.ZAHL)
-			{
-				momentaner_wert = *cast(double*) momentane_verwertung.wert;
-			}
-			else
-			{
-				debug writeln(
-					"Irgendwelche schlimme Fehler sind passiert. OperationGlied bei verwertung mit allnumbers.");
-			}
+			Wert momentaner_wert = wert.verwerte(bereich);
 
 			if (first_pass)
 			{
@@ -70,14 +52,230 @@ class OperationGlied : Glied
 				continue;
 			}
 
+			//MARK: PLUS
 			if (operationenTyp == OperatorenTyp.PLUS)
 			{
-				resultat += momentaner_wert;
+				if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
+				{
+					NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) resultat.wert;
+
+					if (momentaner_wert.typ == WertTyp.NATÜRLICHE_ZAHL)
+					{
+						NatürlicheZahl* neue_zahl = new NatürlicheZahl;
+
+						*neue_zahl = addiere(zwischenresultat,
+							*cast(NatürlicheZahl*) momentaner_wert.wert);
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.GANZE_ZAHL)
+					{
+						GanzeZahl* neue_zahl = new GanzeZahl;
+						*neue_zahl = addiere(GanzeZahl(zwischenresultat),
+							*cast(GanzeZahl*) momentaner_wert.wert);
+
+						resultat = Wert(WertTyp.GANZE_ZAHL, neue_zahl);
+					}
+					else if (momentaner_wert.typ == WertTyp.ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+
+						*neue_zahl = addiere(Zahl(zwischenresultat),
+							*cast(Zahl*) momentaner_wert.wert);
+
+						resultat = Wert(WertTyp.ZAHL, neue_zahl);
+					}
+					else
+					{
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+				}
+
+				else if (resultat.typ == WertTyp.GANZE_ZAHL)
+				{
+					GanzeZahl zwischenresultat = *cast(GanzeZahl*) resultat.wert;
+					if (momentaner_wert.typ == WertTyp.NATÜRLICHE_ZAHL)
+					{
+						GanzeZahl* neue_zahl = new GanzeZahl;
+						*neue_zahl = addiere(zwischenresultat,
+							GanzeZahl(*cast(NatürlicheZahl*) momentaner_wert.wert));
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.GANZE_ZAHL)
+					{
+						GanzeZahl* neue_zahl = new GanzeZahl;
+						*neue_zahl = addiere(zwischenresultat,
+							*cast(GanzeZahl*) momentaner_wert.wert);
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+						*neue_zahl = addiere(Zahl(zwischenresultat),
+							*cast(Zahl*) momentaner_wert.wert);
+
+						resultat = Wert(WertTyp.ZAHL, neue_zahl);
+					}
+					else
+					{
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+				}
+
+				else if (resultat.typ == WertTyp.ZAHL)
+				{
+					Zahl zwischenresultat = *cast(Zahl*) resultat.wert;
+
+					if (momentaner_wert.typ == WertTyp.NATÜRLICHE_ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+
+						*neue_zahl = addiere(zwischenresultat,
+							Zahl(*cast(NatürlicheZahl*) momentaner_wert.wert));
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.GANZE_ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+						*neue_zahl = addiere(zwischenresultat,
+							Zahl(*cast(GanzeZahl*) momentaner_wert.wert));
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+						*neue_zahl = addiere(zwischenresultat,
+							*cast(Zahl*) momentaner_wert.wert);
+
+						resultat.wert = neue_zahl;
+					}
+					else
+					{
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+				}
+				// Noch für andere Typen else ifs
 			}
+
+			//MARK: MINUS
 			else if (operationenTyp == OperatorenTyp.MINUS)
 			{
-				resultat -= momentaner_wert;
+				if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
+				{
+					NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) resultat.wert;
+
+					if (momentaner_wert.typ == WertTyp.NATÜRLICHE_ZAHL)
+					{
+						GanzeZahl* neue_zahl = new GanzeZahl;
+
+						*neue_zahl = subtrahiere(zwischenresultat,
+							*cast(NatürlicheZahl*) momentaner_wert.wert);
+
+						resultat = Wert(WertTyp.GANZE_ZAHL, neue_zahl);
+					}
+
+					else if (momentaner_wert.typ == WertTyp.GANZE_ZAHL)
+					{
+						GanzeZahl* neue_zahl = new GanzeZahl;
+
+						*neue_zahl = subtrahiere(GanzeZahl(zwischenresultat),
+							*cast(GanzeZahl*) momentaner_wert.wert);
+
+						resultat = Wert(WertTyp.GANZE_ZAHL, neue_zahl);
+					}
+
+					else if (momentaner_wert.typ == WertTyp.ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+
+						*neue_zahl = subtrahiere(Zahl(zwischenresultat),
+							*cast(Zahl*) momentaner_wert.wert);
+
+						resultat = Wert(WertTyp.ZAHL, neue_zahl);
+					}
+
+					else
+					{
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+				}
+
+				else if (resultat.typ == WertTyp.GANZE_ZAHL)
+				{
+					GanzeZahl zwischenresultat = *cast(GanzeZahl*) resultat.wert;
+					if (momentaner_wert.typ == WertTyp.NATÜRLICHE_ZAHL)
+					{
+						GanzeZahl* neue_zahl = new GanzeZahl;
+						*neue_zahl = subtrahiere(zwischenresultat,
+							GanzeZahl(*cast(NatürlicheZahl*) momentaner_wert.wert));
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.GANZE_ZAHL)
+					{
+						GanzeZahl* neue_zahl = new GanzeZahl;
+						*neue_zahl = subtrahiere(zwischenresultat,
+							*cast(GanzeZahl*) momentaner_wert.wert);
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+						*neue_zahl = subtrahiere(Zahl(zwischenresultat),
+							*cast(Zahl*) momentaner_wert.wert);
+
+						resultat = Wert(WertTyp.ZAHL, neue_zahl);
+					}
+					else
+					{
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+				}
+
+				else if (resultat.typ == WertTyp.ZAHL)
+				{
+					Zahl zwischenresultat = *cast(Zahl*) resultat.wert;
+					if (momentaner_wert.typ == WertTyp.NATÜRLICHE_ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+						*neue_zahl = subtrahiere(zwischenresultat,
+							Zahl(*cast(NatürlicheZahl*) momentaner_wert.wert));
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.GANZE_ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+						*neue_zahl = subtrahiere(zwischenresultat,
+							Zahl(*cast(GanzeZahl*) momentaner_wert.wert));
+
+						resultat.wert = neue_zahl;
+					}
+					else if (momentaner_wert.typ == WertTyp.ZAHL)
+					{
+						Zahl* neue_zahl = new Zahl;
+						*neue_zahl = subtrahiere(zwischenresultat,
+							*cast(Zahl*) momentaner_wert.wert);
+
+						resultat.wert = neue_zahl;
+					}
+					else
+					{
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+				}
 			}
+			/*
 			else if (operationenTyp == OperatorenTyp.MAL)
 			{
 				resultat *= momentaner_wert;
@@ -86,11 +284,10 @@ class OperationGlied : Glied
 			{
 				resultat = pow(resultat, momentaner_wert);
 			}
+			*/
 		}
 
-		double* heap_resultat = new double;
-		*heap_resultat = resultat;
-		return Wert(WertTyp.ZAHL, heap_resultat);
+		return resultat;
 	}
 
 	override public bool ist_vollständig()
