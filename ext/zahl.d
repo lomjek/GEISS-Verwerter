@@ -133,10 +133,8 @@ private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 	ubyte überschuss = 0;
 
 	if (num1.length != num2.length)
-	{
 		throw new Error(
 			"Es sollte nie passieren. Beim addieren von zwei Zahlen wurden sie nicht richtig gepaddet.");
-	}
 
 	for (ulong i = 0; i < num1.length; i++)
 	{
@@ -146,9 +144,7 @@ private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 	}
 
 	if (überschuss)
-	{
 		resultat ~= überschuss;
-	}
 
 	return resultat.reverse;
 }
@@ -164,14 +160,12 @@ Zahl addiere(Zahl x, Zahl y)
 		return Zahl(z.negativ, x.punkt_position, z.werte);
 	}
 
-	writeln(segments_after_dot_x);
-	writeln(segments_after_dot_y);
-
 	x.werte = right_pad(x.werte, x.punkt_position + segments_after_dot_y);
 	y.werte = right_pad(y.werte, y.punkt_position + segments_after_dot_x);
 
 	GanzeZahl z = addiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte));
-	return Zahl(z.negativ, x.punkt_position, z.werte);
+	ulong punkt_position = z.werte.length - max(segments_after_dot_x, segments_after_dot_y);
+	return Zahl(z.negativ, punkt_position, z.werte);
 }
 
 GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
@@ -290,6 +284,68 @@ GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y
 GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 {
 	return subtrahiere(GanzeZahl(x), GanzeZahl(y));
+}
+
+//MARK: MULTIPLIKATION
+private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
+{
+	//Ich muss alles umschreiben...
+	num1 = reverse(left_pad(num1, num2.length));
+	num2 = reverse(left_pad(num2, num1.length));
+
+	ubyte überschuss = 0;
+	ubyte[] resultat;
+
+	if (num1.length != num2.length)
+		throw new Error(
+			"Es sollte nie passieren. Beim multiplizieren von zwei Zahlen wurden sie nicht richtig gepaddet.");
+
+	for (ulong i = 0; i < num1.length; i++)
+	{
+		ushort zwischenresultat = cast(ushort)((num1[i] * num2[i]) + überschuss);
+
+		überschuss = cast(ubyte)(zwischenresultat >> 8); //oberer Byte des ushort, was übertragen wird...
+		resultat ~= cast(ubyte)(zwischenresultat & 0xFF); // tieferer Byte des ushorts, was an der Stelle eingetragen wird.
+	}
+
+	if (überschuss != 0)
+		resultat ~= überschuss;
+
+	return resultat.reverse;
+}
+
+Zahl multipliziere(Zahl x, Zahl y)
+{
+	ulong segments_after_dot_x = x.werte.length - x.punkt_position;
+	ulong segments_after_dot_y = y.werte.length - y.punkt_position;
+
+	ubyte[] num1 = right_pad(x.werte, x.punkt_position + segments_after_dot_y);
+	ubyte[] num2 = right_pad(y.werte, y.punkt_position + segments_after_dot_x);
+
+	ubyte[] resultat = multipliziere(num1, num2);
+	ulong punkt_position = resultat.length - max(segments_after_dot_x, segments_after_dot_y);
+
+	if ((x.negativ && y.negativ) ||
+		(x.negativ == false && y.negativ == false))
+	{
+		return Zahl(false, punkt_position, resultat);
+	}
+
+	return Zahl(true, punkt_position, resultat);
+}
+
+GanzeZahl multipliziere(GanzeZahl num1, GanzeZahl num2)
+{
+	if ((num1.negativ && num2.negativ) ||
+		(num1.negativ == false && num2.negativ == false))
+		return GanzeZahl(false, multipliziere(num1.werte, num2.werte));
+
+	return GanzeZahl(true, multipliziere(num1.werte, num2.werte));
+}
+
+NatürlicheZahl multipliziere(NatürlicheZahl num1, NatürlicheZahl num2)
+{
+	return NatürlicheZahl(multipliziere(num1.werte, num2.werte));
 }
 
 //MARK: API
