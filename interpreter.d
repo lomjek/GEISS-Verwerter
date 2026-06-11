@@ -1,4 +1,4 @@
-module inerpreter;
+module interpreter;
 
 import std;
 
@@ -13,11 +13,11 @@ import glied.glied;
 
 // @ {} [] # \ || != ~
 
-uint interpretiere_repl_linie(dstring repl_linie)
+uint interpretiere(dstring text)
 {
 	uint error = 0;
 
-	Token[] tokens = lese_linie(repl_linie, &error);
+	Token[] tokens = lese_linie(text, &error);
 
 	if (error != 0)
 	{

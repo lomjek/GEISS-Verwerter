@@ -45,7 +45,6 @@ void set_pen_trait(TextTrait tt)
 
 void schreibe_schön_wert(Wert wert)
 {
-	writeln(wert);
 	if (wert.typ == WertTyp.NATÜRLICHE_ZAHL)
 	{
 		NatürlicheZahl nz = *cast(NatürlicheZahl*) wert.wert;

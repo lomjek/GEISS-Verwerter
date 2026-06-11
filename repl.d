@@ -9,7 +9,7 @@ import ext.prints;
 
 import fehler;
 
-import inerpreter;
+import interpreter;
 
 // @ {} [] # \ || != ~
 
@@ -40,7 +40,7 @@ void enter_repl_loop()
 
 			dstring repl_dstring = repl_linie.to!dstring;
 
-			uint fehler = interpretiere_repl_linie(repl_dstring);
+			uint fehler = interpretiere(repl_dstring);
 		}
 		catch (Fehler fehler)
 		{

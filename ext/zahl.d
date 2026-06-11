@@ -335,13 +335,11 @@ private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit
 
 		matrix ~= zwischenresultat;
 	}
-	writeln(matrix);
 
 	while (matrix.length > 1)
 	{
 		matrix[0] = addiere(matrix[0], matrix[1], false);
 		matrix = matrix.remove(1);
-		writeln(matrix);
 	}
 
 	return matrix[0].reverse;
