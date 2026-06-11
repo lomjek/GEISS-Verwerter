@@ -1,6 +1,10 @@
 module zahl;
 
-import std.algorithm : max, reverse;
+import ext.prints;
+import variablen.wert;
+
+import std.algorithm : max, remove;
+import std.algorithm.mutation : reverse;
 import std.stdio : write, writeln;
 import std.conv : to;
 
@@ -124,10 +128,18 @@ private bool is_equal(ubyte[] x, ubyte[] y)
 }
 
 //MARK: ADDIERE
-private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
+private ubyte[] addiere(ubyte[] num1, ubyte[] num2, bool invert = true)
 {
-	num1 = reverse(left_pad(num1, num2.length)); // Pad and reverse ubyte array.
-	num2 = reverse(left_pad(num2, num1.length));
+	if (invert)
+	{
+		num1 = reverse(left_pad(num1, num2.length)); // Pad and reverse ubyte array.
+		num2 = reverse(left_pad(num2, num1.length));
+	}
+	else
+	{
+		num1 = num1.right_pad(num2.length);
+		num2 = num2.right_pad(num1.length);
+	}
 
 	ubyte[] resultat;
 	ubyte überschuss = 0;
@@ -146,7 +158,10 @@ private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 	if (überschuss)
 		resultat ~= überschuss;
 
-	return resultat.reverse;
+	if (invert)
+		return resultat.reverse;
+	else
+		return resultat;
 }
 
 Zahl addiere(Zahl x, Zahl y)
@@ -289,49 +304,52 @@ GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 //MARK: MULTIPLIKATION
 private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
 {
-	//Ich muss alles umschreiben...
-	num1 = reverse(left_pad(num1, num2.length));
-	num2 = reverse(left_pad(num2, num1.length));
+	num1 = num1.reverse;
+	num2 = num2.reverse;
 
-	ubyte überschuss = 0;
-	ubyte[] resultat;
+	ubyte[][] matrix;
 
-	if (num1.length != num2.length)
-		throw new Error(
-			"Es sollte nie passieren. Beim multiplizieren von zwei Zahlen wurden sie nicht richtig gepaddet.");
-
-	for (ulong i = 0; i < num1.length; i++)
+	for (ulong i = 0; i < num2.length; i++)
 	{
-		ushort zwischenresultat = cast(ushort)((num1[i] * num2[i]) + überschuss);
+		ubyte[] zwischenresultat = [];
+		ubyte überschuss = 0;
 
-		überschuss = cast(ubyte)(zwischenresultat >> 8); //oberer Byte des ushort, was übertragen wird...
-		resultat ~= cast(ubyte)(zwischenresultat & 0xFF); // tieferer Byte des ushorts, was an der Stelle eingetragen wird.
+		for (ulong j = 0; j < num1.length; j++)
+		{
+			ushort ziffer = (num1[j] * num2[i]) + überschuss;
+			überschuss = cast(ubyte)(ziffer >> 8); //oberer Byte des ushort, was übertragen wird...
+			zwischenresultat ~= cast(ubyte)(ziffer & 0xFF); // tieferer Byte des ushorts, was an der Stelle eingetragen wird.
+		}
+
+		if (überschuss > 0)
+		{
+			zwischenresultat ~= überschuss;
+		}
+
+		ulong repeat = i;
+		while (repeat != 0)
+		{
+			zwischenresultat = 0 ~ zwischenresultat;
+			repeat--;
+		}
+
+		matrix ~= zwischenresultat;
+	}
+	writeln(matrix);
+
+	while (matrix.length > 1)
+	{
+		matrix[0] = addiere(matrix[0], matrix[1], false);
+		matrix = matrix.remove(1);
+		writeln(matrix);
 	}
 
-	if (überschuss != 0)
-		resultat ~= überschuss;
-
-	return resultat.reverse;
+	return matrix[0].reverse;
 }
 
 Zahl multipliziere(Zahl x, Zahl y)
 {
-	ulong segments_after_dot_x = x.werte.length - x.punkt_position;
-	ulong segments_after_dot_y = y.werte.length - y.punkt_position;
-
-	ubyte[] num1 = right_pad(x.werte, x.punkt_position + segments_after_dot_y);
-	ubyte[] num2 = right_pad(y.werte, y.punkt_position + segments_after_dot_x);
-
-	ubyte[] resultat = multipliziere(num1, num2);
-	ulong punkt_position = resultat.length - max(segments_after_dot_x, segments_after_dot_y);
-
-	if ((x.negativ && y.negativ) ||
-		(x.negativ == false && y.negativ == false))
-	{
-		return Zahl(false, punkt_position, resultat);
-	}
-
-	return Zahl(true, punkt_position, resultat);
+	throw new Exception("Not implemented...");
 }
 
 GanzeZahl multipliziere(GanzeZahl num1, GanzeZahl num2)
