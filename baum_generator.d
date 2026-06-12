@@ -3,7 +3,7 @@ module baum_generator;
 import token.token;
 
 import operatoren;
-
+import schlüsselwörter;
 import ext.prints;
 
 import glied.glied;
@@ -24,6 +24,8 @@ private enum Operation_priorities
 	INVALID,
 
 	SETZE_VARIABLE,
+
+	GLEICH,
 
 	PLUS_MINUS,
 	MAL_DURCH,
@@ -48,12 +50,12 @@ private bool ist_fertig(Glied[] glieder_liste)
 	return true;
 }
 
-Programm_BlockGlied generiere_master_baum(Token[] token_liste, uint* fehler)
+//MARK: master_baum
+Programm_BlockGlied generiere_master_baum(Token[] token_liste)
 {
 	//region Sind alle Klammern geschlossen?
 	uint offene_klammern = 0;
 	uint offene_eckige_klammern = 0;
-	uint offene_spitze_klammern = 0;
 	uint offene_geschwungene_klammern = 0;
 	foreach (Token token; token_liste)
 	{
@@ -66,8 +68,6 @@ Programm_BlockGlied generiere_master_baum(Token[] token_liste, uint* fehler)
 			offene_klammern++;
 		else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_AUF)
 			offene_eckige_klammern++;
-		else if (op_typ == OperatorenTyp.SPITZE_KLAMMER_AUF)
-			offene_spitze_klammern++;
 		else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF)
 			offene_geschwungene_klammern++;
 
@@ -75,35 +75,21 @@ Programm_BlockGlied generiere_master_baum(Token[] token_liste, uint* fehler)
 			offene_klammern--;
 		else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
 			offene_eckige_klammern--;
-		else if (op_typ == OperatorenTyp.SPITZE_KLAMMER_ZU)
-			offene_spitze_klammern--;
 		else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
 			offene_geschwungene_klammern--;
 	}
 
 	if (offene_klammern != 0)
 	{
-		writeln("FEHLER: Nicht alle Klammern sind zu!");
-		*fehler += 1000;
-		return null;
+		throw new Exception("FEHLER: Nicht alle Klammern sind zu!");
 	}
 	if (offene_eckige_klammern != 0)
 	{
-		writeln("FEHLER: Nicht alle eckigen Klammern sind zu!");
-		*fehler += 1100;
-		return null;
-	}
-	if (offene_spitze_klammern != 0)
-	{
-		writeln("FEHLER: Nicht alle spitze Klammern sind zu!");
-		*fehler += 1200;
-		return null;
+		throw new Exception("FEHLER: Nicht alle eckigen Klammern sind zu!");
 	}
 	if (offene_geschwungene_klammern != 0)
 	{
-		writeln("FEHLER: Nicht alle geschwungenen Klammern sind zu!");
-		*fehler += 1300;
-		return null;
+		throw new Exception("FEHLER: Nicht alle geschwungenen Klammern sind zu!");
 	}
 	//endregion
 
@@ -150,30 +136,44 @@ Programm_BlockGlied generiere_master_baum(Token[] token_liste, uint* fehler)
 			dstring var_name = *cast(dstring*) token_liste[i].wert;
 			glieder_liste ~= new Lese_Variable_Glied(var_name);
 		}
+		else if (token.typ == Token_Typ.schlussel_wort)
+		{
+			glieder_liste ~= new SW_Glied(*cast(SchlüsselWort*) token.wert);
+		}
 	}
 
-	debug write("Rohe Gliederliste: ");
-	debug set_pen_trait(TextTrait.fgCyan);
-	debug writeln(glieder_liste);
-	debug set_pen_trait(TextTrait.reset);
+	debug
+	{
+		write("Rohe Gliederliste: ");
+		set_pen_trait(TextTrait.fgCyan);
+		writeln(glieder_liste);
+		set_pen_trait(TextTrait.reset);
+	}
 
 	Programm_BlockGlied bgl = new Programm_BlockGlied();
 
-	bgl.aktionen = generiere_baum(glieder_liste, fehler);
+	bgl.aktionen = generiere_baum(glieder_liste);
 
-	debug set_pen_trait(TextTrait.bgCyan);
-	debug set_pen_trait(TextTrait.fgBlack);
-	debug bgl.schreibe_baum;
-	debug set_pen_trait(TextTrait.reset);
-	debug write("\n");
+	debug
+	{
+		write("BAUM: ");
+		set_pen_trait(TextTrait.fgCyan);
+		bgl.schreibe_baum;
+		set_pen_trait(TextTrait.reset);
+		write("\n");
+	}
 
 	return bgl;
 }
 
-Glied[] generiere_baum(Glied[] glieder_liste, uint* fehler)
+//MARK: generiere_baum
+Glied[] generiere_baum(Glied[] glieder_liste)
 {
 	ulong arr_length = glieder_liste.length;
 	uint klammern_offen = 0;
+
+	uint geschw_klammern_offen = 0;
+	Glied[] unter_block;
 
 	while (!glieder_liste.ist_fertig) // Muss vermutlich geändert werden.
 	{
@@ -182,6 +182,62 @@ Glied[] generiere_baum(Glied[] glieder_liste, uint* fehler)
 		ulong max_priority_index = 0;
 		for (ulong i = 0; i < arr_length; i++)
 		{
+			//MARK: Subblock check
+			if (geschw_klammern_offen != 0)
+			{
+				if (glieder_liste[i].classinfo == OperationGlied.classinfo)
+				{
+					OperationGlied op_gl = cast(OperationGlied) glieder_liste[i];
+					if (op_gl.operationenTyp == OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF)
+					{
+						geschw_klammern_offen++;
+						continue;
+					}
+					else if (op_gl.operationenTyp == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
+					{
+						geschw_klammern_offen--;
+						if (geschw_klammern_offen == 0)
+						{
+							BlockGlied bl_gl = new BlockGlied;
+							bl_gl.aktionen = generiere_baum(unter_block);
+
+							glieder_liste[i] = bl_gl;
+
+							continue;
+						}
+					}
+				}
+
+				unter_block ~= glieder_liste[i];
+				glieder_liste = glieder_liste.remove(i);
+				arr_length--;
+				i--;
+				continue;
+			}
+
+			//MARK: Subblock typisierung
+			if ((i + 2) < arr_length) // Falls block generation
+			{
+				if (glieder_liste[i].classinfo == SW_Glied.classinfo &&
+					glieder_liste[i + 2].classinfo == BlockGlied.classinfo)
+				{
+					SW_Glied sw_gl = cast(SW_Glied) glieder_liste[i];
+					BlockGlied bl_gl = cast(BlockGlied) glieder_liste[i + 2];
+					if (sw_gl.sw == SchlüsselWort.FALLS)
+					{
+						Falls_BlockGlied falls_block_glied = new Falls_BlockGlied();
+						falls_block_glied.aktionen = bl_gl.aktionen;
+						falls_block_glied.bedingung = glieder_liste[i + 1];
+
+						glieder_liste[i] = falls_block_glied;
+						glieder_liste = glieder_liste.remove(i + 2);
+						glieder_liste = glieder_liste.remove(i + 1);
+						arr_length -= 2;
+					}
+				}
+			}
+
+			//MARK: Find max_prio
 			if (glieder_liste[i].ist_vollständig)
 				continue;
 
@@ -196,6 +252,7 @@ Glied[] generiere_baum(Glied[] glieder_liste, uint* fehler)
 					klammern_offen++;
 					glieder_liste = glieder_liste.remove(i);
 					arr_length--;
+					i--;
 					continue;
 				}
 				else if (opg.operationenTyp == OperatorenTyp.KLAMMER_ZU)
@@ -203,6 +260,15 @@ Glied[] generiere_baum(Glied[] glieder_liste, uint* fehler)
 					klammern_offen--;
 					glieder_liste = glieder_liste.remove(i);
 					arr_length--;
+					i--;
+					continue;
+				}
+				else if (opg.operationenTyp == OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF)
+				{
+					geschw_klammern_offen++;
+					glieder_liste = glieder_liste.remove(i);
+					arr_length--;
+					i--;
 					continue;
 				}
 
@@ -227,6 +293,13 @@ Glied[] generiere_baum(Glied[] glieder_liste, uint* fehler)
 					max_priority_operation = Operation_priorities.HOCH + priority_addition;
 					max_priority_index = i;
 				}
+				else if (opg.operationenTyp == OperatorenTyp.GLEICH &&
+					max_priority_operation < (Operation_priorities.GLEICH + priority_addition))
+				{
+					max_priority_operation = Operation_priorities.GLEICH;
+					max_priority_index = i;
+				}
+
 			}
 			else if (glieder_liste[i].classinfo == Setze_Variable_Glied.classinfo)
 			{
@@ -241,8 +314,17 @@ Glied[] generiere_baum(Glied[] glieder_liste, uint* fehler)
 
 		Glied glied = glieder_liste[max_priority_index];
 
-		debug writeln(max_priority_index, max_priority_operation);
+		debug
+		{
+			set_pen_trait(TextTrait.fgGrey);
+			write("MPO ");
+			write(max_priority_index);
+			write(" an index ");
+			writeln(max_priority_operation);
+			set_pen_trait(TextTrait.reset);
+		}
 
+		//MARK: Build that node
 		if (glied.classinfo == Wert_Glied.classinfo)
 		{
 			continue;

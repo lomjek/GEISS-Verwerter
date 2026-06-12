@@ -114,7 +114,7 @@ private bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
 	}
 }
 
-private bool is_equal(ubyte[] x, ubyte[] y)
+bool is_equal(ubyte[] x, ubyte[] y)
 {
 	x = left_pad(x, y.length);
 	y = left_pad(y, x.length);

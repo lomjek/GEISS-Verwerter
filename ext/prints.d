@@ -66,6 +66,11 @@ void schreibe_schön_wert(Wert wert)
 		write(*cast(dstring*) wert.wert);
 		write("\"");
 	}
+	else if (wert.typ == WertTyp.WAHRHEIT)
+	{
+		bool wahrheit = *cast(bool*) wert.wert;
+		write(wahrheit ? "wahr" : "falsch");
+	}
 	else
 		write(wert.typ);
 }

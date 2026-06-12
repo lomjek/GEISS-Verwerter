@@ -4,8 +4,8 @@ import ext.string;
 import ext.prints;
 
 import token.token;
-import token.schlüsselwörter;
 
+import schlüsselwörter;
 import operatoren;
 import zahl;
 
@@ -173,7 +173,7 @@ private Wert als_wert_zahl(dstring wort)
 
 private Wert als_wert_wahrheit(dstring wort)
 {
-	bool* wahr;
+	bool* wahr = new bool;
 	if (wort == "wahr"d)
 	{
 		*wahr = true;
@@ -198,6 +198,10 @@ private Wert als_wert(dstring wort)
 	else if (wort.ist_zahl)
 	{
 		return als_wert_zahl(wort);
+	}
+	else if (wort.ist_wahrheit)
+	{
+		return als_wert_wahrheit(wort);
 	}
 
 	return Wert(WertTyp.INVALID, null);
@@ -243,7 +247,7 @@ private OperatorenTyp als_operator(dstring wort)
 }
 
 // MARK: lese_linie
-Token[] lese_linie(dstring linie, uint* fehlermeldungen)
+Token[] lese_linie(dstring linie)
 {
 	// Mache Platz vor und nach den Operatoren, damit sie aufgetrennt werden
 	foreach (op; EnumMembers!OperatorenTyp)
@@ -288,8 +292,7 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 				dstring neues_wort = wort_liste[i + 1];
 				if (neues_wort != "zahl"d)
 				{
-					*fehlermeldungen = 10;
-					return token_liste;
+					throw new Error("Muss sowieso noch die alten zweistelligen Typen anschauen...");
 				}
 			}
 			continue;
@@ -315,6 +318,7 @@ Token[] lese_linie(dstring linie, uint* fehlermeldungen)
 		else if (wort.ist_wert == Verifizierung.nicht_ganz)
 		{
 			wort_präfix = wort ~ " ";
+			continue;
 		}
 
 		if (wort.ist_operator)

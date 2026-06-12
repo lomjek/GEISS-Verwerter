@@ -7,35 +7,20 @@ import baum_generator;
 
 import token.token;
 
-import variablen.wert : WertTyp;
+import variablen.wert;
 
 import glied.glied;
+import glied.block_glied;
 
 // @ {} [] # \ || != ~
 
-uint interpretiere(dstring text)
+Wert interpretiere(dstring text)
 {
-	uint error = 0;
+	Token[] tokens = lese_linie(text);
 
-	Token[] tokens = lese_linie(text, &error);
+	Programm_BlockGlied baum = generiere_master_baum(tokens);
 
-	if (error != 0)
-	{
-		//Print_correct_error
-		write("Es ist ein Fehler aufgetretten: ");
-		writeln(error);
-	}
+	Wert resultat = baum.verwerte(0);
 
-	Glied baum = generiere_master_baum(tokens, &error);
-
-	if (error != 0)
-	{
-		//Print_correct_error
-		write("Es ist ein Fehler aufgetretten: ");
-		writeln(error);
-	}
-
-	auto resultat = baum.verwerte(0);
-
-	return 0;
+	return resultat;
 }

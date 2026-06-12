@@ -10,6 +10,8 @@ enum OperatorenTyp
 	GETEILT,
 	HOCH,
 
+	GLEICH,
+
 	RÜCK_PFEIL,
 	VOR_PFEIL,
 
@@ -37,6 +39,8 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
 	OperatorenTyp.MAL: '*',
 	OperatorenTyp.GETEILT: '/',
 	OperatorenTyp.HOCH: '^',
+
+	OperatorenTyp.GLEICH: '=',
 
 	OperatorenTyp.RÜCK_PFEIL: '←',
 	OperatorenTyp.VOR_PFEIL: '→',

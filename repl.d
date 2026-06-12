@@ -40,7 +40,7 @@ void enter_repl_loop()
 
 			dstring repl_dstring = repl_linie.to!dstring;
 
-			uint fehler = interpretiere(repl_dstring);
+			interpretiere(repl_dstring);
 		}
 		catch (Fehler fehler)
 		{

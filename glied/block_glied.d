@@ -20,13 +20,10 @@ enum BlockTypes
 	FUNKTION
 }
 
-abstract class BlockGlied : Glied
+class BlockGlied : Glied
 {
 	public Glied[] aktionen;
-}
 
-class Programm_BlockGlied : BlockGlied
-{
 	override public void schreibe_baum()
 	{
 		bool first = true;
@@ -45,11 +42,66 @@ class Programm_BlockGlied : BlockGlied
 	{
 		foreach (Glied aktion; aktionen)
 		{
-			Wert resultat = aktion.verwerte(0);
-			write("Rückgabewert: ");
-			schreibe_schön_wert(resultat);
-			writeln("");
+			Wert resultat = aktion.verwerte(bereich);
+			debug
+			{
+				write("Rückgabewert: ");
+				schreibe_schön_wert(resultat);
+				writeln("");
+			}
 		}
+		return Wert(WertTyp.INVALID, null);
+	}
+
+	override public bool ist_vollständig()
+	{
+		return false;
+	}
+}
+
+class Programm_BlockGlied : BlockGlied
+{
+	override public Wert verwerte(uint bereich)
+	{
+		return super.verwerte(0);
+	}
+
+	override public bool ist_vollständig()
+	{
+		return true;
+	}
+}
+
+//MARK: FALLS
+class Falls_BlockGlied : BlockGlied
+{
+	public Glied bedingung;
+
+	override public void schreibe_baum()
+	{
+		write("[FALLS ");
+		bedingung.schreibe_baum();
+		write("]{");
+		bool first = true;
+		foreach (Glied aktion; aktionen)
+		{
+			if (!first)
+				write(", ");
+			aktion.schreibe_baum;
+			first = false;
+		}
+		write("}");
+	}
+
+	override public Wert verwerte(uint bereich)
+	{
+		Wert wert_bedingung = this.bedingung.verwerte(bereich);
+
+		if (wert_bedingung.typ == WertTyp.WAHRHEIT && *cast(bool*) wert_bedingung.wert)
+		{
+			return super.verwerte(bereich);
+		}
+
 		return Wert(WertTyp.INVALID, null);
 	}
 
@@ -59,9 +111,8 @@ class Programm_BlockGlied : BlockGlied
 	}
 }
 
-class Falls_Sonst_BlockGlied : BlockGlied
+class Falls_Sonst_BlockGlied : Falls_BlockGlied
 {
-	public Glied bedingung;
 	public Glied[] sonst_aktionen;
 
 	override public void schreibe_baum()
@@ -79,7 +130,7 @@ class Falls_Sonst_BlockGlied : BlockGlied
 		}
 		write("/");
 		first = true;
-		foreach (Glied aktion; aktionen)
+		foreach (Glied aktion; sonst_aktionen)
 		{
 			if (!first)
 				write(", ");
@@ -87,5 +138,15 @@ class Falls_Sonst_BlockGlied : BlockGlied
 			first = false;
 		}
 		write("}");
+	}
+
+	override public Wert verwerte(uint bereich)
+	{
+		return Wert(WertTyp.INVALID, null);
+	}
+
+	override public bool ist_vollständig()
+	{
+		return true;
 	}
 }

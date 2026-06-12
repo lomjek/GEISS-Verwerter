@@ -386,6 +386,28 @@ class OperationGlied : Glied
 				resultat = pow(resultat, momentaner_wert);
 			}
 			*/
+
+			//MARK: GLEICH
+			else if (operationenTyp == OperatorenTyp.GLEICH) // Nimmt an, das immer nur zwei Sachen miteinander verglichen werden, was aber (noch) nicht stimmt.
+			{
+				if (resultat.typ == momentaner_wert.typ)
+				{
+					if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
+					{
+						NatürlicheZahl num1 = *cast(NatürlicheZahl*) resultat.wert;
+						NatürlicheZahl num2 = *cast(NatürlicheZahl*) momentaner_wert.wert;
+						bool* gleich = new bool(is_equal(num1.werte, num2.werte));
+						return Wert(WertTyp.WAHRHEIT, gleich);
+					}
+					else if (resultat.typ == WertTyp.GANZE_ZAHL)
+					{
+					}
+
+				}
+				else
+				{
+				}
+			}
 		}
 
 		return resultat;
