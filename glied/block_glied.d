@@ -26,19 +26,31 @@ class BlockGlied : Glied
 
 	override public void schreibe_baum()
 	{
-		bool first = true;
 		write("[BLOCK]{");
-		foreach (Glied aktion; aktionen)
+		schreibe_glied_liste(this.aktionen);
+		write("}");
+	}
+
+	protected void schreibe_glied_liste(Glied[] glied_liste)
+	{
+		bool first = true;
+		foreach (Glied aktion; glied_liste)
 		{
 			if (!first)
 				write(", ");
 			aktion.schreibe_baum;
 			first = false;
 		}
-		write("}");
+
 	}
 
 	override public Wert verwerte(uint bereich)
+	{
+		verwerte_glieder_liste(bereich, this.aktionen);
+		return Wert(WertTyp.INVALID, null);
+	}
+
+	public void verwerte_glieder_liste(uint bereich, Glied[] aktionen)
 	{
 		foreach (Glied aktion; aktionen)
 		{
@@ -50,7 +62,6 @@ class BlockGlied : Glied
 				writeln("");
 			}
 		}
-		return Wert(WertTyp.INVALID, null);
 	}
 
 	override public bool ist_vollständig()
@@ -61,7 +72,7 @@ class BlockGlied : Glied
 
 class Programm_BlockGlied : BlockGlied
 {
-	override public Wert verwerte(uint bereich)
+	override public Wert verwerte(uint bereich = 0)
 	{
 		return super.verwerte(0);
 	}
@@ -82,24 +93,25 @@ class Falls_BlockGlied : BlockGlied
 		write("[FALLS ");
 		bedingung.schreibe_baum();
 		write("]{");
-		bool first = true;
-		foreach (Glied aktion; aktionen)
-		{
-			if (!first)
-				write(", ");
-			aktion.schreibe_baum;
-			first = false;
-		}
+		schreibe_glied_liste(aktionen);
 		write("}");
 	}
 
-	override public Wert verwerte(uint bereich)
+	protected bool ist_bedingung_erfüllt(uint bereich)
 	{
 		Wert wert_bedingung = this.bedingung.verwerte(bereich);
 
 		if (wert_bedingung.typ == WertTyp.WAHRHEIT && *cast(bool*) wert_bedingung.wert)
+			return true;
+
+		return false;
+	}
+
+	override public Wert verwerte(uint bereich)
+	{
+		if (ist_bedingung_erfüllt(bereich))
 		{
-			return super.verwerte(bereich);
+			verwerte_glieder_liste(bereich, this.aktionen);
 		}
 
 		return Wert(WertTyp.INVALID, null);
@@ -111,33 +123,11 @@ class Falls_BlockGlied : BlockGlied
 	}
 }
 
-class Falls_Sonst_BlockGlied : Falls_BlockGlied
+class Sonst_BlockGlied : BlockGlied
 {
-	public Glied[] sonst_aktionen;
-
 	override public void schreibe_baum()
 	{
-		write("[FALLS ");
-		bedingung.schreibe_baum();
-		write("]{");
-		bool first = true;
-		foreach (Glied aktion; aktionen)
-		{
-			if (!first)
-				write(", ");
-			aktion.schreibe_baum;
-			first = false;
-		}
-		write("/");
-		first = true;
-		foreach (Glied aktion; sonst_aktionen)
-		{
-			if (!first)
-				write(", ");
-			aktion.schreibe_baum;
-			first = false;
-		}
-		write("}");
+		write("(Sonst_Block) INVALID");
 	}
 
 	override public Wert verwerte(uint bereich)
@@ -147,6 +137,48 @@ class Falls_Sonst_BlockGlied : Falls_BlockGlied
 
 	override public bool ist_vollständig()
 	{
+		return false;
+	}
+}
+
+class Falls_Sonst_BlockGlied : Falls_BlockGlied
+{
+	public Glied[] sonst_aktionen;
+
+	override public void schreibe_baum()
+	{
+		write("[FALLS ");
+		bedingung.schreibe_baum();
+		write("]{{");
+		schreibe_glied_liste(this.aktionen);
+		write("} / {");
+		schreibe_glied_liste(this.sonst_aktionen);
+		write("}}");
+	}
+
+	override public Wert verwerte(uint bereich)
+	{
+		if (ist_bedingung_erfüllt(bereich))
+		{
+			verwerte_glieder_liste(bereich, aktionen);
+		}
+		else
+		{
+			verwerte_glieder_liste(bereich, sonst_aktionen);
+		}
+
+		return Wert(WertTyp.INVALID, null);
+	}
+
+	override public bool ist_vollständig()
+	{
 		return true;
+	}
+
+	this(Falls_BlockGlied f_bgl, Sonst_BlockGlied s_bgl)
+	{
+		this.aktionen = f_bgl.aktionen;
+		this.bedingung = f_bgl.bedingung;
+		this.sonst_aktionen = s_bgl.aktionen;
 	}
 }

@@ -1,6 +1,7 @@
 module glied.glied;
 
 import std.stdio : write;
+import std.conv : to;
 
 import variablen.wert;
 import schlüsselwörter;
@@ -43,12 +44,17 @@ class SW_Glied : Glied
 
 	override public void schreibe_baum()
 	{
-		write("INVALID");
+		write(sw.to!string);
 	}
 
 	override public bool ist_vollständig()
 	{
 		return false;
+	}
+
+	override public string toString() const
+	{
+		return "[S] " ~ sw.to!string;
 	}
 
 	this(SchlüsselWort swa)
