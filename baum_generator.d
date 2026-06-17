@@ -29,9 +29,13 @@ private enum Operation_priorities
 	SONST,
 	FALLS,
 
+	SOLANGE,
+
 	SETZE_VARIABLE,
 
 	GLEICH,
+	GRÖSSER_ALS,
+	KLEINER_ALS,
 
 	PLUS_MINUS,
 	MAL_DURCH,
@@ -289,6 +293,16 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 					max_priority_operation = Operation_priorities.GLEICH + klammer_zusatz + sonst_block_priority_addition;
 					max_priority_index = i;
 				}
+				else if (opg.operationenTyp == OperatorenTyp.GRÖSSER_ALS)
+				{
+					max_priority_operation = Operation_priorities.GRÖSSER_ALS + klammer_zusatz + sonst_block_priority_addition;
+					max_priority_index = i;
+				}
+				else if (opg.operationenTyp == OperatorenTyp.KLEINER_ALS)
+				{
+					max_priority_operation = Operation_priorities.KLEINER_ALS + klammer_zusatz + sonst_block_priority_addition;
+					max_priority_index = i;
+				}
 
 			}
 			else if (glieder_liste[i].classinfo == Setze_Variable_Glied.classinfo)
@@ -333,6 +347,20 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 						max_priority_index = i;
 					}
 				}
+				else if (sw == SchlüsselWort.SOLANGE)
+				{
+					if ((i + 2) >= arr_length)
+					{
+						throw new Exception("Das Wort Solange ist zu nahe am Ende...");
+					}
+
+					if (max_priority_operation < (
+							Operation_priorities.SONST + klammer_zusatz + sonst_block_priority_addition))
+					{
+						max_priority_operation = Operation_priorities.SONST + klammer_zusatz + sonst_block_priority_addition;
+						max_priority_index = i;
+					}
+				}
 			}
 		}
 
@@ -360,21 +388,23 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		{
 			OperationGlied op_glied = cast(OperationGlied) glied;
 
-			if (max_priority_index > 0 && max_priority_index < (arr_length - 1))
+			if (!(max_priority_index > 0 && max_priority_index < (arr_length - 1)))
 			{
-				Glied gl1 = glieder_liste[max_priority_index - 1];
-				Glied gl2 = glieder_liste[max_priority_index + 1];
-				// Falls die Operationen nicht immer die zwei Objekte daneben einnehmen sollen, muss hier ein if  Block hin
-				op_glied.werte ~= gl1;
-				op_glied.werte ~= gl2;
-				op_glied.populated = true;
-
-				glieder_liste[max_priority_index] = op_glied;
-				glieder_liste = glieder_liste.remove(max_priority_index + 1);
-				glieder_liste = glieder_liste.remove(max_priority_index - 1);
-				arr_length -= 2;
-				continue;
+				throw new Fehler("Die Operation ist zu weit vorne oder zu weit hinten..."d);
 			}
+
+			Glied gl1 = glieder_liste[max_priority_index - 1];
+			Glied gl2 = glieder_liste[max_priority_index + 1];
+			// Falls die Operationen nicht immer die zwei Objekte daneben einnehmen sollen, muss hier ein if  Block hin
+			op_glied.werte ~= gl1;
+			op_glied.werte ~= gl2;
+			op_glied.populated = true;
+
+			glieder_liste[max_priority_index] = op_glied;
+			glieder_liste = glieder_liste.remove(max_priority_index + 1);
+			glieder_liste = glieder_liste.remove(max_priority_index - 1);
+			arr_length -= 2;
+			continue;
 		}
 
 		if (glied.classinfo == Setze_Variable_Glied.classinfo)
@@ -469,6 +499,23 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 					throw new Fehler("Das nächste Glied hat nicht den Richtigen Typ, es ist "d ~ glieder_liste[max_priority_index + 1]
 							.toString.to!dstring);
 				}
+			}
+			else if (sw == SchlüsselWort.SOLANGE)
+			{
+				if ((max_priority_index + 2) >= arr_length)
+				{
+					throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
+				}
+
+				Solange_BlockGlied solange_block_glied = new Solange_BlockGlied();
+				solange_block_glied.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 2])
+					.aktionen;
+				solange_block_glied.bedingung = glieder_liste[max_priority_index + 1];
+
+				glieder_liste[max_priority_index] = solange_block_glied;
+				glieder_liste = glieder_liste.remove(max_priority_index + 2);
+				glieder_liste = glieder_liste.remove(max_priority_index + 1);
+				arr_length -= 2;
 			}
 		}
 

@@ -97,19 +97,10 @@ class Falls_BlockGlied : BlockGlied
 		write("}");
 	}
 
-	protected bool ist_bedingung_erfüllt(uint bereich)
-	{
-		Wert wert_bedingung = this.bedingung.verwerte(bereich);
-
-		if (wert_bedingung.typ == WertTyp.WAHRHEIT && *cast(bool*) wert_bedingung.wert)
-			return true;
-
-		return false;
-	}
-
 	override public Wert verwerte(uint bereich)
 	{
-		if (ist_bedingung_erfüllt(bereich))
+		Wert wert_bedingung = this.bedingung.verwerte(bereich);
+		if (wert_bedingung.ist_wahr)
 		{
 			verwerte_glieder_liste(bereich, this.aktionen);
 		}
@@ -158,7 +149,9 @@ class Falls_Sonst_BlockGlied : Falls_BlockGlied
 
 	override public Wert verwerte(uint bereich)
 	{
-		if (ist_bedingung_erfüllt(bereich))
+		Wert wert_bedingung = bedingung.verwerte(bereich);
+
+		if (wert_bedingung.ist_wahr)
 		{
 			verwerte_glieder_liste(bereich, aktionen);
 		}
@@ -180,5 +173,40 @@ class Falls_Sonst_BlockGlied : Falls_BlockGlied
 		this.aktionen = f_bgl.aktionen;
 		this.bedingung = f_bgl.bedingung;
 		this.sonst_aktionen = s_bgl.aktionen;
+	}
+}
+
+//MARK: SOLANGE
+class Solange_BlockGlied : BlockGlied
+{
+	Glied bedingung;
+
+	override public void schreibe_baum()
+	{
+		write("[SOLANGE ");
+		bedingung.schreibe_baum();
+		write("]{");
+		schreibe_glied_liste(this.aktionen);
+		write("}");
+	}
+
+	private bool erfüllt(uint bereich)
+	{
+		Wert wert_bedingung = bedingung.verwerte(bereich);
+		return wert_bedingung.ist_wahr;
+	}
+
+	override public Wert verwerte(uint bereich)
+	{
+		while (erfüllt(bereich))
+		{
+			verwerte_glieder_liste(bereich, aktionen);
+		}
+		return Wert(WertTyp.INVALID, null);
+	}
+
+	override public bool ist_vollständig()
+	{
+		return true;
 	}
 }

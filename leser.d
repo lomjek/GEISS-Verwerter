@@ -368,25 +368,9 @@ Token[] lese_linie(dstring linie)
 					// Falls das Minus der Teil eines Pfeiles ist, nicht aber einer Liste. => Ich verändere die Listen sowieso.
 					OperatorenTyp prevOp = *cast(OperatorenTyp*) token_liste[i - 2].wert;
 
-					if (prevOp == OperatorenTyp.SPITZE_KLAMMER_AUF)
+					if (prevOp == OperatorenTyp.KLEINER_ALS)
 					{
-						bool isValidSequence = false;
-
-						if (i + 1 < length && token_liste[i + 1].typ == Token_Typ.operator)
-						{
-							OperatorenTyp nextOp = *cast(OperatorenTyp*) token_liste[i + 1]
-								.wert;
-							if (nextOp == OperatorenTyp.SPITZE_KLAMMER_ZU || nextOp == OperatorenTyp
-								.KOMMA)
-							{
-								isValidSequence = true;
-							}
-						}
-
-						if (!isValidSequence)
-						{
-							continue;
-						}
+						continue;
 					}
 				}
 			}
@@ -464,7 +448,7 @@ Token[] lese_linie(dstring linie)
 	}
 
 	length = token_liste.length; // Eigentlich wäre das hier nicht nötig, aber lieber sicher sein.
-
+	debug schreibe_token_liste(token_liste);
 	for (ulong i = 1; i < length; i++) // Der dritte Durchlauf veränder <- zu Pfeilen.
 	{
 		if (token_liste[i].typ == Token_Typ.operator &&
@@ -472,7 +456,8 @@ Token[] lese_linie(dstring linie)
 		{
 			OperatorenTyp typ_1 = *cast(OperatorenTyp*) token_liste[i - 1].wert;
 			OperatorenTyp typ_2 = *cast(OperatorenTyp*) token_liste[i].wert;
-			if ((typ_1 == OperatorenTyp.SPITZE_KLAMMER_AUF) && (typ_2 == OperatorenTyp.MINUS))
+			writeln(12);
+			if ((typ_1 == OperatorenTyp.KLEINER_ALS) && (typ_2 == OperatorenTyp.MINUS))
 			{
 				OperatorenTyp* op_typ = new OperatorenTyp;
 

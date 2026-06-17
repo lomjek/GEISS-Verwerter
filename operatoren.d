@@ -19,8 +19,10 @@ enum OperatorenTyp
 	KLAMMER_ZU,
 	ECKIGE_KLAMMER_AUF,
 	ECKIGE_KLAMMER_ZU,
-	SPITZE_KLAMMER_AUF,
-	SPITZE_KLAMMER_ZU,
+
+	KLEINER_ALS,
+	GRÖSSER_ALS,
+
 	GESCHWUNGENE_KLAMMER_AUF,
 	GESCHWUNGENE_KLAMMER_ZU,
 
@@ -49,8 +51,10 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
 	OperatorenTyp.KLAMMER_ZU: ')',
 	OperatorenTyp.ECKIGE_KLAMMER_AUF: '[',
 	OperatorenTyp.ECKIGE_KLAMMER_ZU: ']',
-	OperatorenTyp.SPITZE_KLAMMER_AUF: '<',
-	OperatorenTyp.SPITZE_KLAMMER_ZU: '>',
+
+	OperatorenTyp.KLEINER_ALS: '<',
+	OperatorenTyp.GRÖSSER_ALS: '>',
+
 	OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF: '{',
 	OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU: '}',
 

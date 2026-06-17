@@ -53,3 +53,13 @@ immutable dstring[dstring] typ_präfixe = [
 	"ganze"d: "zahl"d,
 	"natürliche"d: "zahl"d
 ];
+
+public bool ist_wahr(Wert wert)
+{
+	if (wert.typ == WertTyp.WAHRHEIT && *cast(bool*) wert.wert)
+		return true;
+
+	//TODO: Hier noch alle anderen wahr/falsch Sachen reinmachen
+
+	return false;
+}

@@ -16,6 +16,13 @@ struct Zahl
 	ulong punkt_position;
 	ubyte[] werte;
 
+	this(Zahl z)
+	{
+		this.negativ = z.negativ;
+		this.punkt_position = z.punkt_position;
+		this.werte = z.werte;
+	}
+
 	this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
@@ -49,6 +56,12 @@ struct GanzeZahl
 		this.werte = nz.werte;
 	}
 
+	this(GanzeZahl gz)
+	{
+		this.negativ = gz.negativ;
+		this.werte = gz.werte;
+	}
+
 	this(bool negativ, ubyte[] werte)
 	{
 		this.negativ = negativ;
@@ -59,6 +72,11 @@ struct GanzeZahl
 struct NatürlicheZahl
 {
 	ubyte[] werte;
+
+	this(NatürlicheZahl nz)
+	{
+		this.werte = nz.werte;
+	}
 
 	this(ubyte[] werte)
 	{
@@ -92,7 +110,7 @@ private ubyte[] right_pad(ubyte[] num, ulong desired_length)
 }
 
 //MARK: COMPARE
-private bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
+bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
 {
 	if (x.length < y.length)
 	{
