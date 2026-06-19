@@ -456,7 +456,7 @@ Token[] lese_linie(dstring linie)
 		{
 			OperatorenTyp typ_1 = *cast(OperatorenTyp*) token_liste[i - 1].wert;
 			OperatorenTyp typ_2 = *cast(OperatorenTyp*) token_liste[i].wert;
-			writeln(12);
+
 			if ((typ_1 == OperatorenTyp.KLEINER_ALS) && (typ_2 == OperatorenTyp.MINUS))
 			{
 				OperatorenTyp* op_typ = new OperatorenTyp;

@@ -6,6 +6,18 @@ struct Wert
 {
 	WertTyp typ;
 	void* wert;
+
+	this(WertTyp typ, void* wert)
+	{
+		this.typ = typ;
+		this.wert = wert;
+	}
+
+	this(Wert nwert)
+	{
+		this.typ = nwert.typ;
+		this.wert = nwert.wert;
+	}
 }
 
 // Wert Typ

@@ -6,7 +6,7 @@
 	"description": "Ein Intepreter für meine Programmiersprache MÖWE",
 	"license": "LGPL-3.0-or-later",
 	"name": "interpreter",
-	"targetName": "möwe.dc",
+	"targetName": "geiss.dc",
 	"mainSourceFile": "app.d",
 	"targetType": "executable",
 	"sourcePaths": [

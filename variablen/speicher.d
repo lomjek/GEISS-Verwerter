@@ -2,6 +2,8 @@ module variablen.speicher;
 
 import fehler;
 
+import zahl;
+
 import variablen.variable;
 import variablen.wert;
 
@@ -96,22 +98,48 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 	{
 		if (var.identifier == var_name)
 		{
+			// Variable gefunden.
 			if (var.var_typ == VariablenTyp.FIX)
 			{
 				WertTyp vw_typ = (*cast(Wert*) var.wert).typ;
-				WertTyp nw_typ = (*neuer_wert).typ;
+				WertTyp nw_typ = neuer_wert.typ;
+
+				// Typen sind genau gleich
 				if (vw_typ == nw_typ)
 				{
 					var.wert = neuer_wert;
 				}
-				else if (nw_typ == WertTyp.GANZE_ZAHL && vw_typ == WertTyp.ZAHL)
-				{
 
+				// Upcasting für Zahlen  
+			else if (nw_typ == WertTyp.GANZE_ZAHL && vw_typ == WertTyp.ZAHL)
+				{
+					GanzeZahl nw_gzahl = *cast(GanzeZahl*) neuer_wert.wert;
+					Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(nw_gzahl));
+					var.wert = nw;
 				}
+
+				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp.ZAHL)
+				{
+					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert.wert;
+					Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(nw_nzahl));
+					var.wert = nw;
+				}
+
+				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp.GANZE_ZAHL)
+				{
+					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert.wert;
+					Wert* nw = new Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(nw_nzahl));
+					var.wert = nw;
+				}
+
 				else
 				{
 					throw new Variable_Assign_Typ_Error(var.identifier, vw_typ, nw_typ);
 				}
+			}
+			else if (var.var_typ == VariablenTyp.VARIABEL)
+			{
+				var.wert = neuer_wert;
 			}
 		}
 	}
