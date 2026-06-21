@@ -4,8 +4,6 @@ import operatoren : OperatorenTyp;
 
 import zahl;
 
-import token.token;
-
 import variablen.wert;
 
 import std.stdio : write, writeln;
@@ -73,53 +71,6 @@ void schreibe_schön_wert(Wert wert)
 	}
 	else
 		write(wert.typ);
-}
-
-debug void schreibe_token_liste(Token[] token_liste)
-{
-	set_pen_trait(TextTrait.fgGrey);
-	write("[");
-
-	bool first = true;
-	foreach (Token token; token_liste)
-	{
-		if (!first)
-			write(", ");
-
-		write("T(");
-		write(token.typ);
-		write(" | ");
-
-		if (token.typ == Token_Typ.wert)
-		{
-			Wert wert = *cast(Wert*) token.wert;
-			schreibe_schön_wert(wert);
-		}
-		else if (token.typ == Token_Typ.operator)
-		{
-			OperatorenTyp op_typ = *cast(OperatorenTyp*) token.wert;
-			write(op_typ);
-		}
-		else if (token.typ == Token_Typ.var_typ)
-		{
-			WertTyp w_typ = *cast(WertTyp*) token.wert;
-			write(wertTypString[w_typ]);
-		}
-		else if (token.typ == Token_Typ.var_name)
-		{
-			write(*cast(dstring*) token.wert);
-		}
-		else
-		{
-			write("INVALID");
-		}
-
-		write(")");
-		first = false;
-	}
-
-	writeln("]");
-	set_pen_trait(TextTrait.reset);
 }
 
 //region REPL

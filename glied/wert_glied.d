@@ -11,7 +11,7 @@ import ext.prints;
 
 class Wert_Glied : Glied
 {
-	private Wert wert;
+	Wert wert;
 
 	this(Wert neuer_wert)
 	{
@@ -35,6 +35,6 @@ class Wert_Glied : Glied
 
 	override public string toString() const
 	{
-		return "[W] " ~ wert.typ.to!string;
+		return "G(WERT | " ~ wert.toString ~ ")";
 	}
 }

@@ -7,6 +7,7 @@ import variablen.wert;
 import ext.prints;
 
 import std.stdio : writeln, write;
+import std.conv : to;
 
 // @ {} [] # \ || != ~
 
@@ -68,6 +69,11 @@ class BlockGlied : Glied
 	{
 		return false;
 	}
+
+	override string toString() const
+	{
+		return "G(BLOCK | " ~ aktionen.length.to!string ~ ")";
+	}
 }
 
 class Programm_BlockGlied : BlockGlied
@@ -80,6 +86,11 @@ class Programm_BlockGlied : BlockGlied
 	override public bool ist_vollständig()
 	{
 		return true;
+	}
+
+	override string toString() const
+	{
+		return "G(PROGRAMM | " ~ aktionen.length.to!string ~ ")";
 	}
 }
 
@@ -112,6 +123,11 @@ class Falls_BlockGlied : BlockGlied
 	{
 		return true;
 	}
+
+	override string toString() const
+	{
+		return "G(FALLS | " ~ aktionen.length.to!string ~ ")";
+	}
 }
 
 class Sonst_BlockGlied : BlockGlied
@@ -129,6 +145,12 @@ class Sonst_BlockGlied : BlockGlied
 	override public bool ist_vollständig()
 	{
 		return false;
+	}
+
+	override string toString() const
+	{
+		return "G(SONST | " ~ (aktionen.length)
+			.to!string ~ ")";
 	}
 }
 
@@ -173,6 +195,12 @@ class Falls_Sonst_BlockGlied : Falls_BlockGlied
 		this.aktionen = f_bgl.aktionen;
 		this.bedingung = f_bgl.bedingung;
 		this.sonst_aktionen = s_bgl.aktionen;
+	}
+
+	override string toString() const
+	{
+		return "G(FALLS / SONST | " ~ (aktionen.length)
+			.to!string ~ "/" ~ (sonst_aktionen.length).to!string ~ ")";
 	}
 }
 

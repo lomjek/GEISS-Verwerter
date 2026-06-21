@@ -3,7 +3,10 @@ module leser;
 import ext.string;
 import ext.prints;
 
-import token.token;
+import glied.glied;
+import glied.wert_glied;
+import glied.variablen_glied;
+import glied.operation_glied;
 
 import schlüsselwörter;
 import operatoren;
@@ -247,7 +250,7 @@ private OperatorenTyp als_operator(dstring wort)
 }
 
 // MARK: lese_linie
-Token[] lese_linie(dstring linie)
+Glied[] lese_linie(dstring linie)
 {
 	// Mache Platz vor und nach den Operatoren, damit sie aufgetrennt werden
 	foreach (op; EnumMembers!OperatorenTyp)
@@ -257,7 +260,7 @@ Token[] lese_linie(dstring linie)
 			to_convert);
 	}
 
-	Token[] token_liste;
+	Glied[] token_liste;
 	dstring[] wort_liste = linie.split(" ");
 	ulong wort_liste_length = wort_liste.length;
 	dstring wort_präfix;
@@ -278,10 +281,7 @@ Token[] lese_linie(dstring linie)
 		// WertTypen
 		if (wort.ist_vt == Verifizierung.ja)
 		{
-			WertTyp* vt = new WertTyp;
-
-			*vt = wort.als_vt;
-			token_liste ~= Token(Token_Typ.var_typ, vt);
+			token_liste ~= new WT_Glied(wort.als_vt);
 			continue;
 		}
 		else if (wort.ist_vt == Verifizierung.nicht_ganz)
@@ -292,6 +292,7 @@ Token[] lese_linie(dstring linie)
 				dstring neues_wort = wort_liste[i + 1];
 				if (neues_wort != "zahl"d)
 				{
+					//TODO: Zweistellige Typen anschauen.
 					throw new Error("Muss sowieso noch die alten zweistelligen Typen anschauen...");
 				}
 			}
@@ -300,19 +301,13 @@ Token[] lese_linie(dstring linie)
 
 		if (wort.ist_sw == Verifizierung.ja)
 		{
-			SchlüsselWort* sw = new SchlüsselWort;
-
-			*sw = wort.als_sw;
-			token_liste ~= Token(Token_Typ.schlussel_wort, sw);
+			token_liste ~= new SW_Glied(wort.als_sw);
 			continue;
 		}
 
 		if (wort.ist_wert == Verifizierung.ja)
 		{
-			Wert* var = new Wert;
-			*var = als_wert(wort);
-
-			token_liste ~= Token(Token_Typ.wert, var);
+			token_liste ~= new Wert_Glied(wort.als_wert);
 			continue;
 		}
 		else if (wort.ist_wert == Verifizierung.nicht_ganz)
@@ -323,39 +318,34 @@ Token[] lese_linie(dstring linie)
 
 		if (wort.ist_operator)
 		{
-			OperatorenTyp* op_typ = new OperatorenTyp;
-			*op_typ = wort.als_operator;
-
-			token_liste ~= Token(Token_Typ.operator, op_typ);
+			token_liste ~= new OperationGlied(wort.als_operator);
 			continue;
 		}
 
 		// If none of the above treat as variable name
-		dstring* v_name = (new dstring[1]).ptr;
-		*v_name = wort.dup;
-		token_liste ~= Token(Token_Typ.var_name, v_name);
+		token_liste ~= new Lese_Variable_Glied(wort);
 	}
 
 	debug write("Token Liste: ");
-	debug schreibe_token_liste(token_liste);
+	debug writeln(token_liste);
 
 	ulong length = token_liste.length;
 
 	//MARK: Aufräumen
 	for (ulong i = 1; i < length; i++) // Der erste Durchgang beachtet Minuszahlen
 	{
-		if (token_liste[i].typ == Token_Typ.wert && token_liste[i - 1].typ == Token_Typ
-			.operator)
+		if (token_liste[i].classinfo == Wert_Glied.classinfo &&
+			token_liste[i - 1].classinfo == OperationGlied.classinfo)
 		{
-			Wert* var = cast(Wert*) token_liste[i].wert;
-			OperatorenTyp op_typ = *cast(OperatorenTyp*) token_liste[i - 1].wert;
+			Wert* var = &(cast(Wert_Glied) token_liste[i]).wert;
+			OperatorenTyp op_typ = (cast(OperationGlied) token_liste[i - 1]).operationenTyp;
 
 			if (i > 1)
 			{
-				if (token_liste[i - 2].typ == Token_Typ.wert)
+				if (token_liste[i - 2].classinfo == Wert_Glied.classinfo)
 				{
 					// Falls der Minusoperator zwischen verschiedenen Typen funktionieren sollte, muss man das hier noch ändern.
-					Wert* var_vorher = cast(Wert*) token_liste[i - 2].wert;
+					Wert var_vorher = (cast(Wert_Glied) token_liste[i - 2]).wert;
 					if (ZAHLEN_TYPEN.canFind(var_vorher.typ))
 					{
 						continue;
@@ -363,11 +353,11 @@ Token[] lese_linie(dstring linie)
 
 				}
 
-				if (token_liste[i - 2].typ == Token_Typ.operator)
+				if (token_liste[i - 2].classinfo == OperationGlied.classinfo)
 				{
-					// Falls das Minus der Teil eines Pfeiles ist, nicht aber einer Liste. => Ich verändere die Listen sowieso.
-					OperatorenTyp prevOp = *cast(OperatorenTyp*) token_liste[i - 2].wert;
-
+					// Falls das Minus der Teil eines Pfeiles ist.
+					OperatorenTyp prevOp = (cast(OperationGlied) token_liste[i - 2])
+						.operationenTyp;
 					if (prevOp == OperatorenTyp.KLEINER_ALS)
 					{
 						continue;
@@ -381,18 +371,12 @@ Token[] lese_linie(dstring linie)
 				{
 					NatürlicheZahl nz = *cast(NatürlicheZahl*) var.wert;
 					GanzeZahl* gz = new GanzeZahl(true, nz.werte);
-					token_liste[i].wert = new Wert(WertTyp.GANZE_ZAHL, gz);
+					var = new Wert(WertTyp.GANZE_ZAHL, gz);
 					token_liste = token_liste.remove(i - 1);
-
 					length--;
 					i--;
 				}
-				else if (var.typ == WertTyp.GANZE_ZAHL)
-				{
-					throw new Exception(
-						"Das hatte ich mal implementiert, es sollte aber nie hierhin kommen...");
-				}
-				else if (var.typ == WertTyp.ZAHL)
+				else if ([WertTyp.GANZE_ZAHL, WertTyp.NATÜRLICHE_ZAHL].canFind(var.typ))
 				{
 					throw new Exception(
 						"Das hatte ich mal implementiert, es sollte aber nie hierhin kommen...");
@@ -405,13 +389,15 @@ Token[] lese_linie(dstring linie)
 
 	for (ulong i = 1; i < length - 1; i++) // Der zweite Durchgang Zieht die Kommazahlen wieder zusammen.
 	{
-		if (token_liste[i - 1].typ == Token_Typ.wert &&
-			token_liste[i + 1].typ == Token_Typ.wert &&
-			token_liste[i].typ == Token_Typ.operator)
+		if (token_liste[i - 1].classinfo == Wert_Glied.classinfo &&
+			token_liste[i + 1].classinfo == Wert_Glied.classinfo &&
+			token_liste[i].classinfo == OperationGlied.classinfo)
 		{
-			OperatorenTyp operator = *cast(OperatorenTyp*) token_liste[i].wert;
-			Wert vorher = *cast(Wert*) token_liste[i - 1].wert;
-			Wert naher = *cast(Wert*) token_liste[i + 1].wert;
+			OperatorenTyp operator = (cast(OperationGlied) token_liste[i])
+				.operationenTyp;
+			Wert vorher = (cast(Wert_Glied) token_liste[i - 1])
+				.wert;
+			Wert naher = (cast(Wert_Glied) token_liste[i + 1]).wert;
 
 			if (operator == OperatorenTyp.PUNKT)
 			{
@@ -423,7 +409,6 @@ Token[] lese_linie(dstring linie)
 				}
 				NatürlicheZahl naher_nz = *cast(NatürlicheZahl*) naher.wert;
 				Zahl* resultat = new Zahl;
-
 				if (vorher.typ == WertTyp.GANZE_ZAHL)
 				{
 					GanzeZahl vorher_gz = *cast(GanzeZahl*) vorher.wert;
@@ -435,12 +420,11 @@ Token[] lese_linie(dstring linie)
 					*resultat = konstruiere(vorher_nz, naher_nz);
 				}
 
-				Wert* wert = new Wert(WertTyp.ZAHL, resultat);
-				token_liste[i - 1] = Token(Token_Typ.wert, wert);
-
+				Wert wert = Wert(WertTyp.ZAHL, resultat);
+				token_liste[i - 1] = new Wert_Glied(
+					wert);
 				token_liste = token_liste.remove(i + 1);
 				token_liste = token_liste.remove(i);
-
 				length -= 2;
 				i--;
 			}
@@ -448,21 +432,22 @@ Token[] lese_linie(dstring linie)
 	}
 
 	length = token_liste.length; // Eigentlich wäre das hier nicht nötig, aber lieber sicher sein.
-	debug schreibe_token_liste(token_liste);
+
+	debug writeln(token_liste);
 	for (ulong i = 1; i < length; i++) // Der dritte Durchlauf veränder <- zu Pfeilen.
 	{
-		if (token_liste[i].typ == Token_Typ.operator &&
-			token_liste[i - 1].typ == Token_Typ.operator)
+		if (token_liste[i].classinfo == OperationGlied.classinfo &&
+			token_liste[i - 1].classinfo == OperationGlied.classinfo)
 		{
-			OperatorenTyp typ_1 = *cast(OperatorenTyp*) token_liste[i - 1].wert;
-			OperatorenTyp typ_2 = *cast(OperatorenTyp*) token_liste[i].wert;
+			OperatorenTyp typ_1 = (cast(OperationGlied) token_liste[i - 1])
+				.operationenTyp;
+			OperatorenTyp typ_2 = (
+				cast(OperationGlied) token_liste[i]).operationenTyp;
 
-			if ((typ_1 == OperatorenTyp.KLEINER_ALS) && (typ_2 == OperatorenTyp.MINUS))
+			if ((typ_1 == OperatorenTyp.KLEINER_ALS) && (
+					typ_2 == OperatorenTyp.MINUS))
 			{
-				OperatorenTyp* op_typ = new OperatorenTyp;
-
-				*op_typ = OperatorenTyp.RÜCK_PFEIL;
-				token_liste[i] = Token(Token_Typ.operator, op_typ);
+				token_liste[i] = new OperationGlied(OperatorenTyp.RÜCK_PFEIL);
 
 				token_liste = token_liste.remove(i - 1);
 				length--;
@@ -472,7 +457,7 @@ Token[] lese_linie(dstring linie)
 	}
 
 	debug write("Neue Token Liste: ");
-	debug schreibe_token_liste(token_liste);
+	debug writeln(token_liste);
 
 	return token_liste;
 }

@@ -1,7 +1,5 @@
 module baum_generator;
 
-import token.token;
-
 import operatoren;
 import schlüsselwörter;
 import ext.prints;
@@ -61,19 +59,20 @@ private bool ist_fertig(Glied[] glieder_liste)
 }
 
 //MARK: master_baum
-Programm_BlockGlied generiere_master_baum(Token[] token_liste)
+Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 {
 	//region Sind alle Klammern geschlossen?
 	uint offene_klammern = 0;
 	uint offene_eckige_klammern = 0;
 	uint offene_geschwungene_klammern = 0;
-	foreach (Token token; token_liste)
+	foreach (Glied glied; glieder_liste)
 	{
-		if (token.typ != Token_Typ.operator)
+		if (glied.classinfo != OperationGlied.classinfo)
 		{
 			continue;
 		}
-		OperatorenTyp op_typ = *cast(OperatorenTyp*) token.wert;
+
+		OperatorenTyp op_typ = (cast(OperationGlied) glied).operationenTyp;
 		if (op_typ == OperatorenTyp.KLAMMER_AUF)
 			offene_klammern++;
 		else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_AUF)
@@ -103,52 +102,28 @@ Programm_BlockGlied generiere_master_baum(Token[] token_liste)
 	}
 	//endregion
 
-	Glied[] glieder_liste = [];
-
-	ulong length = token_liste.length;
+	ulong length = glieder_liste.length;
 	for (ulong i = 0; i < length; i++)
 	{
-		Token token = token_liste[i];
+		Glied glied = glieder_liste[i];
 
-		if (token.wert == null)
+		if (glied.classinfo == OperationGlied.classinfo)
 		{
-			throw new Exception("Es hat keinen wert!!!");
-		}
+			OperationGlied op_glied = cast(OperationGlied) glied;
+			if (op_glied.operationenTyp == OperatorenTyp.RÜCK_PFEIL)
+			{
+				glieder_liste[i] = new Setze_Variable_Glied();
+			}
 
-		if (token.typ == Token_Typ.wert)
-		{
-			Wert var = *cast(Wert*) token.wert;
-			glieder_liste ~= new Wert_Glied(var);
 		}
-		else if (token.typ == Token_Typ.operator)
+		else if (glied.classinfo == WT_Glied.classinfo && i + 1 < length &&
+			glieder_liste[i + 1].classinfo == Lese_Variable_Glied.classinfo)
 		{
-			OperatorenTyp op_typ = *cast(OperatorenTyp*) token.wert;
-			if (op_typ == OperatorenTyp.RÜCK_PFEIL)
-			{
-				glieder_liste ~= new Setze_Variable_Glied();
-			}
-			else
-			{
-				glieder_liste ~= new OperationGlied(op_typ);
-			}
-		}
-		else if (token.typ == Token_Typ.var_typ && i + 1 < length &&
-			token_liste[i + 1].typ == Token_Typ.var_name)
-		{
-			dstring var_name = *cast(dstring*) token_liste[i + 1].wert;
-			WertTyp wert_typ = *cast(WertTyp*) token.wert;
-			glieder_liste ~= new Erstelle_Variable_Glied(var_name, wert_typ);
-			token_liste = token_liste.remove(i + 1);
+			dstring var_name = (cast(Lese_Variable_Glied) glieder_liste[i + 1]).var_name;
+			WertTyp wert_typ = (cast(WT_Glied) glied).vt;
+			glieder_liste[i] = new Erstelle_Variable_Glied(var_name, wert_typ);
+			glieder_liste = glieder_liste.remove(i + 1);
 			length--;
-		}
-		else if (token.typ == Token_Typ.var_name)
-		{
-			dstring var_name = *cast(dstring*) token_liste[i].wert;
-			glieder_liste ~= new Lese_Variable_Glied(var_name);
-		}
-		else if (token.typ == Token_Typ.schlussel_wort)
-		{
-			glieder_liste ~= new SW_Glied(*cast(SchlüsselWort*) token.wert);
 		}
 	}
 

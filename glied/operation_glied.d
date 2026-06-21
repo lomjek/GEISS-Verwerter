@@ -462,4 +462,9 @@ class OperationGlied : Glied
 	{
 		operationenTyp = op_typ;
 	}
+
+	override string toString() const
+	{
+		return "G(OPERATOR | " ~ this.operationenTyp.to!string ~ ")";
+	}
 }

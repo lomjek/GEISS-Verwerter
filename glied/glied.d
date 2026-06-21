@@ -4,6 +4,7 @@ import std.stdio : write;
 import std.conv : to;
 
 import variablen.wert;
+import variablen.variable;
 import schlüsselwörter;
 
 // @ {} [] # \ || != ~
@@ -31,6 +32,11 @@ class InvalidGlied : Glied
 	{
 		return true;
 	}
+
+	override string toString() const
+	{
+		return "G(INVALID)";
+	}
 }
 
 class SW_Glied : Glied
@@ -52,13 +58,43 @@ class SW_Glied : Glied
 		return false;
 	}
 
-	override public string toString() const
-	{
-		return "[S] " ~ sw.to!string;
-	}
-
 	this(SchlüsselWort swa)
 	{
 		this.sw = swa;
+	}
+
+	override string toString() const
+	{
+		return "G(SCHLÜSSELWORT | " ~ this.sw.to!string ~ ")";
+	}
+}
+
+class WT_Glied : Glied
+{
+	public WertTyp vt;
+
+	override public Wert verwerte(uint bereich)
+	{
+		return Wert(WertTyp.INVALID, null);
+	}
+
+	override public void schreibe_baum()
+	{
+		write(vt.to!string);
+	}
+
+	override public bool ist_vollständig()
+	{
+		return false;
+	}
+
+	this(WertTyp vta)
+	{
+		this.vt = vta;
+	}
+
+	override string toString() const
+	{
+		return "G(VAR_TYP | " ~ this.vt.to!string ~ ")";
 	}
 }

@@ -5,8 +5,6 @@ import std;
 import leser;
 import baum_generator;
 
-import token.token;
-
 import variablen.wert;
 
 import glied.glied;
@@ -16,7 +14,7 @@ import glied.block_glied;
 
 Wert interpretiere(dstring text)
 {
-	Token[] tokens = lese_linie(text);
+	Glied[] tokens = lese_linie(text);
 
 	Programm_BlockGlied baum = generiere_master_baum(tokens);
 

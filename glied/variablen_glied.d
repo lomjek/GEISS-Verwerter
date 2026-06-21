@@ -7,6 +7,7 @@ import variablen.variable;
 import glied.glied;
 
 import std.stdio : write;
+import std.conv : to;
 
 class Erstelle_Variable_Glied : Glied
 {
@@ -28,7 +29,7 @@ class Erstelle_Variable_Glied : Glied
 
 	override public bool ist_vollständig()
 	{
-		return true;
+		return (var_name.length != 0) && (var_typ != VariablenTyp.INVALID);
 	}
 
 	this(dstring var_name, WertTyp constructor)
@@ -43,6 +44,11 @@ class Erstelle_Variable_Glied : Glied
 			this.var_typ = VariablenTyp.FIX;
 		}
 		wert_typ = constructor;
+	}
+
+	override string toString() const
+	{
+		return "G(MACHE_VAR | " ~ var_name.to!string ~ ")";
 	}
 }
 
@@ -69,6 +75,11 @@ class Setze_Variable_Glied : Glied
 	override public bool ist_vollständig()
 	{
 		return (var_name != "" && assign_wert !is null);
+	}
+
+	override string toString() const
+	{
+		return "G(SETZE_VAR | " ~ var_name.to!string ~ ")";
 	}
 }
 
@@ -97,5 +108,10 @@ class Lese_Variable_Glied : Glied
 	this(dstring namen)
 	{
 		this.var_name = namen;
+	}
+
+	override string toString() const
+	{
+		return "G(LESE_VAR | " ~ var_name.to!string ~ ")";
 	}
 }
