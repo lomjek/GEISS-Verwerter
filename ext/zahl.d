@@ -13,35 +13,33 @@ import std.conv : to;
 struct Zahl
 {
 	bool negativ;
-	ulong punkt_position;
 	ubyte[] werte;
+	Bruch nach_komma;
 
-	this(Zahl z)
+	pure this(Zahl z)
 	{
 		this.negativ = z.negativ;
-		this.punkt_position = z.punkt_position;
+		this.nach_komma = z.nach_komma;
 		this.werte = z.werte;
 	}
 
-	this(GanzeZahl gz)
+	pure this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
-		this.punkt_position = gz.werte.length;
 		this.werte = gz.werte;
 	}
 
-	this(NatürlicheZahl nz)
+	pure this(NatürlicheZahl nz)
 	{
 		this.negativ = false;
-		this.punkt_position = nz.werte.length;
 		this.werte = nz.werte;
 	}
 
-	this(bool negativ, ulong punkt_position, ubyte[] werte)
+	pure this(bool negativ, Bruch nach_komma, ubyte[] werte)
 	{
 		this.negativ = negativ;
-		this.punkt_position = punkt_position;
 		this.werte = werte;
+		this.nach_komma = nach_komma;
 	}
 }
 
@@ -50,19 +48,19 @@ struct GanzeZahl
 	bool negativ;
 	ubyte[] werte;
 
-	this(NatürlicheZahl nz)
+	pure this(NatürlicheZahl nz)
 	{
 		this.negativ = false;
 		this.werte = nz.werte;
 	}
 
-	this(GanzeZahl gz)
+	pure this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
 		this.werte = gz.werte;
 	}
 
-	this(bool negativ, ubyte[] werte)
+	pure this(bool negativ, ubyte[] werte)
 	{
 		this.negativ = negativ;
 		this.werte = werte;
@@ -73,19 +71,43 @@ struct NatürlicheZahl
 {
 	ubyte[] werte;
 
-	this(NatürlicheZahl nz)
+	pure this(NatürlicheZahl nz)
 	{
 		this.werte = nz.werte;
 	}
 
-	this(ubyte[] werte)
+	pure this(ubyte[] werte)
 	{
 		this.werte = werte;
 	}
 }
 
+struct Bruch
+{
+	ubyte[] zähler;
+	ubyte[] nenner;
+
+	pure this(ubyte[] nzähler, ubyte[] nnenner)
+	{
+		zähler = nzähler;
+		nenner = nnenner;
+	}
+
+	pure this(Bruch bruch)
+	{
+		zähler = bruch.zähler;
+		nenner = bruch.nenner;
+	}
+
+	pure this(NatürlicheZahl nz)
+	{
+		zähler = nz.werte;
+		nenner = [1];
+	}
+}
+
 //MARK: PADDING
-private ubyte[] left_pad(ubyte[] num, ulong desired_length)
+private pure ubyte[] left_pad(ubyte[] num, ulong desired_length)
 {
 	if (num.length >= desired_length)
 	{
@@ -97,7 +119,7 @@ private ubyte[] left_pad(ubyte[] num, ulong desired_length)
 	return padded;
 }
 
-private ubyte[] right_pad(ubyte[] num, ulong desired_length)
+private pure ubyte[] right_pad(ubyte[] num, ulong desired_length)
 {
 	if (num.length >= desired_length)
 	{
@@ -110,7 +132,7 @@ private ubyte[] right_pad(ubyte[] num, ulong desired_length)
 }
 
 //MARK: COMPARE
-bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
+pure bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
 {
 	if (x.length < y.length)
 	{
@@ -132,7 +154,7 @@ bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
 	}
 }
 
-bool is_equal(ubyte[] x, ubyte[] y)
+pure bool is_equal(ubyte[] x, ubyte[] y)
 {
 	x = left_pad(x, y.length);
 	y = left_pad(y, x.length);
@@ -145,8 +167,19 @@ bool is_equal(ubyte[] x, ubyte[] y)
 	return true;
 }
 
+pure bool ist_grösser_gleich_1(Bruch bruch)
+{
+	if (is_equal(bruch.nenner, bruch.zähler))
+		return true;
+
+	if (is_bigger(bruch.zähler, bruch.nenner))
+		return true;
+
+	return false;
+}
+
 //MARK: ADDIERE
-private ubyte[] addiere(ubyte[] num1, ubyte[] num2, bool invert = true)
+pure private ubyte[] addiere(ubyte[] num1, ubyte[] num2, bool invert = true)
 {
 	if (invert)
 	{
@@ -182,23 +215,37 @@ private ubyte[] addiere(ubyte[] num1, ubyte[] num2, bool invert = true)
 		return resultat;
 }
 
+pure private Bruch addiere(Bruch num1, Bruch num2)
+{
+	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
+
+	ubyte[] summand1 = multipliziere(num1.zähler, num2.nenner);
+	ubyte[] summand2 = multipliziere(num2.zähler, num1.nenner);
+
+	return Bruch(addiere(summand1, summand2), neuer_nenner);
+}
+
 Zahl addiere(Zahl x, Zahl y)
 {
-	ulong segments_after_dot_x = x.werte.length - x.punkt_position;
-	ulong segments_after_dot_y = y.werte.length - y.punkt_position;
-
-	if (segments_after_dot_x == segments_after_dot_y)
+	if ((x.negativ && y.negativ) ||
+		(!x.negativ && !y.negativ))
 	{
-		GanzeZahl z = addiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte));
-		return Zahl(z.negativ, x.punkt_position, z.werte);
+		Bruch neuer_bruch = addiere(x.nach_komma, y.nach_komma);
+
+		ubyte[] neuer_vor_komma_wert = addiere(x.werte, y.werte);
+
+		while (neuer_bruch.ist_grösser_gleich_1)
+		{
+			neuer_vor_komma_wert = addiere(neuer_vor_komma_wert, [1]);
+		}
+
+		//TODO: Kürzen
+
+		return Zahl(x.negativ, neuer_bruch, neuer_vor_komma_wert);
 	}
 
-	x.werte = right_pad(x.werte, x.punkt_position + segments_after_dot_y);
-	y.werte = right_pad(y.werte, y.punkt_position + segments_after_dot_x);
-
-	GanzeZahl z = addiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte));
-	ulong punkt_position = z.werte.length - max(segments_after_dot_x, segments_after_dot_y);
-	return Zahl(z.negativ, punkt_position, z.werte);
+	//TODO: Subtrahieren:
+	return Zahl();
 }
 
 GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
@@ -221,7 +268,8 @@ GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
 		return subtrahiere(num1, num2);
 	}
 
-	throw new Error("Wenn man hier anlangt, weiss ich echt nicht, was passiert ist...");
+	//Man sollte hier nie anlangen...
+	throw new Exception("Es sollte nie hier ankommen...");
 }
 
 NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
@@ -230,23 +278,26 @@ NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
 }
 
 //MARK: SUBTRAHIERE
-Zahl subtrahiere(Zahl x, Zahl y) // x - y
+private Bruch subtrahiere(Bruch num1, Bruch num2)
 {
-	ulong segments_after_dot_x = x.werte.length - x.punkt_position;
-	ulong segments_after_dot_y = y.werte.length - y.punkt_position;
+	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
 
-	if (segments_after_dot_x == segments_after_dot_y)
+	GanzeZahl summand1 = GanzeZahl(false, multipliziere(num1.zähler, num2.nenner));
+	GanzeZahl summand2 = GanzeZahl(false, multipliziere(num2.zähler, num1.nenner));
+
+	GanzeZahl neuer_zähler = subtrahiere(summand1, summand2);
+	if (neuer_zähler.negativ)
 	{
-		GanzeZahl z = subtrahiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte));
-		return Zahl(z.negativ, x.punkt_position, z.werte);
+		throw new Exception("Es sollte nie dazu kommen");
+		//TODO: Sich dieses Problem noch einmal genau überlegen.
 	}
 
-	x.werte = right_pad(x.werte, x.punkt_position + segments_after_dot_y);
-	y.werte = right_pad(y.werte, y.punkt_position + segments_after_dot_x);
+	return Bruch(neuer_zähler.werte, neuer_nenner);
+}
 
-	GanzeZahl z = subtrahiere(GanzeZahl(x.negativ, x.werte), GanzeZahl(y.negativ, y.werte)); // x - y 
-	ulong punkt_position = z.werte.length - max(segments_after_dot_x, segments_after_dot_y);
-	return Zahl(z.negativ, punkt_position, z.werte);
+Zahl subtrahiere(Zahl x, Zahl y) // x - y
+{
+	throw new Error("Not Implemented!");
 }
 
 GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
@@ -320,7 +371,7 @@ GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 }
 
 //MARK: MULTIPLIKATION
-private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
+pure private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
 {
 	num1 = num1.reverse;
 	num2 = num2.reverse;
@@ -361,6 +412,11 @@ private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit
 	}
 
 	return matrix[0].reverse;
+}
+
+pure private Bruch multipliziere(Bruch num1, Bruch num2)
+{
+	return Bruch(multipliziere(num1.zähler, num2.zähler), multipliziere(num1.nenner, num1.zähler));
 }
 
 Zahl multipliziere(Zahl x, Zahl y)
