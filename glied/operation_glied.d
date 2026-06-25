@@ -426,7 +426,8 @@ class OperationGlied : Glied
 					{
 						NatürlicheZahl num1 = *cast(NatürlicheZahl*) resultat.wert;
 						NatürlicheZahl num2 = *cast(NatürlicheZahl*) momentaner_wert.wert;
-						resultat = Wert(WertTyp.WAHRHEIT, new bool(is_bigger(num1.werte, num2.werte)));
+						resultat = Wert(WertTyp.WAHRHEIT, new bool(ist_grösser(num1.werte, num2
+								.werte)));
 						break ots;
 					}
 				}
@@ -439,7 +440,8 @@ class OperationGlied : Glied
 					{
 						NatürlicheZahl num1 = *cast(NatürlicheZahl*) resultat.wert;
 						NatürlicheZahl num2 = *cast(NatürlicheZahl*) momentaner_wert.wert;
-						resultat = Wert(WertTyp.WAHRHEIT, new bool(is_bigger(num2.werte, num1.werte)));
+						resultat = Wert(WertTyp.WAHRHEIT, new bool(ist_grösser(num2.werte, num1
+								.werte)));
 						break ots;
 					}
 				}

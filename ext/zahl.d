@@ -4,6 +4,7 @@ import ext.prints;
 import variablen.wert;
 
 import std.algorithm : max, remove;
+import std.range : retro;
 import std.algorithm.mutation : reverse;
 import std.stdio : write, writeln;
 import std.conv : to;
@@ -131,8 +132,31 @@ private pure ubyte[] right_pad(ubyte[] num, ulong desired_length)
 	return padded;
 }
 
+private pure ubyte[] right_unpad(ubyte[] num)
+{
+	num.reverse();
+	ubyte[] unpadded;
+
+	bool encountered_int = false;
+
+	foreach (ubyte key; num)
+	{
+		if (encountered_int)
+		{
+			unpadded ~= key;
+		}
+		else if (key != 0)
+		{
+			encountered_int = true;
+			unpadded ~= key;
+		}
+	}
+
+	return unpadded.reverse;
+}
+
 //MARK: COMPARE
-pure bool is_bigger(ubyte[] x, ubyte[] y) // x > y => TRUE
+pure bool ist_grösser(ubyte[] x, ubyte[] y) // x > y => TRUE
 {
 	if (x.length < y.length)
 	{
@@ -172,25 +196,25 @@ pure bool ist_grösser_gleich_1(Bruch bruch)
 	if (is_equal(bruch.nenner, bruch.zähler))
 		return true;
 
-	if (is_bigger(bruch.zähler, bruch.nenner))
+	if (ist_grösser(bruch.zähler, bruch.nenner))
 		return true;
 
 	return false;
 }
 
-//MARK: ADDIERE
-pure private ubyte[] addiere(ubyte[] num1, ubyte[] num2, bool invert = true)
+pure private bool ist_grösser(Bruch num1, Bruch num2)
 {
-	if (invert)
-	{
-		num1 = reverse(left_pad(num1, num2.length)); // Pad and reverse ubyte array.
-		num2 = reverse(left_pad(num2, num1.length));
-	}
-	else
-	{
-		num1 = num1.right_pad(num2.length);
-		num2 = num2.right_pad(num1.length);
-	}
+	ubyte[] zähler1 = multipliziere(num1.zähler, num2.nenner);
+	ubyte[] zähler2 = multipliziere(num2.zähler, num1.nenner);
+
+	return ist_grösser(zähler1, zähler2);
+}
+
+//MARK: ADDIERE
+pure private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
+{
+	num1 = right_pad(num1, num2.length); // Pad ubyte array.
+	num2 = right_pad(num2, num1.length);
 
 	ubyte[] resultat;
 	ubyte überschuss = 0;
@@ -209,10 +233,7 @@ pure private ubyte[] addiere(ubyte[] num1, ubyte[] num2, bool invert = true)
 	if (überschuss)
 		resultat ~= überschuss;
 
-	if (invert)
-		return resultat.reverse;
-	else
-		return resultat;
+	return resultat;
 }
 
 pure private Bruch addiere(Bruch num1, Bruch num2)
@@ -225,7 +246,7 @@ pure private Bruch addiere(Bruch num1, Bruch num2)
 	return Bruch(addiere(summand1, summand2), neuer_nenner);
 }
 
-Zahl addiere(Zahl x, Zahl y)
+pure Zahl addiere(Zahl x, Zahl y)
 {
 	if ((x.negativ && y.negativ) ||
 		(!x.negativ && !y.negativ))
@@ -236,19 +257,28 @@ Zahl addiere(Zahl x, Zahl y)
 
 		while (neuer_bruch.ist_grösser_gleich_1)
 		{
-			neuer_vor_komma_wert = addiere(neuer_vor_komma_wert, [1]);
+			neuer_vor_komma_wert = neuer_vor_komma_wert.addiere([1]);
+			neuer_bruch = Bruch(subtrahiere(neuer_bruch.zähler, neuer_bruch.nenner), neuer_bruch
+					.nenner);
 		}
-
-		//TODO: Kürzen
 
 		return Zahl(x.negativ, neuer_bruch, neuer_vor_komma_wert);
 	}
 
-	//TODO: Subtrahieren:
-	return Zahl();
+	if (num1.negativ && num2.negativ == false)
+	{
+		return subtrahiere(num2, num1);
+	}
+	else if (num1.negativ == false && num2.negativ)
+	{
+		return subtrahiere(num1, num2);
+	}
+
+	//Man sollte hier nie anlangen...
+	throw new Exception("Es sollte nie hier ankommen...");
 }
 
-GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
+pure GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
 {
 	if (num1.negativ && num2.negativ)
 	{
@@ -272,67 +302,25 @@ GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
 	throw new Exception("Es sollte nie hier ankommen...");
 }
 
-NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
+pure NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
 {
 	return NatürlicheZahl(addiere(x.werte, y.werte));
 }
 
 //MARK: SUBTRAHIERE
-private Bruch subtrahiere(Bruch num1, Bruch num2)
+private pure ubyte[] subtrahiere(ubyte[] num1, ubyte[] num2)
 {
-	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
-
-	GanzeZahl summand1 = GanzeZahl(false, multipliziere(num1.zähler, num2.nenner));
-	GanzeZahl summand2 = GanzeZahl(false, multipliziere(num2.zähler, num1.nenner));
-
-	GanzeZahl neuer_zähler = subtrahiere(summand1, summand2);
-	if (neuer_zähler.negativ)
+	if (num2.ist_grösser(num1))
 	{
-		throw new Exception("Es sollte nie dazu kommen");
-		//TODO: Sich dieses Problem noch einmal genau überlegen.
+		throw new Exception("Es gäbe einen Underflow");
 	}
 
-	return Bruch(neuer_zähler.werte, neuer_nenner);
-}
-
-Zahl subtrahiere(Zahl x, Zahl y) // x - y
-{
-	throw new Error("Not Implemented!");
-}
-
-GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
-{
-	if (minuend.negativ && subtrahend.negativ == false)
-	{
-		return GanzeZahl(true, addiere(minuend.werte, subtrahend.werte));
-	}
-	else if (minuend.negativ == false && subtrahend.negativ)
-	{
-		return GanzeZahl(false, addiere(minuend.werte, subtrahend.werte));
-	}
-	else if (minuend.negativ && subtrahend.negativ)
-	{
-		GanzeZahl summe = addiere(minuend, GanzeZahl(false, subtrahend.werte));
-		return GanzeZahl(false, summe.werte);
-	}
-
-	ubyte[] min = reverse(left_pad(minuend.werte, subtrahend.werte.length));
-	ubyte[] sub = reverse(left_pad(subtrahend.werte, minuend.werte.length));
+	ubyte[] min = right_pad(num1, num2.length);
+	ubyte[] sub = right_pad(num2, num1.length);
 
 	if (is_equal(sub, min))
 	{
-		return GanzeZahl(false, [0]);
-	}
-
-	bool inverted = false;
-
-	if (is_bigger(sub, min))
-	{
-		ubyte[] zwischenspeicher = sub;
-		sub = min;
-		min = zwischenspeicher;
-
-		inverted = true;
+		return [0];
 	}
 
 	ubyte[] resultat;
@@ -359,13 +347,106 @@ GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y
 
 	if (carry_over != 0)
 		throw new Exception(
-			"Das carryover sollte null sein, weil ich es ja vorher sonst inverted habe: " ~ carry_over
+			"Es gibt ein Underflow von: " ~ carry_over
 				.to!string);
 
-	return GanzeZahl(inverted, resultat.reverse);
+	return resultat;
 }
 
-GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
+private pure Bruch subtrahiere(Bruch num1, Bruch num2)
+{
+	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
+
+	ubyte[] summand1 = multipliziere(num1.zähler, num2.nenner);
+	ubyte[] summand2 = multipliziere(num2.zähler, num1.nenner);
+
+	ubyte[] neuer_zähler = subtrahiere(summand1, summand2);
+
+	return Bruch(neuer_zähler, neuer_nenner);
+}
+
+pure Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
+{
+	if (minuend.negativ && subtrahend.negativ == false)
+	{
+		ubyte[] summe = addiere(minuend.werte, subtrahend.werte);
+		Bruch summe_auch = addiere(minuend.nach_komma, subtrahend.nach_komma);
+		return Zahl(true, summe_auch, summe);
+	}
+	else if (minuend.negativ == false && subtrahend.negativ)
+	{
+		ubyte[] summe_vor = addiere(minuend.werte, subtrahend.werte);
+		Bruch summe_nach = addiere(minuend.nach_komma, subtrahend.nach_komma);
+		return Zahl(false, summe_nach, summe_vor);
+	}
+	else if (minuend.negativ && subtrahend.negativ)
+	{
+		Zahl summe = addiere(minuend, Zahl(false, subtrahend.nach_komma, subtrahend.werte));
+		return Zahl(false, summe.nach_komma, summe.werte);
+	}
+
+	bool inverted = false;
+
+	ubyte[] min = minuend.werte;
+	ubyte[] sub = subtrahend.werte;
+
+	if (ist_grösser(sub, min))
+	{
+		ubyte[] zwischenspeicher = sub;
+		sub = min;
+		min = zwischenspeicher;
+
+		inverted = true;
+	}
+
+	ubyte[] sub_vor = subtrahiere(min, sub);
+	Bruch sub_nach;
+	if (inverted)
+	{
+		sub_nach = subtrahiere(subtrahend.nach_komma, minuend.nach_komma);
+	}
+	else
+	{
+		sub_nach = subtrahiere(minuend.nach_komma, subtrahend.nach_komma);
+	}
+
+	return Zahl(inverted, sub_nach, sub_vor);
+}
+
+pure GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
+{
+	if (minuend.negativ && subtrahend.negativ == false)
+	{
+		return GanzeZahl(true, addiere(minuend.werte, subtrahend.werte));
+	}
+	else if (minuend.negativ == false && subtrahend.negativ)
+	{
+		return GanzeZahl(false, addiere(minuend.werte, subtrahend.werte));
+	}
+	else if (minuend.negativ && subtrahend.negativ)
+	{
+		GanzeZahl summe = addiere(minuend, GanzeZahl(false, subtrahend.werte));
+		return GanzeZahl(false, summe.werte);
+	}
+
+	bool inverted = false;
+
+	ubyte[] min = minuend.werte;
+	ubyte[] sub = subtrahend.werte;
+
+	if (ist_grösser(sub, min))
+	{
+		ubyte[] zwischenspeicher = sub;
+		sub = min;
+		min = zwischenspeicher;
+
+		inverted = true;
+	}
+
+	return GanzeZahl(inverted, subtrahiere(min, sub));
+}
+
+pure GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 {
 	return subtrahiere(GanzeZahl(x), GanzeZahl(y));
 }
@@ -373,9 +454,6 @@ GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 //MARK: MULTIPLIKATION
 pure private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
 {
-	num1 = num1.reverse;
-	num2 = num2.reverse;
-
 	ubyte[][] matrix;
 
 	for (ulong i = 0; i < num2.length; i++)
@@ -407,21 +485,39 @@ pure private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nu
 
 	while (matrix.length > 1)
 	{
-		matrix[0] = addiere(matrix[0], matrix[1], false);
+		matrix[0] = addiere(matrix[0], matrix[1]);
 		matrix = matrix.remove(1);
 	}
 
-	return matrix[0].reverse;
+	return matrix[0];
 }
 
 pure private Bruch multipliziere(Bruch num1, Bruch num2)
 {
-	return Bruch(multipliziere(num1.zähler, num2.zähler), multipliziere(num1.nenner, num1.zähler));
+	return Bruch(multipliziere(num1.zähler, num2.zähler), multipliziere(num1.nenner, num1
+			.zähler));
 }
 
-Zahl multipliziere(Zahl x, Zahl y)
+pure Zahl multipliziere(Zahl num1, Zahl num2)
 {
-	throw new Exception("Not implemented...");
+	bool negativ = true;
+	if ((num1.negativ && num2.negativ) ||
+		(num1.negativ == false && num2.negativ == false))
+		negativ = false;
+
+	Bruch neuer_bruch = multipliziere(num1.nach_komma, num2.nach_komma);
+
+	ubyte[] neuer_vor_komma_wert = multipliziere(num1.werte, num2.werte);
+
+	while (neuer_bruch.ist_grösser_gleich_1)
+	{
+		neuer_vor_komma_wert = neuer_vor_komma_wert.addiere([1]);
+		neuer_bruch = Bruch(
+			subtrahiere(neuer_bruch.zähler, neuer_bruch.nenner), neuer_bruch
+				.nenner);
+	}
+
+	return Zahl(negativ, neuer_bruch, neuer_vor_komma_wert);
 }
 
 GanzeZahl multipliziere(GanzeZahl num1, GanzeZahl num2)
@@ -438,10 +534,41 @@ NatürlicheZahl multipliziere(NatürlicheZahl num1, NatürlicheZahl num2)
 	return NatürlicheZahl(multipliziere(num1.werte, num2.werte));
 }
 
+//MARK: DIVISON
+
+/// dividiere => Bruch / Bruch = Bruch
+/// Funktioniert eigentlich durch multiplikation.
+pure Bruch dividiere(Bruch num1, Bruch num2)
+{
+	return Bruch(multipliziere(num1.zähler, num2.nenner), multipliziere(num1.nenner, num2
+			.zähler));
+}
+
+/// dividiere => ubyte[] / ubyte[] = ubyte[];
+/// der Rest wird einfach weggeschmissen.
+/// 0en am Anfang werden nicht weggestrichen.
+pure ubyte[] dividiere(ubyte[] num1, ubyte[] num2)
+{
+	if (num2.right_unpad.length == 0)
+		throw new Exception("Division durch 0");
+
+	num1.reverse();
+
+	ubyte byte1 = num1[0];
+	ubyte byte2 = num1[1];
+
+	ushort longer = cast(ushort)((byte1 << 8) | byte2);
+
+	throw new Error("Not implemented");
+}
+
+pure Zahl dividiere(Zahl num1, Zahl num2);
+
 //MARK: API
-bool ist_zahl(dstring wort)
+pure bool ist_zahl(dstring wort)
 {
 	bool allDigits = wort.length > 0;
+
 	foreach (dchar c; wort)
 	{
 		if (c < '0' || c > '9')
@@ -498,14 +625,13 @@ NatürlicheZahl als_zahl(dstring wort)
 		digits = nextDigits;
 	}
 
-	werte = werte.reverse();
-
 	return NatürlicheZahl(werte);
 }
 
 Zahl konstruiere(GanzeZahl vor, NatürlicheZahl nach)
 {
-	return Zahl(vor.negativ, vor.werte.length, vor.werte ~ nach.werte);
+	//TODO:Implementieren
+	throw new Error("Nicht implementiert.");
 }
 
 Zahl konstruiere(NatürlicheZahl vor, NatürlicheZahl nach)
@@ -516,7 +642,9 @@ Zahl konstruiere(NatürlicheZahl vor, NatürlicheZahl nach)
 //MARK: als_string
 string als_string(NatürlicheZahl n)
 {
-	if (n.werte.length == 0)
+	ubyte[] werte = n.werte;
+
+	if (werte.length == 0)
 	{
 		return "0";
 	}
@@ -524,9 +652,8 @@ string als_string(NatürlicheZahl n)
 	ubyte[] digits;
 	digits ~= 0;
 
-	for (size_t i = 0; i < n.werte.length; i++)
+	foreach (uint rest; werte.retro)
 	{
-		uint rest = n.werte[i];
 		for (size_t j = 0; j < digits.length; j++)
 		{
 			uint prod = digits[j] * 256 + rest;
@@ -565,9 +692,14 @@ string als_string(Zahl z)
 	if (z.negativ)
 		result ~= "-";
 
-	result ~= als_string(NatürlicheZahl(z.werte[0 .. z.punkt_position]));
+	result ~= als_string(NatürlicheZahl(z.werte));
 	result ~= ".";
-	result ~= als_string(NatürlicheZahl(z.werte[z.punkt_position .. $]));
+	result ~= ""; // Man muss noch Zahl.toString machen.
 
 	return result;
+}
+
+string als_string(Bruch b)
+{
+	return "bruch";
 }
