@@ -3,11 +3,17 @@ module app;
 import repl;
 import interpreter;
 
+import variablen.speicher;
+import variablen.wert;
+import zahl;
+
 import ext.prints;
 import ext.datei;
 
 import std.stdio : write, writeln;
 import std.conv : to;
+
+// @ {} [] # \ || != ~
 
 bool repl_mode = false;
 dstring file_name = "";
@@ -23,15 +29,18 @@ int main(string[] args)
 		set_pen_trait(TextTrait.reset);
 
 		enter_repl_loop();
-		return 0;
+
+		return bekomme_return_status;
 	}
 
 	if (args.length == 2)
 	{
 		dstring file = args[1].to!dstring;
 		dstring datei_inhalt = datei_lesen(file);
+
 		interpretiere(datei_inhalt);
-		return 0;
+
+		return bekomme_return_status;
 	}
 
 	writeln("Entweder ohne Argumente für REPL, oder aber mit einer Datei, als argument....");

@@ -20,9 +20,11 @@ struct Bereich
 
 private Bereich*[] bereiche;
 
-static this()
+shared static this()
 {
 	bereiche ~= new Bereich("global"d, 0, [
+			Variable("status_nummer"d, VariablenTyp.FIX, new Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl())), // Exit code 
+
 			//Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
 		]);
 }
@@ -143,5 +145,16 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 			}
 		}
 	}
+}
+//endregion
+
+//region Global_Helpers
+int bekomme_return_status()
+{
+	Variable var = lies_variable(0, "status_nummer");
+	Wert wert = *cast(Wert*) var.wert;
+	NatürlicheZahl zahl = *cast(NatürlicheZahl*) wert.wert;
+
+	return als_int(zahl.werte);
 }
 //endregion

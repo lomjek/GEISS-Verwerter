@@ -20,7 +20,20 @@ enthalten. Installieren kann man es wie folgt:
 sudo apt install build-essential
 ```
 
-**
+**ldc**
+
+Dies ist der tatsächliche compiler für die D Sprache. Man braucht ihn für
+das kompilieren von allen .d Dateien. Es gibt auch andere D-Compiler, aber
+für sie werde ich jetzt keine Anleitung schreiben. Alle schritte sollten
+auch mit anderen Compilern funktionieren.
+
+```sh
+sudo apt install ldc2
+```
+
+**dub**
+
+Das ist
 
 Wenn sie alle diese Sachen installiert haben, navigieren Sie in ihrem **Terminal** 
 in den Ordner dieses Projektes hinein und führen Sie folgenden Befehl aus:

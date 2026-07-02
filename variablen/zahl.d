@@ -6,6 +6,7 @@ import variablen.wert;
 import std.algorithm : max, remove;
 import std.range : retro;
 import std.algorithm.mutation : reverse;
+import std.bitmanip : littleEndianToNative;
 import std.stdio : write, writeln;
 import std.conv : to;
 
@@ -246,14 +247,14 @@ pure private Bruch addiere(Bruch num1, Bruch num2)
 	return Bruch(addiere(summand1, summand2), neuer_nenner);
 }
 
-pure Zahl addiere(Zahl x, Zahl y)
+pure Zahl addiere(Zahl num1, Zahl num2)
 {
-	if ((x.negativ && y.negativ) ||
-		(!x.negativ && !y.negativ))
+	if ((num1.negativ && num2.negativ) ||
+		(!num1.negativ && !num2.negativ))
 	{
-		Bruch neuer_bruch = addiere(x.nach_komma, y.nach_komma);
+		Bruch neuer_bruch = addiere(num1.nach_komma, num2.nach_komma);
 
-		ubyte[] neuer_vor_komma_wert = addiere(x.werte, y.werte);
+		ubyte[] neuer_vor_komma_wert = addiere(num1.werte, num2.werte);
 
 		while (neuer_bruch.ist_grösser_gleich_1)
 		{
@@ -262,7 +263,7 @@ pure Zahl addiere(Zahl x, Zahl y)
 					.nenner);
 		}
 
-		return Zahl(x.negativ, neuer_bruch, neuer_vor_komma_wert);
+		return Zahl(num1.negativ, neuer_bruch, neuer_vor_komma_wert);
 	}
 
 	if (num1.negativ && num2.negativ == false)
@@ -702,4 +703,34 @@ string als_string(Zahl z)
 string als_string(Bruch b)
 {
 	return "bruch";
+}
+
+//MARK: als_std_zahl
+
+/// Es nimmt die letzten vier ubytes und stopfft Sie in ein int.
+/// Keine garantie, wie negative Zahlen funktionieren werden.
+int als_int(ubyte[] liste, bool throw_on_overflow = true)
+{
+	if (liste.length > 4 && throw_on_overflow)
+	{
+		throw new Exception("Die Zahl ist zu gross für die Umwandlung in ein ubyte");
+	}
+
+	ubyte[4] kurze_liste;
+	if (liste.length > 4)
+	{
+		kurze_liste = liste[$ - 4 .. $];
+	}
+	else
+	{
+		while (liste.length < 4)
+		{
+			liste = liste ~ 0;
+		}
+		kurze_liste = liste;
+	}
+
+	int resultat = littleEndianToNative!int(kurze_liste);
+
+	return resultat;
 }

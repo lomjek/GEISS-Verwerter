@@ -7,7 +7,7 @@
 	"license": "LGPL-3.0-or-later",
 	"name": "interpreter",
 	"targetName": "geiss.dc",
-	"mainSourceFile": "app.d",
+	"mainSourceFile": "geiss.d",
 	"targetType": "executable",
 	"sourcePaths": [
 		"."
