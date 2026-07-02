@@ -1,13 +1,15 @@
 module variablen.speicher;
 
 import fehler;
-
+import liste;
 import zahl;
 
 import variablen.variable;
 import variablen.wert;
 
 import ext.string;
+
+import std.conv : to;
 
 // @ {} [] # \ || != ~
 
@@ -23,7 +25,31 @@ private Bereich*[] bereiche;
 static this()
 {
 	bereiche ~= new Bereich("global"d, 0, [
-			Variable("status_nummer"d, VariablenTyp.FIX, new Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl())), // Exit code 
+			Variable(
+				"status_nummer"d,
+				VariablenTyp.FIX,
+				new Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl([0]))
+			), // Exit code 
+			Variable(
+				"std_wert_nzahl"d,
+				VariablenTyp.FIX,
+				new Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl([0]))
+			), //Standard Wert, mit welchem nzahlen initialisiert werden.
+			Variable(
+				"std_wert_gzahl"d,
+				VariablenTyp.FIX,
+				new Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(false, [0]))
+			), //Standard Wert, mit welchem gzahlen initialisiert werden.
+			Variable(
+				"std_wert_zahl"d,
+				VariablenTyp.FIX,
+				new Wert(WertTyp.ZAHL, new Zahl(NatürlicheZahl([0])))
+			), //Standard Wert, mit welchem zahlen initialisiert werden.
+			Variable(
+				"std_wert_wahrheit"d,
+				VariablenTyp.FIX,
+				new Wert(WertTyp.WAHRHEIT, new bool(true))
+			), //Standard Wert, mit welchem wahrheiten initialisiert werden.
 
 			//Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
 		]);
@@ -111,6 +137,40 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
 	if (variable_existiert(bereich_num, var_name))
 		throw new Variable_Schon_Existent_Fehler(var_name);
 
+	if (init_wert.wert == null)
+	{
+		switch (init_wert.typ)
+		{
+		case WertTyp.ZAHL:
+			Variable var = lies_variable(0, "std_wert_zahl");
+			init_wert = cast(Wert*) var.wert;
+			break;
+
+		case WertTyp.GANZE_ZAHL:
+			Variable var = lies_variable(0, "std_wert_gzahl");
+			init_wert = cast(Wert*) var.wert;
+			break;
+
+		case WertTyp.NATÜRLICHE_ZAHL:
+			Variable var = lies_variable(0, "std_wert_nzahl");
+			init_wert = cast(Wert*) var.wert;
+			break;
+
+		case WertTyp.WAHRHEIT:
+			Variable var = lies_variable(0, "std_wert_wahrheit");
+			init_wert = cast(Wert*) var.wert;
+			break;
+
+		case WertTyp.LISTE:
+			init_wert.wert = new Liste(true, WertTyp.INVALID, []);
+			break;
+
+		default:
+			throw new Fehler(
+				"Dieser Typ sollte nicht existieren: " ~ init_wert.typ.to!dstring);
+		}
+	}
+
 	bereiche[bereich_num].variablen ~= Variable(var_name, var_typ, init_wert);
 }
 
@@ -118,12 +178,11 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 {
 	if (bereiche[bereich_num] == null)
 		throw new Error("Der Bereich für die Variable existiert nicht!");
-
-	if (!variable_existiert(bereich_num, var_name))
+	if (
+		!variable_existiert(bereich_num, var_name))
 		throw new Variable_Nicht_Existent_Fehler(var_name, bereich_num.variablen_namen);
 
 	Bereich* bereich = bereiche[bereich_num];
-
 	foreach (ref Variable var; bereich.variablen)
 	{
 		if (var.identifier == var_name)
@@ -132,9 +191,8 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 			if (var.var_typ == VariablenTyp.FIX)
 			{
 				WertTyp vw_typ = (*cast(Wert*) var.wert).typ;
-				WertTyp nw_typ = neuer_wert.typ;
-
-				// Typen sind genau gleich
+				WertTyp nw_typ = neuer_wert
+					.typ; // Typen sind genau gleich
 				if (vw_typ == nw_typ)
 				{
 					var.wert = neuer_wert;
@@ -148,17 +206,23 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 					var.wert = nw;
 				}
 
-				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp.ZAHL)
+				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp
+					.ZAHL)
 				{
-					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert.wert;
-					Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(nw_nzahl));
+					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert
+						.wert;
+					Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(
+							nw_nzahl));
 					var.wert = nw;
 				}
 
-				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp.GANZE_ZAHL)
+				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp
+					.GANZE_ZAHL)
 				{
-					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert.wert;
-					Wert* nw = new Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(nw_nzahl));
+					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert
+						.wert;
+					Wert* nw = new Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(
+							nw_nzahl));
 					var.wert = nw;
 				}
 
@@ -180,9 +244,10 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 int bekomme_return_status()
 {
 	Variable var = lies_variable(0, "status_nummer");
-	Wert wert = *cast(Wert*) var.wert;
-	NatürlicheZahl zahl = *cast(NatürlicheZahl*) wert.wert;
-
+	Wert wert = *cast(
+		Wert*) var.wert;
+	NatürlicheZahl zahl = *cast(NatürlicheZahl*) wert
+		.wert;
 	return als_int(zahl.werte);
 }
 //endregion

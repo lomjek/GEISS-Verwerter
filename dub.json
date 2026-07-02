@@ -14,5 +14,16 @@
 	],
 	"importPaths": [
 		"."
+	],
+	"configurations": [
+		{
+			"name": "default"
+		},
+		{
+			"name": "static",
+			"dflags": [
+				"-static"
+			]
+		}
 	]
 }

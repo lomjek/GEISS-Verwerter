@@ -1,7 +1,5 @@
 module interpreter;
 
-import std;
-
 import leser;
 import baum_generator;
 

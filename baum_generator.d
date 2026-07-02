@@ -4,6 +4,8 @@ import operatoren;
 import schlüsselwörter;
 import ext.prints;
 
+import liste;
+
 import fehler;
 
 import glied.glied;
@@ -65,6 +67,7 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 	uint offene_klammern = 0;
 	uint offene_eckige_klammern = 0;
 	uint offene_geschwungene_klammern = 0;
+
 	foreach (Glied glied; glieder_liste)
 	{
 		if (glied.classinfo != OperationGlied.classinfo)
@@ -107,6 +110,7 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 	{
 		Glied glied = glieder_liste[i];
 
+		// RÜCK-PFEIL wird umgewandelt zu Setze_VAR_Glied
 		if (glied.classinfo == OperationGlied.classinfo)
 		{
 			OperationGlied op_glied = cast(OperationGlied) glied;
@@ -116,6 +120,7 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 			}
 
 		}
+		// WT_GLIED wird zu VAR_bauen node umgewandelt.
 		else if (glied.classinfo == WT_Glied.classinfo && i + 1 < length &&
 			glieder_liste[i + 1].classinfo == Lese_Variable_Glied.classinfo)
 		{
@@ -126,6 +131,8 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 			length--;
 		}
 	}
+
+	glieder_liste = listen_zusammenfassen(glieder_liste);
 
 	Programm_BlockGlied bgl = new Programm_BlockGlied();
 
@@ -536,6 +543,77 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				continue;
 			}
 		}
+	}
+
+	return glieder_liste;
+}
+
+//MARK: ListenParsing
+Wert_Glied liste_erstellen(Glied[] glieder_liste) //TODO: MUss zu ListeWert_Glied umgeändert werden.
+{
+	Wert*[] werte;
+
+	foreach (Glied glied; glieder_liste)
+	{
+		if (glied.classinfo != Wert_Glied.classinfo)
+		{
+			throw new Error("Not Implemented: TODO!");
+		}
+
+		werte ~= new Wert(glied.verwerte(0));
+	}
+
+	Liste* liste = new Liste(true, WertTyp.INVALID, werte);
+
+	return new Wert_Glied(Wert(WertTyp.LISTE, liste));
+}
+
+Glied[] listen_zusammenfassen(Glied[] glieder_liste)
+{
+	ulong eckige_klammern_offen = 0; // TODO: Brauche ich dann für rekrusive Listen
+	Glied[] liste_für_wert;
+
+	ulong arr_length = glieder_liste.length;
+
+	for (ulong i = 0; i < arr_length; i++)
+	{
+		Glied glied = glieder_liste[i];
+
+		if (glied.classinfo == OperationGlied.classinfo)
+		{
+			if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_AUF)
+			{
+				eckige_klammern_offen++;
+				glieder_liste = glieder_liste.remove(i);
+				i--;
+				arr_length--;
+				continue;
+			}
+			else if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_ZU)
+			{
+				if (eckige_klammern_offen == 0)
+					throw new Fehler("Es werden mehr Klammern zu als aufgemacht.");
+
+				eckige_klammern_offen--;
+
+				if (eckige_klammern_offen == 0)
+				{
+					glieder_liste[i] = liste_erstellen(liste_für_wert);
+					continue;
+				}
+			}
+		}
+
+		if (eckige_klammern_offen == 1)
+		{
+			liste_für_wert ~= glied;
+			glieder_liste = glieder_liste.remove(i);
+			i--;
+			arr_length--;
+			continue;
+		}
+
+		//TODO: Rekrusive Listen implementieren.
 	}
 
 	return glieder_liste;

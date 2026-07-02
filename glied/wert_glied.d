@@ -38,3 +38,8 @@ class Wert_Glied : Glied
 		return "G(WERT | " ~ wert.toString ~ ")";
 	}
 }
+
+//MARK: Glied Liste 
+class ListeWert_Glied : Glied
+{
+}

@@ -4,6 +4,8 @@ import variablen.wert;
 import variablen.speicher;
 import variablen.variable;
 
+import zahl;
+
 import glied.glied;
 
 import std.stdio : write;

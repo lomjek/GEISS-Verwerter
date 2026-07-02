@@ -2,7 +2,9 @@ module ext.prints;
 
 import operatoren : OperatorenTyp;
 
+import liste;
 import zahl;
+import std.conv : to;
 
 import variablen.wert;
 
@@ -43,34 +45,51 @@ void set_pen_trait(TextTrait tt)
 
 void schreibe_schön_wert(Wert wert)
 {
-	if (wert.typ == WertTyp.NATÜRLICHE_ZAHL)
+	write(wert.als_schön_string);
+}
+
+string als_schön_string(Wert wert)
+{
+	string str;
+
+	switch (wert.typ)
 	{
+	case WertTyp.NATÜRLICHE_ZAHL:
 		NatürlicheZahl nz = *cast(NatürlicheZahl*) wert.wert;
-		write(nz.als_string);
-	}
-	else if (wert.typ == WertTyp.GANZE_ZAHL)
-	{
+		str = nz.als_string;
+		break;
+
+	case WertTyp.GANZE_ZAHL:
 		GanzeZahl gz = *cast(GanzeZahl*) wert.wert;
-		write(gz.als_string);
-	}
-	else if (wert.typ == WertTyp.ZAHL)
-	{
+		str = gz.als_string;
+		break;
+
+	case WertTyp.ZAHL:
 		Zahl z = *cast(Zahl*) wert.wert;
-		write(z.als_string);
-	}
-	else if (wert.typ == WertTyp.TEXT)
-	{
-		write("\"");
-		write(*cast(dstring*) wert.wert);
-		write("\"");
-	}
-	else if (wert.typ == WertTyp.WAHRHEIT)
-	{
+		str = z.als_string;
+		break;
+
+	case WertTyp.TEXT:
+		str = "\"";
+		str ~= (*cast(dstring*) wert.wert).to!string;
+		str ~= "\"";
+		break;
+
+	case WertTyp.WAHRHEIT:
 		bool wahrheit = *cast(bool*) wert.wert;
-		write(wahrheit ? "wahr" : "falsch");
+		str = wahrheit ? "wahr" : "falsch";
+		break;
+
+	case WertTyp.LISTE:
+		Liste li = *cast(Liste*) wert.wert;
+		str = li.als_string;
+		break;
+
+	default:
+		str = wert.typ.to!string;
 	}
-	else
-		write(wert.typ);
+
+	return str;
 }
 
 //region REPL
