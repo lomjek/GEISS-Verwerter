@@ -28,6 +28,8 @@ enum OperatorenTyp
 
 	PUNKT,
 	KOMMA,
+	DOPPELPUNKT,
+	SEMIKOLON,
 
 	NEUE_LINIE,
 	ANFANG_LINIE,
@@ -60,6 +62,8 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
 
 	OperatorenTyp.PUNKT: '.',
 	OperatorenTyp.KOMMA: ',',
+	OperatorenTyp.DOPPELPUNKT: ':',
+	OperatorenTyp.SEMIKOLON: ';',
 
 	OperatorenTyp.NEUE_LINIE: '\n',
 	OperatorenTyp.ANFANG_LINIE: '\r'

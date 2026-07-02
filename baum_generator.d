@@ -90,15 +90,15 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 
 	if (offene_klammern != 0)
 	{
-		throw new Exception("FEHLER: Nicht alle Klammern sind zu!");
+		throw new Fehler("FEHLER: Nicht alle Klammern sind zu!"d);
 	}
 	if (offene_eckige_klammern != 0)
 	{
-		throw new Exception("FEHLER: Nicht alle eckigen Klammern sind zu!");
+		throw new Fehler("FEHLER: Nicht alle eckigen Klammern sind zu!"d);
 	}
 	if (offene_geschwungene_klammern != 0)
 	{
-		throw new Exception("FEHLER: Nicht alle geschwungenen Klammern sind zu!");
+		throw new Fehler("FEHLER: Nicht alle geschwungenen Klammern sind zu!"d);
 	}
 	//endregion
 
@@ -154,11 +154,22 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		set_pen_trait(TextTrait.reset);
 	}
 
+	uint _Op_wiederholungen = 0;
+	// Diese Variable ist dazu da, dass wenn der Parser keine Aktion findet,
+	// aber der Baum noch nich abgeschlossen ist, er sich nicht in einer
+	// endlosen Schleife verhaddert. 
+
 	ulong arr_length = glieder_liste.length;
+
 	uint klammern_offen = 0;
+	// Diese Zahl ist dazu da, dass man zu der Maximalen priorität noch durch
+	// Klamern einen Zusatz geben kann, also man kann die Priorität von Operationen 
+	// wichtiger machen.
 
 	uint geschw_klammern_offen = 0;
 	Glied[] unter_block;
+	// Diese zwei Variablen dienen dazu, dass man die Unterblöcke, welche mit
+	// geschwungenen Klammern kennzeichnet rekrusiv abgerufen werden. 
 
 	main_loop: while (!glieder_liste.ist_fertig) // Muss vermutlich geändert werden.
 	{
@@ -340,6 +351,20 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		}
 
 		Glied glied = glieder_liste[max_priority_index];
+
+		if (max_priority_index == 0 && max_priority_operation == 0)
+			_Op_wiederholungen++;
+		else
+			_Op_wiederholungen = 0;
+		// Wenn man keine Operation findet, macht man diese Zahl grösser.
+		// Bei genug Wiederhloungen beendet man die Schleife mit einem Fehler.
+		// Es sollte eigentlich nie passieren, aber jetzt in der BETA-Phase,
+		// hilft mir das Extrem beim Debuggen. // TODO: Braucht es das am Schluss?
+		if (_Op_wiederholungen >= 10)
+		{
+			throw new Fehler(
+				"Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen."d);
+		}
 
 		debug
 		{

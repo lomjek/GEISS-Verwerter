@@ -20,7 +20,7 @@ struct Bereich
 
 private Bereich*[] bereiche;
 
-shared static this()
+static this()
 {
 	bereiche ~= new Bereich("global"d, 0, [
 			Variable("status_nummer"d, VariablenTyp.FIX, new Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl())), // Exit code 
@@ -29,7 +29,7 @@ shared static this()
 		]);
 }
 
-uint initialisiere_bereich(dstring name)
+private nothrow uint initialisiere_bereich(dstring name)
 {
 	uint bereich_level = 1;
 	while (bereiche[bereich_level] != null)
@@ -40,9 +40,9 @@ uint initialisiere_bereich(dstring name)
 	return bereich_level;
 }
 
-bool variable_existiert(uint bereich_num, dstring var_name)
+private nothrow bool variable_existiert(uint bereich_num, dstring var_name)
 {
-	if (bereiche[bereich_num] == null)
+	if (!bereich_num.bereich_existiert)
 		return false;
 
 	foreach (Variable var; bereiche[bereich_num].variablen)
@@ -55,11 +55,41 @@ bool variable_existiert(uint bereich_num, dstring var_name)
 	return false;
 }
 
+private nothrow bool bereich_existiert(uint bereich_num)
+{
+	if (bereich_num >= bereiche.length)
+		return false;
+
+	if (bereiche[bereich_num] == null)
+		return false;
+
+	return true;
+}
+
+private dstring[] variablen_namen(uint bereich_num)
+{
+	if (!bereich_num.bereich_existiert)
+	{
+		throw new Bereich_Nicht_Existent_Fehler(bereich_num);
+	}
+
+	Bereich ber = *bereiche[bereich_num];
+
+	dstring[] namen;
+
+	foreach (Variable var; ber.variablen)
+	{
+		namen ~= var.identifier;
+	}
+
+	return namen;
+}
+
 //region API
 Variable lies_variable(uint bereich_num, dstring var_name)
 {
-	if (bereiche[bereich_num] == null)
-		throw new Variable_Nicht_Existent_Fehler(var_name);
+	if (!bereich_num.bereich_existiert)
+		throw new Variable_Nicht_Existent_Fehler(var_name, variablen_namen(bereich_num));
 
 	Bereich bereich = *bereiche[bereich_num];
 
@@ -70,18 +100,16 @@ Variable lies_variable(uint bereich_num, dstring var_name)
 			return var;
 		}
 	}
-	throw new Variable_Nicht_Existent_Fehler(var_name);
+	throw new Variable_Nicht_Existent_Fehler(var_name, bereich_num.variablen_namen);
 }
 
 void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ, Wert* init_wert)
 {
-	if (bereiche[bereich_num] == null)
-		throw new Error("Der Bereich für die Variable existiert nicht!");
+	if (!bereich_num.bereich_existiert)
+		throw new Bereich_Nicht_Existent_Fehler(bereich_num);
 
 	if (variable_existiert(bereich_num, var_name))
-	{
 		throw new Variable_Schon_Existent_Fehler(var_name);
-	}
 
 	bereiche[bereich_num].variablen ~= Variable(var_name, var_typ, init_wert);
 }
@@ -92,7 +120,7 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 		throw new Error("Der Bereich für die Variable existiert nicht!");
 
 	if (!variable_existiert(bereich_num, var_name))
-		throw new Variable_Nicht_Existent_Fehler(var_name);
+		throw new Variable_Nicht_Existent_Fehler(var_name, bereich_num.variablen_namen);
 
 	Bereich* bereich = bereiche[bereich_num];
 

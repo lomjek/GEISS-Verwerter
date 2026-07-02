@@ -5,6 +5,7 @@ import operatoren;
 import variablen.wert;
 
 import std.conv : to;
+import std.array : join;
 
 // @ {} [] # \ || != ~
 
@@ -34,10 +35,22 @@ abstract class VariablenFehler : Fehler
 
 class Variable_Nicht_Existent_Fehler : VariablenFehler
 {
-	this(dstring variable_name)
+	this(dstring variable_name, dstring[] bekannte_variablen, ulong linie = __LINE__)
 	{
-		dstring msg = "Variable '" ~ variable_name ~ "' gibt es nicht!";
-		super(msg); //Todo: Das Line getue fixen
+		dstring msg = "Variable '"d ~ variable_name ~ "' gibt es nicht!\nBekannte Variablen: "d ~
+			(
+				join(
+					bekannte_variablen, ", ")).to!dstring;
+		super(msg, linie); //Todo: Das Line getue fixen
+	}
+}
+
+class Bereich_Nicht_Existent_Fehler : Fehler
+{
+	this(uint bereich_num, ulong linie = __LINE__)
+	{
+		dstring msg = "Bereich für Variablen mit der Nummer " ~ bereich_num.to!dstring ~ " existiert nicht.";
+		super(msg, linie);
 	}
 }
 
@@ -61,20 +74,22 @@ class Variable_Assign_Typ_Error : VariablenFehler
 }
 
 //MARK: Typenfehler
-abstract class TypenFehler : Fehler
+class Operation_TypenFehler : Fehler
 {
-	this(dstring msg, size_t linie = __LINE__)
-	{
-		super(msg, linie);
-	}
-}
-
-class Operation_TypenFehler : TypenFehler
-{
-	this(OperatorenTyp op_typ, WertTyp w1_typ, WertTyp w2_typ)
+	this(OperatorenTyp op_typ, WertTyp w1_typ, WertTyp w2_typ, ulong linie = __LINE__)
 	{
 		dstring message = "Die Operation " ~ op_typ.to!dstring ~ " kann nicht mit den Typen " ~ w1_typ.to!dstring ~ " und "
 			~ w2_typ.to!dstring ~ "durchegführt werden.";
+		super(message, linie);
+	}
+}
+
+class Liste_TypenFehler : Fehler
+{
+	this(WertTyp liste_typ, WertTyp w_typ)
+	{
+		dstring message = "Die fixe liste voller "d
+			~ liste_typ.to!dstring ~ " kann nicht "d ~ w_typ.to!dstring ~ " enthalten"d;
 		super(message);
 	}
 }
