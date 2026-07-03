@@ -33,7 +33,12 @@ sudo apt install ldc2
 
 **dub**
 
-Das ist
+Das ist eine tolle Sache. Anstelle davon, dass man manuell jedes der Dateien zu
+einem Objekt macht und sie dann alle manuell linkt, macht es das einfach für dich.
+
+```sh
+sudo apt install dub
+```
 
 Wenn sie alle diese Sachen installiert haben, navigieren Sie in ihrem **Terminal** 
 in den Ordner dieses Projektes hinein und führen Sie folgenden Befehl aus:

@@ -15,9 +15,6 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
-bool repl_mode = false;
-dstring file_name = "";
-
 int main(string[] args)
 {
 	if (args.length == 1)

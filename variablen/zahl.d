@@ -3,8 +3,10 @@ module zahl;
 import ext.prints;
 import variablen.wert;
 
-import std.algorithm : max, remove;
-import std.range : retro;
+import std.algorithm : max, remove, canFind, find;
+import std.range : retro, split;
+import std.bigint : BigInt;
+import std.digest : toHexString;
 import std.algorithm.mutation : reverse;
 import std.bitmanip : littleEndianToNative;
 import std.stdio : write, writeln;
@@ -18,26 +20,26 @@ struct Zahl
 	ubyte[] werte;
 	Bruch nach_komma;
 
-	pure this(Zahl z)
+	pure nothrow this(Zahl z)
 	{
 		this.negativ = z.negativ;
 		this.nach_komma = z.nach_komma;
 		this.werte = z.werte;
 	}
 
-	pure this(GanzeZahl gz)
+	pure nothrow this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
 		this.werte = gz.werte;
 	}
 
-	pure this(NatürlicheZahl nz)
+	pure nothrow this(NatürlicheZahl nz)
 	{
 		this.negativ = false;
 		this.werte = nz.werte;
 	}
 
-	pure this(bool negativ, Bruch nach_komma, ubyte[] werte)
+	pure nothrow this(bool negativ, Bruch nach_komma, ubyte[] werte)
 	{
 		this.negativ = negativ;
 		this.werte = werte;
@@ -50,19 +52,19 @@ struct GanzeZahl
 	bool negativ;
 	ubyte[] werte;
 
-	pure this(NatürlicheZahl nz)
+	pure nothrow this(NatürlicheZahl nz)
 	{
 		this.negativ = false;
 		this.werte = nz.werte;
 	}
 
-	pure this(GanzeZahl gz)
+	pure nothrow this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
 		this.werte = gz.werte;
 	}
 
-	pure this(bool negativ, ubyte[] werte)
+	pure nothrow this(bool negativ, ubyte[] werte)
 	{
 		this.negativ = negativ;
 		this.werte = werte;
@@ -73,12 +75,12 @@ struct NatürlicheZahl
 {
 	ubyte[] werte;
 
-	pure this(NatürlicheZahl nz)
+	pure nothrow this(NatürlicheZahl nz)
 	{
 		this.werte = nz.werte;
 	}
 
-	pure this(ubyte[] werte)
+	pure nothrow this(ubyte[] werte)
 	{
 		this.werte = werte;
 	}
@@ -89,19 +91,19 @@ struct Bruch
 	ubyte[] zähler;
 	ubyte[] nenner;
 
-	pure this(ubyte[] nzähler, ubyte[] nnenner)
+	pure nothrow this(ubyte[] nzähler, ubyte[] nnenner)
 	{
 		zähler = nzähler;
 		nenner = nnenner;
 	}
 
-	pure this(Bruch bruch)
+	pure nothrow this(Bruch bruch)
 	{
 		zähler = bruch.zähler;
 		nenner = bruch.nenner;
 	}
 
-	pure this(NatürlicheZahl nz)
+	pure nothrow this(NatürlicheZahl nz)
 	{
 		zähler = nz.werte;
 		nenner = [1];
@@ -121,7 +123,7 @@ private pure ubyte[] left_pad(ubyte[] num, ulong desired_length)
 	return padded;
 }
 
-private pure ubyte[] right_pad(ubyte[] num, ulong desired_length)
+private pure nothrow ubyte[] right_pad(ubyte[] num, ulong desired_length)
 {
 	if (num.length >= desired_length)
 	{
@@ -133,7 +135,7 @@ private pure ubyte[] right_pad(ubyte[] num, ulong desired_length)
 	return padded;
 }
 
-private pure ubyte[] right_unpad(ubyte[] num)
+private pure nothrow ubyte[] right_unpad(ubyte[] num)
 {
 	num.reverse();
 	ubyte[] unpadded;
@@ -154,6 +156,17 @@ private pure ubyte[] right_unpad(ubyte[] num)
 	}
 
 	return unpadded.reverse;
+}
+
+//MARK: Bruch zusammenfassen
+private pure Bruch zusammengefasst(Bruch x)
+{
+	while (x.ist_grösser_gleich_1)
+	{
+		x.zähler = x.zähler.subtrahiere(x.nenner);
+	}
+
+	return x;
 }
 
 //MARK: COMPARE
@@ -192,7 +205,7 @@ pure bool is_equal(ubyte[] x, ubyte[] y)
 	return true;
 }
 
-pure bool ist_grösser_gleich_1(Bruch bruch)
+private pure bool ist_grösser_gleich_1(Bruch bruch)
 {
 	if (is_equal(bruch.nenner, bruch.zähler))
 		return true;
@@ -203,7 +216,7 @@ pure bool ist_grösser_gleich_1(Bruch bruch)
 	return false;
 }
 
-pure private bool ist_grösser(Bruch num1, Bruch num2)
+private pure bool ist_grösser(Bruch num1, Bruch num2)
 {
 	ubyte[] zähler1 = multipliziere(num1.zähler, num2.nenner);
 	ubyte[] zähler2 = multipliziere(num2.zähler, num1.nenner);
@@ -212,7 +225,7 @@ pure private bool ist_grösser(Bruch num1, Bruch num2)
 }
 
 //MARK: ADDIERE
-pure private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
+private pure nothrow ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 {
 	num1 = right_pad(num1, num2.length); // Pad ubyte array.
 	num2 = right_pad(num2, num1.length);
@@ -237,7 +250,7 @@ pure private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 	return resultat;
 }
 
-pure private Bruch addiere(Bruch num1, Bruch num2)
+private pure nothrow Bruch addiere(Bruch num1, Bruch num2)
 {
 	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
 
@@ -263,7 +276,7 @@ pure Zahl addiere(Zahl num1, Zahl num2)
 					.nenner);
 		}
 
-		return Zahl(num1.negativ, neuer_bruch, neuer_vor_komma_wert);
+		return Zahl(num1.negativ, neuer_bruch.zusammengefasst, neuer_vor_komma_wert);
 	}
 
 	if (num1.negativ && num2.negativ == false)
@@ -372,18 +385,18 @@ pure Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 	{
 		ubyte[] summe = addiere(minuend.werte, subtrahend.werte);
 		Bruch summe_auch = addiere(minuend.nach_komma, subtrahend.nach_komma);
-		return Zahl(true, summe_auch, summe);
+		return Zahl(true, summe_auch.zusammengefasst, summe);
 	}
 	else if (minuend.negativ == false && subtrahend.negativ)
 	{
 		ubyte[] summe_vor = addiere(minuend.werte, subtrahend.werte);
 		Bruch summe_nach = addiere(minuend.nach_komma, subtrahend.nach_komma);
-		return Zahl(false, summe_nach, summe_vor);
+		return Zahl(false, summe_nach.zusammengefasst, summe_vor);
 	}
 	else if (minuend.negativ && subtrahend.negativ)
 	{
 		Zahl summe = addiere(minuend, Zahl(false, subtrahend.nach_komma, subtrahend.werte));
-		return Zahl(false, summe.nach_komma, summe.werte);
+		return Zahl(false, summe.nach_komma.zusammengefasst, summe.werte);
 	}
 
 	bool inverted = false;
@@ -411,7 +424,7 @@ pure Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 		sub_nach = subtrahiere(minuend.nach_komma, subtrahend.nach_komma);
 	}
 
-	return Zahl(inverted, sub_nach, sub_vor);
+	return Zahl(inverted, sub_nach.zusammengefasst, sub_vor);
 }
 
 pure GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
@@ -453,9 +466,10 @@ pure GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 }
 
 //MARK: MULTIPLIKATION
-pure private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
+private pure nothrow ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
 {
 	ubyte[][] matrix;
+	matrix.length = 1;
 
 	for (ulong i = 0; i < num2.length; i++)
 	{
@@ -518,7 +532,7 @@ pure Zahl multipliziere(Zahl num1, Zahl num2)
 				.nenner);
 	}
 
-	return Zahl(negativ, neuer_bruch, neuer_vor_komma_wert);
+	return Zahl(negativ, neuer_bruch.zusammengefasst, neuer_vor_komma_wert);
 }
 
 GanzeZahl multipliziere(GanzeZahl num1, GanzeZahl num2)
@@ -539,7 +553,7 @@ NatürlicheZahl multipliziere(NatürlicheZahl num1, NatürlicheZahl num2)
 
 /// dividiere => Bruch / Bruch = Bruch
 /// Funktioniert eigentlich durch multiplikation.
-pure Bruch dividiere(Bruch num1, Bruch num2)
+pure nothrow Bruch dividiere(Bruch num1, Bruch num2)
 {
 	return Bruch(multipliziere(num1.zähler, num2.nenner), multipliziere(num1.nenner, num2
 			.zähler));
@@ -553,20 +567,34 @@ pure ubyte[] dividiere(ubyte[] num1, ubyte[] num2)
 	if (num2.right_unpad.length == 0)
 		throw new Exception("Division durch 0");
 
-	num1.reverse();
+	if (num1 == num2)
+		return [0];
 
-	ubyte byte1 = num1[0];
-	ubyte byte2 = num1[1];
-
-	ushort longer = cast(ushort)((byte1 << 8) | byte2);
-
-	throw new Error("Not implemented");
+	throw new Error("Not Implemented!");
 }
 
-pure Zahl dividiere(Zahl num1, Zahl num2);
+pure Zahl dividiere(Zahl num1, Zahl num2)
+{
+	throw new Error("Not Implemented!");
+}
 
-//MARK: API
-pure bool ist_zahl(dstring wort)
+//MARK: POTENTIERUNG
+
+/// potenz => ubyte[] ^ ubyte[] = ubyte[];
+/// die zweite Zahl wird kopiert...
+pure ubyte[] potenz(ubyte[] num1, ubyte[] num2)
+{
+	while (ist_grösser(num2, [1]))
+	{
+		num1 = num1.multipliziere(num1);
+		num2 = subtrahiere(num2, [1]);
+	}
+
+	return num1;
+}
+
+//MARK: ist_zahl
+pure nothrow bool ist_zahl(dstring wort)
 {
 	bool allDigits = wort.length > 0;
 
@@ -582,62 +610,74 @@ pure bool ist_zahl(dstring wort)
 
 	return allDigits;
 }
+//MARK: als_zahl
 
-NatürlicheZahl als_zahl(dstring wort)
+/// ALS ZAHL str => ubyte[]
+private pure ubyte[] als_zahl_us(dstring wort)
 {
-	if (!ist_zahl(wort))
-		throw new Exception(
-			"Es sollte nichts zu einer Zahl gemacht werden, was keine ist: " ~ cast(string) wort);
-
-	ubyte[] digits;
-	foreach (c; wort)
-	{
-		if (c >= '0' && c <= '9')
-		{
-			digits ~= cast(ubyte)(c - '0');
-		}
-		// Hier müsste ich, wenn ich wollen würde 0x und ähnliches Implementieren.
-	}
-
-	if (digits.length == 0)
-	{
-		return NatürlicheZahl([0]);
-	}
-
-	ubyte[] werte;
-	while (digits.length > 0)
-	{
-		ubyte[] nextDigits;
-		uint rest = 0;
-
-		foreach (d; digits)
-		{
-			uint val = rest * 10 + d;
-			uint q = val / 256;
-			rest = val % 256;
-
-			if (nextDigits.length > 0 || q > 0)
-			{
-				nextDigits ~= cast(ubyte) q;
-			}
-		}
-
-		werte ~= cast(ubyte) rest;
-		digits = nextDigits;
-	}
-
-	return NatürlicheZahl(werte);
+	BigInt bgi = BigInt(wort);
+	return als_zahl_ub(bgi);
 }
 
-Zahl konstruiere(GanzeZahl vor, NatürlicheZahl nach)
+/// ALS ZAHL ulong => ubyte[]
+private pure ubyte[] als_zahl_uu(ulong num)
 {
-	//TODO:Implementieren
-	throw new Error("Nicht implementiert.");
+	BigInt bgi = BigInt(num);
+	return als_zahl_ub(bgi);
 }
 
-Zahl konstruiere(NatürlicheZahl vor, NatürlicheZahl nach)
+/// ALS ZAHL BigInt => ubyte[]
+private pure ubyte[] als_zahl_ub(BigInt bgi)
 {
-	return konstruiere(GanzeZahl(false, vor.werte), nach);
+	ubyte[] resultat;
+
+	if (bgi == 0)
+	{
+		return [0];
+	}
+
+	while (bgi > 0)
+	{
+		resultat ~= to!ubyte(bgi % 256);
+		bgi /= 256;
+	}
+
+	return resultat;
+}
+
+Zahl als_zahl(dstring wort)
+{
+	dstring vor_komma_stellen;
+	dstring nach_komma_stellen;
+
+	if (wort.canFind("."d))
+	{
+		dstring[] parts = wort.split("."d);
+
+		if (parts.length > 2)
+			throw new Exception("Nur ein . pro Zahl ist möglich.");
+
+		vor_komma_stellen = parts[0];
+		nach_komma_stellen = parts[1];
+	}
+	else
+	{
+		vor_komma_stellen = wort;
+	}
+
+	ubyte[] vor_komma = als_zahl_us(vor_komma_stellen);
+
+	Bruch bruch;
+
+	if (nach_komma_stellen != "")
+	{
+		ubyte[] nach_komma = als_zahl_us(nach_komma_stellen);
+		ubyte[] nach_komma_länge = als_zahl_uu(nach_komma_stellen.length);
+
+		bruch = Bruch(nach_komma, potenz([10], nach_komma_länge));
+	}
+
+	return Zahl(false, bruch, vor_komma);
 }
 
 //MARK: als_string
@@ -694,15 +734,47 @@ string als_string(Zahl z)
 		result ~= "-";
 
 	result ~= als_string(NatürlicheZahl(z.werte));
-	result ~= ".";
-	result ~= ""; // Man muss noch Zahl.toString machen.
+
+	if (z.nach_komma != Bruch())
+	{
+		result ~= ".";
+		result ~= als_string(z.nach_komma);
+	}
 
 	return result;
 }
 
-string als_string(Bruch b)
+string als_string(Bruch b, ulong maxLen = 100)
 {
-	return "bruch";
+	if (b.ist_grösser_gleich_1)
+	{
+		writeln(b);
+
+		throw new Exception("Jemand hat nicht richtig aufgeräumt!");
+	}
+
+	BigInt zähler = BigInt(b.zähler.length ? "0x" ~ b.zähler.toHexString().idup : "0");
+	BigInt nenner = BigInt(b.nenner.length ? "0x" ~ b.nenner.toHexString().idup : "0");
+
+	if (nenner == 0)
+		throw new Exception("Division durch Null!");
+
+	string res;
+	BigInt rem = zähler % nenner;
+
+	if (rem == 0)
+		return res;
+
+	foreach (_; 0 .. maxLen)
+	{
+		rem *= 10;
+		res ~= (rem / nenner).to!string;
+		rem %= nenner;
+		if (rem == 0)
+			break;
+	}
+
+	return res;
 }
 
 //MARK: als_std_zahl

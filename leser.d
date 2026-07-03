@@ -15,7 +15,9 @@ import zahl;
 import variablen.wert;
 
 import core.memory;
-import std.algorithm : startsWith, endsWith, remove, canFind;
+
+import std.array;
+import std.algorithm : startsWith, endsWith, remove, canFind, filter;
 import std.string : strip;
 import std.conv : to, ConvException;
 import std.stdio : write, writeln;
@@ -100,7 +102,7 @@ dstring[] string_delims = [
 	"\\\'"d, "\\\""d, "\'"d, "\""d
 ];
 
-private Verifizierung ist_string(dstring wort)
+private nothrow Verifizierung ist_string(dstring wort)
 {
 	foreach (dstring delim; string_delims)
 	{
@@ -122,16 +124,7 @@ private Verifizierung ist_string(dstring wort)
 	return Verifizierung.nein;
 }
 
-private bool ist_wahrheit(dstring wort)
-{
-	if (wort == "wahr"d || wort == "falsch"d)
-	{
-		return true;
-	}
-	return false;
-}
-
-private Verifizierung ist_wert(dstring wort)
+private nothrow Verifizierung ist_wert(dstring wort)
 {
 	if (wort.ist_zahl)
 	{
@@ -141,7 +134,7 @@ private Verifizierung ist_wert(dstring wort)
 	{
 		return wort.ist_string;
 	}
-	else if (wort.ist_wahrheit)
+	else if (wort == "wahr"d || wort == "falsch"d)
 	{
 		return Verifizierung.ja;
 	}
@@ -165,13 +158,6 @@ private Wert als_wert_string(dstring wort)
 	dstring* heapSlice = cast(dstring*) GC.malloc(dstring.sizeof);
 	*heapSlice = wort;
 	return Wert(WertTyp.TEXT, heapSlice);
-}
-
-private Wert als_wert_zahl(dstring wort)
-{
-	NatürlicheZahl* nz = new NatürlicheZahl;
-	*nz = als_zahl(wort);
-	return Wert(WertTyp.NATÜRLICHE_ZAHL, nz);
 }
 
 private Wert als_wert_wahrheit(dstring wort)
@@ -198,11 +184,7 @@ private Wert als_wert(dstring wort)
 	{
 		return als_wert_string(wort);
 	}
-	else if (wort.ist_zahl)
-	{
-		return als_wert_zahl(wort);
-	}
-	else if (wort.ist_wahrheit)
+	else if (wort == "wahr"d || wort == "falsch"d)
 	{
 		return als_wert_wahrheit(wort);
 	}
@@ -261,7 +243,10 @@ Glied[] lese_linie(dstring linie)
 	}
 
 	Glied[] token_liste;
+
 	dstring[] wort_liste = linie.split(" ");
+	wort_liste = wort_liste.filter!(s => s.length > 0).array;
+
 	ulong wort_liste_length = wort_liste.length;
 	dstring wort_präfix;
 
@@ -276,6 +261,46 @@ Glied[] lese_linie(dstring linie)
 		if (wort.length == 0)
 		{
 			continue;
+		}
+
+		if (wort_liste.length > i + 1) // Pfeile schon sofort zu Pfeilen machen
+		{
+			if (wort == "<" && (wort_liste[i + 1]).strip == "-")
+			{
+				token_liste ~= new OperationGlied(OperatorenTyp.RÜCK_PFEIL);
+				wort_liste = wort_liste.remove(i + 1);
+				wort_liste_length--;
+				wort_liste[i] = " ";
+				continue;
+			}
+		}
+
+		if (wort_liste.length > i + 2)
+		{
+			if (wort.ist_zahl && wort_liste[i + 1] == ".")
+			{
+				Zahl z;
+
+				if ((wort_liste[i + 2]).ist_zahl)
+				{
+					z = als_zahl(wort ~ wort_liste[i + 1] ~ wort_liste[i + 2]);
+
+					wort_liste = wort_liste.remove(i + 2);
+					wort_liste = wort_liste.remove(i + 1);
+					wort_liste_length -= 2;
+				}
+				else
+				{
+					z = als_zahl(wort);
+
+					wort_liste = wort_liste.remove(i + 1);
+					wort_liste_length--;
+				}
+
+				wort_liste[i] = " ";
+				token_liste ~= new Wert_Glied(Wert(WertTyp.ZAHL, new Zahl(z)));
+				continue;
+			}
 		}
 
 		// WertTypen
@@ -293,7 +318,8 @@ Glied[] lese_linie(dstring linie)
 				if (neues_wort != "zahl"d)
 				{
 					//TODO: Zweistellige Typen anschauen.
-					throw new Error("Muss sowieso noch die alten zweistelligen Typen anschauen...");
+					throw new Error(
+						"Muss sowieso noch die alten zweistelligen Typen anschauen...");
 				}
 			}
 			continue;
@@ -302,6 +328,12 @@ Glied[] lese_linie(dstring linie)
 		if (wort.ist_sw == Verifizierung.ja)
 		{
 			token_liste ~= new SW_Glied(wort.als_sw);
+			continue;
+		}
+
+		if (wort.ist_zahl)
+		{
+			token_liste ~= new Wert_Glied(Wert(WertTyp.ZAHL, new Zahl(als_zahl(wort))));
 			continue;
 		}
 
@@ -326,8 +358,13 @@ Glied[] lese_linie(dstring linie)
 		token_liste ~= new Lese_Variable_Glied(wort);
 	}
 
-	debug write("Token Liste: ");
-	debug writeln(token_liste);
+	debug
+	{
+		write("GL (1.0): ");
+		set_pen_trait(TextTrait.fgGrey);
+		writeln(token_liste);
+		set_pen_trait();
+	}
 
 	ulong length = token_liste.length;
 
@@ -340,124 +377,35 @@ Glied[] lese_linie(dstring linie)
 			Wert* var = &(cast(Wert_Glied) token_liste[i]).wert;
 			OperatorenTyp op_typ = (cast(OperationGlied) token_liste[i - 1]).operationenTyp;
 
-			if (i > 1)
+			// Falls nach dem Minus ein anderer Operator ist, lassen wir ihn liegen.
+			if ((i > 1) && token_liste[i - 2].classinfo == Wert_Glied.classinfo)
 			{
-				if (token_liste[i - 2].classinfo == Wert_Glied.classinfo)
-				{
-					// Falls der Minusoperator zwischen verschiedenen Typen funktionieren sollte, muss man das hier noch ändern.
-					Wert var_vorher = (cast(Wert_Glied) token_liste[i - 2]).wert;
-					if (ZAHLEN_TYPEN.canFind(var_vorher.typ))
-					{
-						continue;
-					}
-
-				}
-
-				if (token_liste[i - 2].classinfo == OperationGlied.classinfo)
-				{
-					// Falls das Minus der Teil eines Pfeiles ist.
-					OperatorenTyp prevOp = (cast(OperationGlied) token_liste[i - 2])
-						.operationenTyp;
-					if (prevOp == OperatorenTyp.KLEINER_ALS)
-					{
-						continue;
-					}
-				}
+				continue;
 			}
 
 			if (op_typ == OperatorenTyp.MINUS)
 			{
-				if (var.typ == WertTyp.NATÜRLICHE_ZAHL)
+				if (var.typ == WertTyp.ZAHL)
 				{
-					NatürlicheZahl nz = *cast(NatürlicheZahl*) var.wert;
-					GanzeZahl* gz = new GanzeZahl(true, nz.werte);
-					var = new Wert(WertTyp.GANZE_ZAHL, gz);
+					Zahl* z = cast(Zahl*) var.wert;
+					z.negativ = true;
+					(cast(Wert_Glied) token_liste[i]).wert = Wert(WertTyp.ZAHL, new Zahl(*z));
 					token_liste = token_liste.remove(i - 1);
-					length--;
 					i--;
-				}
-				else if ([WertTyp.GANZE_ZAHL, WertTyp.NATÜRLICHE_ZAHL].canFind(var.typ))
-				{
-					throw new Exception(
-						"Das hatte ich mal implementiert, es sollte aber nie hierhin kommen...");
-				}
-			}
-		}
-	}
-
-	length = token_liste.length; // Eigentlich wäre das hier nicht nötig, aber lieber sicher sein.
-
-	for (ulong i = 1; i < length - 1; i++) // Der zweite Durchgang Zieht die Kommazahlen wieder zusammen.
-	{
-		if (token_liste[i - 1].classinfo == Wert_Glied.classinfo &&
-			token_liste[i + 1].classinfo == Wert_Glied.classinfo &&
-			token_liste[i].classinfo == OperationGlied.classinfo)
-		{
-			OperatorenTyp operator = (cast(OperationGlied) token_liste[i])
-				.operationenTyp;
-			Wert vorher = (cast(Wert_Glied) token_liste[i - 1])
-				.wert;
-			Wert naher = (cast(Wert_Glied) token_liste[i + 1]).wert;
-
-			if (operator == OperatorenTyp.PUNKT)
-			{
-				if (naher.typ != WertTyp.NATÜRLICHE_ZAHL)
-				{
-					writeln("Die Zahl nach dem Komma kann kaum negativ sein...");
-					writeln("Skipping");
+					length--;
 					continue;
 				}
-				NatürlicheZahl naher_nz = *cast(NatürlicheZahl*) naher.wert;
-				Zahl* resultat = new Zahl;
-				if (vorher.typ == WertTyp.GANZE_ZAHL)
-				{
-					GanzeZahl vorher_gz = *cast(GanzeZahl*) vorher.wert;
-					*resultat = konstruiere(vorher_gz, naher_nz);
-				}
-				else if (vorher.typ == WertTyp.NATÜRLICHE_ZAHL)
-				{
-					NatürlicheZahl vorher_nz = *cast(NatürlicheZahl*) vorher.wert;
-					*resultat = konstruiere(vorher_nz, naher_nz);
-				}
-
-				Wert wert = Wert(WertTyp.ZAHL, resultat);
-				token_liste[i - 1] = new Wert_Glied(
-					wert);
-				token_liste = token_liste.remove(i + 1);
-				token_liste = token_liste.remove(i);
-				length -= 2;
-				i--;
 			}
 		}
 	}
 
-	length = token_liste.length; // Eigentlich wäre das hier nicht nötig, aber lieber sicher sein.
-
-	debug writeln(token_liste);
-	for (ulong i = 1; i < length; i++) // Der dritte Durchlauf veränder <- zu Pfeilen.
+	debug
 	{
-		if (token_liste[i].classinfo == OperationGlied.classinfo &&
-			token_liste[i - 1].classinfo == OperationGlied.classinfo)
-		{
-			OperatorenTyp typ_1 = (cast(OperationGlied) token_liste[i - 1])
-				.operationenTyp;
-			OperatorenTyp typ_2 = (
-				cast(OperationGlied) token_liste[i]).operationenTyp;
-
-			if ((typ_1 == OperatorenTyp.KLEINER_ALS) && (
-					typ_2 == OperatorenTyp.MINUS))
-			{
-				token_liste[i] = new OperationGlied(OperatorenTyp.RÜCK_PFEIL);
-
-				token_liste = token_liste.remove(i - 1);
-				length--;
-				i--;
-			}
-		}
+		write("GL (1.1): ");
+		set_pen_trait(TextTrait.fgGrey);
+		writeln(token_liste);
+		set_pen_trait();
 	}
-
-	debug write("Neue Token Liste: ");
-	debug writeln(token_liste);
 
 	return token_liste;
 }

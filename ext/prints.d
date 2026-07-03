@@ -38,7 +38,7 @@ enum TextTrait : string
 	bgWhite = "\033[47m"
 }
 
-void set_pen_trait(TextTrait tt)
+void set_pen_trait(TextTrait tt = TextTrait.reset)
 {
 	write(cast(string) tt);
 }

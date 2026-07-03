@@ -1,6 +1,6 @@
 module fehler;
 
-import app;
+import interpreter;
 import operatoren;
 import variablen.wert;
 

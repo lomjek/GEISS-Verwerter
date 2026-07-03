@@ -10,6 +10,9 @@ import glied.block_glied;
 
 // @ {} [] # \ || != ~
 
+bool repl_mode = false;
+dstring file_name = "";
+
 Wert interpretiere(dstring text)
 {
 	Glied[] tokens = lese_linie(text);

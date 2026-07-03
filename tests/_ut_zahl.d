@@ -15,4 +15,5 @@ unittest
 	assert(ist_grösser_gleich_1(b_viertel) == false); // auch für Brüche
 	assert(ist_grösser_gleich_1(dividiere(b_drittel, b_viertel)) == true);
 
+	assert(als_zahl("3") == Zahl(NatürlicheZahl([3])));
 }

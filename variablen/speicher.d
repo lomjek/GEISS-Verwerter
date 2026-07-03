@@ -11,6 +11,11 @@ import ext.string;
 
 import std.conv : to;
 
+debug
+{
+	import std.stdio : write, writeln;
+}
+
 // @ {} [] # \ || != ~
 
 struct Bereich
@@ -165,6 +170,9 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
 			init_wert.wert = new Liste(true, WertTyp.INVALID, []);
 			break;
 
+		case WertTyp.TEXT:
+			break;
+
 		default:
 			throw new Fehler(
 				"Dieser Typ sollte nicht existieren: " ~ init_wert.typ.to!dstring);
@@ -251,3 +259,27 @@ int bekomme_return_status()
 	return als_int(zahl.werte);
 }
 //endregion
+
+debug
+{
+	void dump_speicher()
+	{
+		foreach (Bereich* key; bereiche)
+		{
+			write(key.name ~ " ("d ~ key.uid.to!dstring ~ "): ["d);
+
+			bool first = true;
+			foreach (Variable var; key.variablen)
+			{
+				if (!first)
+					write(", ");
+
+				write(var.als_string);
+
+				first = false;
+			}
+
+			writeln("]");
+		}
+	}
+}

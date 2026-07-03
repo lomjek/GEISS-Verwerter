@@ -7,6 +7,11 @@ import std.conv : to;
 import ext.string : dchar_from_string;
 import ext.prints;
 
+debug
+{
+	import variablen.speicher : dump_speicher;
+}
+
 import fehler;
 
 import interpreter;
@@ -20,8 +25,10 @@ void enter_repl_loop()
 		try
 		{
 			print_prompt();
+
 			dchar[] repl_linie = [];
 			readln(repl_linie);
+
 			repl_linie = repl_linie.strip;
 
 			if (repl_linie == "exit".dchar_from_string)
@@ -32,6 +39,14 @@ void enter_repl_loop()
 			{
 				write("\x1b[2J\x1b[H");
 				continue;
+			}
+			else if (repl_linie == "memdump".dchar_from_string)
+			{
+				debug
+				{
+					dump_speicher;
+					continue;
+				}
 			}
 			else if (repl_linie == null || repl_linie.length == 0)
 			{
