@@ -549,29 +549,34 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 }
 
 //MARK: ListenParsing
-Wert_Glied liste_erstellen(Glied[] glieder_liste) //TODO: MUss zu ListeWert_Glied umgeändert werden.
+
+/// Nimmt eine Liste ohne eckigen Klammern und gibt daraus
+/// ein ListeWert_Glied mit der gegebenen Liste. Alle 
+/// Kommas werden einfach rausfiltriert.
+ListeWert_Glied liste_erstellen(Glied[] glieder_liste)
 {
-	Wert*[] werte;
+	Glied[] werte;
 
 	foreach (Glied glied; glieder_liste)
 	{
-		if (glied.classinfo != Wert_Glied.classinfo)
+		if (glied.classinfo == OperationGlied.classinfo)
 		{
-			throw new Error("Not Implemented: TODO!");
+			if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.KOMMA)
+			{
+				continue;
+			}
 		}
 
-		werte ~= new Wert(glied.verwerte(0));
+		werte ~= glied;
 	}
 
-	Liste* liste = new Liste(true, WertTyp.INVALID, werte);
-
-	return new Wert_Glied(Wert(WertTyp.LISTE, liste));
+	return new ListeWert_Glied(werte);
 }
 
 Glied[] listen_zusammenfassen(Glied[] glieder_liste)
 {
 	ulong eckige_klammern_offen = 0; // TODO: Brauche ich dann für rekrusive Listen
-	Glied[] liste_für_wert;
+	Glied[][] neue_gl;
 
 	ulong arr_length = glieder_liste.length;
 
@@ -584,9 +589,6 @@ Glied[] listen_zusammenfassen(Glied[] glieder_liste)
 			if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_AUF)
 			{
 				eckige_klammern_offen++;
-				glieder_liste = glieder_liste.remove(i);
-				i--;
-				arr_length--;
 				continue;
 			}
 			else if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_ZU)
@@ -595,26 +597,19 @@ Glied[] listen_zusammenfassen(Glied[] glieder_liste)
 					throw new Fehler("Es werden mehr Klammern zu als aufgemacht.");
 
 				eckige_klammern_offen--;
-
-				if (eckige_klammern_offen == 0)
-				{
-					glieder_liste[i] = liste_erstellen(liste_für_wert);
-					continue;
-				}
+				neue_gl[eckige_klammern_offen] ~= liste_erstellen(neue_gl[eckige_klammern_offen + 1]);
+				neue_gl[eckige_klammern_offen + 1] = [];
+				continue;
 			}
 		}
 
-		if (eckige_klammern_offen == 1)
+		if (neue_gl.length != (1 + eckige_klammern_offen))
 		{
-			liste_für_wert ~= glied;
-			glieder_liste = glieder_liste.remove(i);
-			i--;
-			arr_length--;
-			continue;
+			neue_gl.length = eckige_klammern_offen + 1;
 		}
 
-		//TODO: Rekrusive Listen implementieren.
+		neue_gl[eckige_klammern_offen] ~= glieder_liste[i];
 	}
 
-	return glieder_liste;
+	return neue_gl[0];
 }
