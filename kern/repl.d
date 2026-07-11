@@ -48,6 +48,11 @@ void enter_repl_loop()
 					continue;
 				}
 			}
+			else if (repl_linie == "hilfe".dchar_from_string)
+			{
+				schreibe_hilfe();
+				continue;
+			}
 			else if (repl_linie == null || repl_linie.length == 0)
 			{
 				continue;

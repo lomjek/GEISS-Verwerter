@@ -106,4 +106,20 @@ void print_continuation()
 	write("... ");
 	set_pen_trait(TextTrait.reset);
 }
+
+void schreibe_hilfe()
+{
+	set_pen_trait(TextTrait.fgGreen);
+	writeln("Schön dich hier zu sehen. Vor dir hast du GEISS, meine kleine Programmiersprache");
+	writeln("Falls du dieses Program zum ersten Mal benutzt, wäre es gescheit ein keines Bis-");
+	writeln("chen meiner Dokumentation zu lesen, wenn du aber zu faul bist, dann hier einige");
+	writeln("nützliche Informationen:");
+	writeln;
+	set_pen_trait();
+	writeln("varbiable x // Damit erstellst du eine Variable.");
+	writeln("x <- 'Hallo Welt' // So kannst du einen Wert in die Variable schreiben");
+	writeln("schreibe x // So kannst du deinen Text in die Ausgabe schreiben.");
+	writeln;
+	writeln("Viel Spass");
+}
 //endregion

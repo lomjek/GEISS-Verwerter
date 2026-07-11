@@ -2,17 +2,15 @@ module baum_generator;
 
 import operatoren;
 import schlüsselwörter;
+
 import ext.prints;
+import ext.klasse;
 
 import liste;
 
 import fehler;
 
-import glied.glied;
-import glied.wert_glied;
-import glied.operation_glied;
-import glied.block_glied;
-import glied.variablen_glied;
+import glied;
 
 import variablen.wert;
 
@@ -25,6 +23,8 @@ import std.conv : to;
 private enum Operation_priorities
 {
 	INVALID,
+
+	FUNKTION_ABRUFEN,
 
 	SONST,
 	FALLS,
@@ -70,7 +70,7 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 
 	foreach (Glied glied; glieder_liste)
 	{
-		if (glied.classinfo != OperationGlied.classinfo)
+		if (!glied.instanceof!OperationGlied)
 		{
 			continue;
 		}
@@ -151,12 +151,33 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 }
 
 //MARK: generiere_baum
+
+// Finde die Anwendung mit max. Prioriäten;
+ulong max_priority_operation = 0;
+ulong max_priority_index = 0;
+
+uint sonst_block_priority_addition = 0;
+// Diese Variable ist dazu da, damit man die Sonst Blöcke von hinten nach 
+// vorne parst, was wichtig ist für verkettungen.
+
+uint klammer_zusatz = 0;
+// Für den Zusatz an Priorität, wegen Klammern.
+
+void passe_mpo_an(Operation_priorities op, ulong index)
+{
+	if (max_priority_operation < (op + klammer_zusatz + sonst_block_priority_addition))
+	{
+		max_priority_operation = Operation_priorities.PLUS_MINUS + klammer_zusatz + sonst_block_priority_addition;
+		max_priority_index = index;
+	}
+}
+
 Glied[] generiere_baum(Glied[] glieder_liste)
 {
 	debug
 	{
-		write("Gliederliste:");
-		set_pen_trait(TextTrait.fgCyan);
+		write("GL (2.0): ");
+		set_pen_trait(TextTrait.fgGrey);
 		writeln(glieder_liste);
 		set_pen_trait(TextTrait.reset);
 	}
@@ -180,12 +201,6 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
 	main_loop: while (!glieder_liste.ist_fertig) // Muss vermutlich geändert werden.
 	{
-		// Finde die Anwendung mit max. Prioriäten;
-		ulong max_priority_operation = 0;
-		ulong max_priority_index = 0;
-
-		uint sonst_block_priority_addition = 0;
-
 		element_loop: for (ulong i = 0; i < arr_length; i++)
 		{
 			//MARK: Subblock bauen
@@ -225,78 +240,98 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			if (glieder_liste[i].ist_vollständig)
 				continue;
 
-			uint klammer_zusatz = (klammern_offen * get_op_prio_length);
+			klammer_zusatz = (klammern_offen * get_op_prio_length);
 
 			if (glieder_liste[i].classinfo == OperationGlied.classinfo)
 			{
 				OperationGlied opg = cast(OperationGlied) glieder_liste[i];
 
-				if (opg.operationenTyp == OperatorenTyp.KLAMMER_AUF)
+			op_typ_switch:
+				switch (opg.operationenTyp)
 				{
+				case OperatorenTyp.KLAMMER_AUF:
+					if (i > 0)
+					{
+						if (glieder_liste[i - 1].instanceof!Lese_Variable_Glied)
+						{
+							Glied[] argumente = konstruiere_argumente(glieder_liste, i);
+
+							Glied[] präfix = glieder_liste[0 .. i - 1];
+							Glied[] suffix = glieder_liste[(i + argumente.length + 2) .. $];
+
+							Funktion_Abrufen_Glied fag = new Funktion_Abrufen_Glied(
+								(cast(Lese_Variable_Glied) glieder_liste[i - 1])
+									.var_name,
+									argumente
+							);
+
+							glieder_liste = präfix ~ fag ~ suffix;
+
+							debug
+							{
+								write("GL (2.F): ");
+
+								set_pen_trait(TextTrait.fgGrey);
+								writeln(glieder_liste);
+								set_pen_trait(TextTrait.reset);
+							}
+
+							arr_length = glieder_liste.length;
+							i--;
+							continue;
+						}
+
+					}
+
 					klammern_offen++;
 					glieder_liste = glieder_liste.remove(i);
 					arr_length--;
 					i--;
-					continue;
-				}
-				else if (opg.operationenTyp == OperatorenTyp.KLAMMER_ZU)
-				{
+					continue main_loop;
+
+				case OperatorenTyp.KLAMMER_ZU:
 					klammern_offen--;
 					glieder_liste = glieder_liste.remove(i);
 					arr_length--;
 					i--;
-					continue;
-				}
-				else if (opg.operationenTyp == OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF)
-				{
+					continue main_loop;
+
+				case OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF:
 					geschw_klammern_offen++;
 					glieder_liste = glieder_liste.remove(i);
 					arr_length--;
 					i--;
-					continue;
-				}
+					continue main_loop;
 
-				if ([OperatorenTyp.PLUS, OperatorenTyp.MINUS]
-					.canFind(opg.operationenTyp) &&
-					max_priority_operation < (
-						Operation_priorities.PLUS_MINUS + klammer_zusatz + sonst_block_priority_addition))
-				{
-					max_priority_operation = Operation_priorities.PLUS_MINUS + klammer_zusatz + sonst_block_priority_addition;
-					max_priority_index = i;
-				}
-				else if ([OperatorenTyp.MAL, OperatorenTyp.GETEILT]
-					.canFind(opg.operationenTyp) &&
-					max_priority_operation < (
-						Operation_priorities.MAL_DURCH + klammer_zusatz + sonst_block_priority_addition))
-				{
-					max_priority_operation = Operation_priorities.MAL_DURCH + klammer_zusatz + sonst_block_priority_addition;
-					max_priority_index = i;
-				}
-				else if (opg.operationenTyp == OperatorenTyp.HOCH &&
-					max_priority_operation < (
-						Operation_priorities.HOCH + klammer_zusatz + sonst_block_priority_addition))
-				{
-					max_priority_operation = Operation_priorities.HOCH + klammer_zusatz + sonst_block_priority_addition;
-					max_priority_index = i;
-				}
-				else if (opg.operationenTyp == OperatorenTyp.GLEICH &&
-					max_priority_operation < (
-						Operation_priorities.GLEICH + klammer_zusatz + sonst_block_priority_addition))
-				{
-					max_priority_operation = Operation_priorities.GLEICH + klammer_zusatz + sonst_block_priority_addition;
-					max_priority_index = i;
-				}
-				else if (opg.operationenTyp == OperatorenTyp.GRÖSSER_ALS)
-				{
-					max_priority_operation = Operation_priorities.GRÖSSER_ALS + klammer_zusatz + sonst_block_priority_addition;
-					max_priority_index = i;
-				}
-				else if (opg.operationenTyp == OperatorenTyp.KLEINER_ALS)
-				{
-					max_priority_operation = Operation_priorities.KLEINER_ALS + klammer_zusatz + sonst_block_priority_addition;
-					max_priority_index = i;
-				}
+				case OperatorenTyp.PLUS:
+				case OperatorenTyp.MINUS:
+					passe_mpo_an(Operation_priorities.PLUS_MINUS, i);
+					break op_typ_switch;
 
+				case OperatorenTyp.MAL:
+				case OperatorenTyp.GETEILT:
+					passe_mpo_an(Operation_priorities.MAL_DURCH, i);
+					break op_typ_switch;
+
+				case OperatorenTyp.HOCH:
+					passe_mpo_an(Operation_priorities.HOCH, i);
+					break op_typ_switch;
+
+				case OperatorenTyp.GLEICH:
+					passe_mpo_an(Operation_priorities.GLEICH, i);
+					break op_typ_switch;
+
+				case OperatorenTyp.GRÖSSER_ALS:
+					passe_mpo_an(Operation_priorities.GRÖSSER_ALS, i);
+					break op_typ_switch;
+
+				case OperatorenTyp.KLEINER_ALS:
+					passe_mpo_an(Operation_priorities.KLEINER_ALS, i);
+					break op_typ_switch;
+
+				default:
+					break op_typ_switch;
+				}
 			}
 			else if (glieder_liste[i].classinfo == Setze_Variable_Glied.classinfo)
 			{
@@ -309,13 +344,14 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			}
 			else if (glieder_liste[i].classinfo == SW_Glied.classinfo)
 			{
-				SchlüsselWort sw = (cast(SW_Glied) glieder_liste[i]).sw;
-
+				SchlüsselWort sw = (cast(SW_Glied) glieder_liste[i])
+					.sw;
 				if (sw == SchlüsselWort.FALLS)
 				{
 					if ((i + 2) >= arr_length)
 					{
-						throw new Exception("Das Wort Falls ist zu nahe am Ende...");
+						throw new Exception(
+							"Das Wort Falls ist zu nahe am Ende...");
 					}
 
 					if (max_priority_operation < (
@@ -329,7 +365,8 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				{
 					if ((i + 1) >= arr_length)
 					{
-						throw new Exception("Das Wort Sonst ist zu nahe am Ende...");
+						throw new Exception(
+							"Das Wort Sonst ist zu nahe am Ende...");
 					}
 
 					if (max_priority_operation < (
@@ -344,7 +381,8 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				{
 					if ((i + 2) >= arr_length)
 					{
-						throw new Exception("Das Wort Solange ist zu nahe am Ende...");
+						throw new Exception(
+							"Das Wort Solange ist zu nahe am Ende...");
 					}
 
 					if (max_priority_operation < (
@@ -362,8 +400,7 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		if (max_priority_index == 0 && max_priority_operation == 0)
 			_Op_wiederholungen++;
 		else
-			_Op_wiederholungen = 0;
-		// Wenn man keine Operation findet, macht man diese Zahl grösser.
+			_Op_wiederholungen = 0; // Wenn man keine Operation findet, macht man diese Zahl grösser.
 		// Bei genug Wiederhloungen beendet man die Schleife mit einem Fehler.
 		// Es sollte eigentlich nie passieren, aber jetzt in der BETA-Phase,
 		// hilft mir das Extrem beim Debuggen. // TODO: Braucht es das am Schluss?
@@ -382,7 +419,8 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			write(max_priority_index);
 			write(" in List ");
 			writeln(glieder_liste);
-			set_pen_trait(TextTrait.reset);
+			set_pen_trait(
+				TextTrait.reset);
 		}
 
 		//MARK: Build that node
@@ -395,9 +433,11 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		{
 			OperationGlied op_glied = cast(OperationGlied) glied;
 
-			if (!(max_priority_index > 0 && max_priority_index < (arr_length - 1)))
+			if (!(max_priority_index > 0 && max_priority_index < (
+					arr_length - 1)))
 			{
-				throw new Fehler("Die Operation ist zu weit vorne oder zu weit hinten..."d);
+				throw new Fehler(
+					"Die Operation ist zu weit vorne oder zu weit hinten..."d);
 			}
 
 			Glied gl1 = glieder_liste[max_priority_index - 1];
@@ -408,97 +448,129 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			op_glied.populated = true;
 
 			glieder_liste[max_priority_index] = op_glied;
-			glieder_liste = glieder_liste.remove(max_priority_index + 1);
-			glieder_liste = glieder_liste.remove(max_priority_index - 1);
+			glieder_liste = glieder_liste.remove(
+				max_priority_index + 1);
+			glieder_liste = glieder_liste.remove(
+				max_priority_index - 1);
 			arr_length -= 2;
 			continue;
 		}
 
-		if (glied.classinfo == Setze_Variable_Glied.classinfo)
+		if (
+			glied.classinfo == Setze_Variable_Glied
+			.classinfo)
 		{
-			Setze_Variable_Glied svglied = cast(Setze_Variable_Glied) glied;
+			Setze_Variable_Glied svglied = cast(
+				Setze_Variable_Glied) glied;
 
 			if (max_priority_index < 1)
-				throw new Exception("Der Pfeil kann nicht das erste Ding der Linie sein...");
+				throw new Exception(
+					"Der Pfeil kann nicht das erste Ding der Linie sein...");
 
-			if (max_priority_index >= glieder_liste.length)
-				throw new Exception("Der Pfeil kann nicht das letzte Element der Linie sein");
+			if (
+				max_priority_index >= glieder_liste
+				.length)
+				throw new Exception(
+					"Der Pfeil kann nicht das letzte Element der Linie sein");
 
 			Glied vorher_glied = glieder_liste[max_priority_index - 1];
 			Glied naher_glied = glieder_liste[max_priority_index + 1];
 
-			if (vorher_glied.classinfo == Erstelle_Variable_Glied.classinfo)
+			if (
+				vorher_glied.classinfo == Erstelle_Variable_Glied
+				.classinfo)
 			{
-				Erstelle_Variable_Glied evg = cast(Erstelle_Variable_Glied) vorher_glied;
+				Erstelle_Variable_Glied evg = cast(
+					Erstelle_Variable_Glied) vorher_glied;
 				svglied.var_name = evg.var_name;
 				svglied.assign_wert = naher_glied;
-				glieder_liste = glieder_liste.remove(max_priority_index + 1);
+				glieder_liste = glieder_liste.remove(
+					max_priority_index + 1);
 				arr_length--;
 			}
-			else if (vorher_glied.classinfo == Lese_Variable_Glied.classinfo)
+			else if (
+				vorher_glied.classinfo == Lese_Variable_Glied
+				.classinfo)
 			{
-				Lese_Variable_Glied lvg = cast(Lese_Variable_Glied) vorher_glied;
+				Lese_Variable_Glied lvg = cast(
+					Lese_Variable_Glied) vorher_glied;
 				svglied.var_name = lvg.var_name;
 				svglied.assign_wert = naher_glied;
 
-				glieder_liste = glieder_liste.remove(max_priority_index + 1);
-				glieder_liste = glieder_liste.remove(max_priority_index - 1);
+				glieder_liste = glieder_liste.remove(
+					max_priority_index + 1);
+				glieder_liste = glieder_liste.remove(
+					max_priority_index - 1);
 
 				arr_length -= 2;
 			}
 			else
 			{
-				throw new Exception("Variablennamen unbekannt!");
+				throw new Exception(
+					"Variablennamen unbekannt!");
 			}
 		}
 
 		if (glied.classinfo == SW_Glied.classinfo)
 		{
-			SchlüsselWort sw = (cast(SW_Glied) glied).sw;
+			SchlüsselWort sw = (
+				cast(SW_Glied) glied).sw;
 			if (sw == SchlüsselWort.FALLS)
 			{
-				if ((max_priority_index + 2) >= arr_length)
+				if (
+					(max_priority_index + 2) >= arr_length)
 				{
-					throw new Exception("Das Wort Falls ist zu nahe am Ende...");
+					throw new Exception(
+						"Das Wort Falls ist zu nahe am Ende...");
 				}
 
 				Falls_BlockGlied falls_block_glied = new Falls_BlockGlied();
-				falls_block_glied.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 2])
+				falls_block_glied.aktionen = (cast(
+						BlockGlied) glieder_liste[max_priority_index + 2])
 					.aktionen;
 				falls_block_glied.bedingung = glieder_liste[max_priority_index + 1];
 
 				glieder_liste[max_priority_index] = falls_block_glied;
-				glieder_liste = glieder_liste.remove(max_priority_index + 2);
-				glieder_liste = glieder_liste.remove(max_priority_index + 1);
+				glieder_liste = glieder_liste.remove(
+					max_priority_index + 2);
+				glieder_liste = glieder_liste.remove(
+					max_priority_index + 1);
 				arr_length -= 2;
 			}
 			else if (sw == SchlüsselWort.SONST)
 			{
-				if ((max_priority_index + 1) >= arr_length)
+				if (
+					(max_priority_index + 1) >= arr_length)
 				{
-					throw new Exception("Das Wort Sonst ist zu nahe am Ende...");
+					throw new Exception(
+						"Das Wort Sonst ist zu nahe am Ende...");
 				}
-				if (glieder_liste[max_priority_index + 1].classinfo == BlockGlied.classinfo)
+				if (glieder_liste[max_priority_index + 1].classinfo == BlockGlied
+					.classinfo)
 				{
 					Sonst_BlockGlied sonst_block = new Sonst_BlockGlied();
-					sonst_block.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 1])
+					sonst_block.aktionen = (
+						cast(BlockGlied) glieder_liste[max_priority_index + 1])
 						.aktionen;
 
 					glieder_liste[max_priority_index] = sonst_block;
-					glieder_liste = glieder_liste.remove(max_priority_index + 1);
+					glieder_liste = glieder_liste.remove(
+						max_priority_index + 1);
 					arr_length--;
 				}
 				else if ([
 						Falls_BlockGlied.classinfo,
 						Falls_Sonst_BlockGlied.classinfo
 					].canFind(
-						glieder_liste[max_priority_index + 1].classinfo))
+						glieder_liste[max_priority_index + 1]
+							.classinfo))
 				{
 					Sonst_BlockGlied sonst_block = new Sonst_BlockGlied();
 					sonst_block.aktionen ~= glieder_liste[max_priority_index + 1];
 
 					glieder_liste[max_priority_index] = sonst_block;
-					glieder_liste = glieder_liste.remove(max_priority_index + 1);
+					glieder_liste = glieder_liste.remove(
+						max_priority_index + 1);
 					arr_length--;
 				}
 				else
@@ -509,19 +581,24 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			}
 			else if (sw == SchlüsselWort.SOLANGE)
 			{
-				if ((max_priority_index + 2) >= arr_length)
+				if (
+					(max_priority_index + 2) >= arr_length)
 				{
-					throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
+					throw new Exception(
+						"Das Wort SOOLANGE ist zu nahe am Ende...");
 				}
 
 				Solange_BlockGlied solange_block_glied = new Solange_BlockGlied();
-				solange_block_glied.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 2])
+				solange_block_glied.aktionen = (cast(
+						BlockGlied) glieder_liste[max_priority_index + 2])
 					.aktionen;
 				solange_block_glied.bedingung = glieder_liste[max_priority_index + 1];
 
 				glieder_liste[max_priority_index] = solange_block_glied;
-				glieder_liste = glieder_liste.remove(max_priority_index + 2);
-				glieder_liste = glieder_liste.remove(max_priority_index + 1);
+				glieder_liste = glieder_liste.remove(
+					max_priority_index + 2);
+				glieder_liste = glieder_liste.remove(
+					max_priority_index + 1);
 				arr_length -= 2;
 			}
 		}
@@ -537,8 +614,7 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				Falls_Sonst_BlockGlied fsbgl = new Falls_Sonst_BlockGlied(fbgl, sbgl);
 
 				glieder_liste[i] = fsbgl;
-				glieder_liste = glieder_liste.remove(
-					i + 1);
+				glieder_liste = glieder_liste.remove(i + 1);
 				arr_length--;
 				continue;
 			}
@@ -612,4 +688,30 @@ Glied[] listen_zusammenfassen(Glied[] glieder_liste)
 	}
 
 	return neue_gl[0];
+}
+
+//MARK: Argumente Parsing
+
+//TODO: Muss noch richtig umgesetzt werden.
+Glied[] konstruiere_argumente(Glied[] glieder_liste, ulong klammer_auf_position)
+{
+	if (glieder_liste.length > klammer_auf_position + 1 &&
+		glieder_liste[klammer_auf_position + 1].instanceof!OperationGlied &&
+		(cast(OperationGlied) glieder_liste[klammer_auf_position + 1])
+		.operationenTyp == OperatorenTyp
+		.KLAMMER_ZU)
+	{
+		return [];
+	}
+
+	else if (glieder_liste.length > klammer_auf_position + 2 &&
+		glieder_liste[klammer_auf_position + 2].instanceof!OperationGlied &&
+		(cast(OperationGlied) glieder_liste[klammer_auf_position + 2])
+		.operationenTyp == OperatorenTyp
+		.KLAMMER_ZU)
+	{
+		return [glieder_liste[klammer_auf_position + 1]];
+	}
+
+	throw new Error("Not implemented!");
 }

@@ -7,6 +7,8 @@ import zahl;
 import variablen.variable;
 import variablen.wert;
 
+import glied.funktion_glied;
+
 import ext.string;
 
 import std.conv : to;
@@ -55,22 +57,59 @@ static this()
 				VariablenTyp.FIX,
 				new Wert(WertTyp.WAHRHEIT, new bool(true))
 			), //Standard Wert, mit welchem wahrheiten initialisiert werden.
-
-			//Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
+			Variable(
+				"schreibe"d,
+				VariablenTyp.FUNKTION,
+				cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.PRINT))
+			) //Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
 		]);
 }
 
-private nothrow uint initialisiere_bereich(dstring name)
+//MARK: BEREICH
+nothrow
+uint initialisiere_bereich(dstring name)
 {
 	uint bereich_level = 1;
-	while (bereiche[bereich_level] != null)
+
+	for (; bereich_level < bereiche.length; bereich_level++)
 	{
-		bereich_level++;
+		if (bereiche[bereich_level] == null)
+		{
+			break;
+		}
 	}
-	bereiche[bereich_level] = new Bereich(name, bereich_level, []);
+
+	if (bereich_level < bereiche.length)
+	{
+		bereiche[bereich_level] = new Bereich(name, bereich_level, []);
+	}
+	else
+	{
+		bereiche ~= new Bereich(name, bereich_level, []);
+		bereich_level = cast(uint) bereiche.length - 1;
+	}
 	return bereich_level;
 }
 
+nothrow @safe
+bool bereich_existiert(uint bereich_num)
+{
+	if (bereich_num >= bereiche.length)
+		return false;
+
+	if (bereiche[bereich_num] == null)
+		return false;
+
+	return true;
+}
+
+nothrow @safe
+void lösche_bereich(uint bereich_num)
+{
+
+}
+
+//MARK: VARIABLEN
 private nothrow bool variable_existiert(uint bereich_num, dstring var_name)
 {
 	if (!bereich_num.bereich_existiert)
@@ -84,17 +123,6 @@ private nothrow bool variable_existiert(uint bereich_num, dstring var_name)
 		}
 	}
 	return false;
-}
-
-private nothrow bool bereich_existiert(uint bereich_num)
-{
-	if (bereich_num >= bereiche.length)
-		return false;
-
-	if (bereiche[bereich_num] == null)
-		return false;
-
-	return true;
 }
 
 private dstring[] variablen_namen(uint bereich_num)
@@ -116,7 +144,6 @@ private dstring[] variablen_namen(uint bereich_num)
 	return namen;
 }
 
-//region API
 Variable lies_variable(uint bereich_num, dstring var_name)
 {
 	if (!bereich_num.bereich_existiert)
@@ -171,6 +198,9 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
 			break;
 
 		case WertTyp.TEXT:
+			break;
+
+		case WertTyp.INVALID:
 			break;
 
 		default:
@@ -246,9 +276,8 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 		}
 	}
 }
-//endregion
 
-//region Global_Helpers
+//MARK: Global_Helpers
 int bekomme_return_status()
 {
 	Variable var = lies_variable(0, "status_nummer");
@@ -258,8 +287,14 @@ int bekomme_return_status()
 		.wert;
 	return als_int(zahl.werte);
 }
-//endregion
 
+bool hat_variable_typ(uint bereich, dstring indetifier, VariablenTyp vt)
+{
+	Variable var = lies_variable(bereich, indetifier);
+	return var.var_typ == vt;
+}
+
+//MARK: DEBUG
 debug
 {
 	void dump_speicher()
