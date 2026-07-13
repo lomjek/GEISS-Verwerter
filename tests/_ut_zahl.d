@@ -1,17 +1,80 @@
 module ut_zahl;
 
 import zahl;
-
-// @ {} [] # \ || != ~
+import std.stdio;
 
 unittest
 {
+	writeln("========================================");
+	writeln("Testiere alle Zahlen");
+	writeln("========================================");
+
 	Bruch b_drittel = Bruch([1], [3]);
 	Bruch b_viertel = Bruch([1], [4]);
-
 	NatürlicheZahl drei = NatürlicheZahl([3]);
 
-	assert(ist_grösser(b_drittel, b_viertel)); // ist_grösser Bruch
+	write("Testing ist_grösser(Bruch)... ");
+	assert(ist_grösser(b_drittel, b_viertel));
+	writeln("läuft");
 
+	write("Testing addiere(Bruch)... ");
+	assert(addiere(b_drittel, b_viertel) == Bruch([7], [12]));
+	writeln("läuft");
+
+	write("Testing addiere(Zahl with fractions)... ");
+	Zahl z_drittel = Zahl(false, b_drittel, [0]);
+	Zahl z_viertel = Zahl(false, b_viertel, [0]);
+	assert(addiere(z_drittel, z_viertel) == Zahl(false, Bruch([7], [12]), [0]));
+
+	// Test overflow carrying (2/3 + 2/3 = 1 + 3/9)
+	Zahl z_zwei_drittel = Zahl(false, Bruch([2], [3]), [0]);
+	assert(addiere(z_zwei_drittel, z_zwei_drittel) == Zahl(false, Bruch([3], [9]), [
+				1
+			]));
+	writeln("läuft");
+
+	write("Testing als_zahl(\"3\")... ");
 	assert(als_zahl("3") == Zahl(NatürlicheZahl([3])));
+	writeln("läuft");
+
+	write("Testing int_div_by2([0x2C, 1])... ");
+	assert(int_div_by2([0x2C, 1]) == [150]);
+	writeln("läuft");
+
+	write("Testing dividiere([4], [3]])... ");
+	assert(dividiere([4], [3]) == DivisionResultat([1], [1]));
+	writeln("läuft");
+
+	write("Testing dividiere([4, 0x2C], [3])... ");
+	assert(dividiere([4, 0x2C], [3]) == DivisionResultat([0xAC, 0xE], [0]));
+	writeln("läuft");
+
+	write("Testing dividiere(b_drittel, b_viertel)... ");
+	assert(dividiere(b_drittel, b_viertel) == Bruch([4], [3]));
+	writeln("läuft");
+
+	write("Testing dividiere(drei, NatürlicheZahl([2]))... ");
+	assert(
+		dividiere(drei, NatürlicheZahl([2])) == Zahl(
+			false,
+			Bruch([1], [2]),
+			[1]
+	)
+	);
+	writeln("läuft");
+
+	write("Testing dividiere(Zahl 3, Zahl 2)... ");
+	assert(
+		dividiere(Zahl(drei), Zahl(false, Bruch(), [2])) == Zahl(
+			false,
+			Bruch([1], [2]),
+			[1]
+	)
+	);
+	writeln("läuft");
+
+	writeln("========================================");
+	writeln("All Zahlenoperationen funktionieren!");
+	writeln("========================================");
+	writeln;
 }

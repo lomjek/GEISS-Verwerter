@@ -385,8 +385,118 @@ class OperationGlied : Glied
 						"Man kann nicht anderes Plusrechnen" ~ operationenTyp.to!dstring);
 				}
 
-			case OperatorenTyp.GETEILT:
-				goto default; //TODO: Implementieren
+			case OperatorenTyp.GETEILT: //TODO
+				switch (resultat.typ)
+				{
+				case WertTyp.NATÜRLICHE_ZAHL:
+					NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) resultat.wert;
+
+					switch (momentaner_wert.typ)
+					{
+					case WertTyp.NATÜRLICHE_ZAHL:
+						NatürlicheZahl alte_zahl = *cast(NatürlicheZahl*) momentaner_wert
+							.wert;
+
+						Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+
+						resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
+						break ots;
+
+					case WertTyp.GANZE_ZAHL:
+						GanzeZahl alte_zahl = *cast(GanzeZahl*) momentaner_wert.wert;
+
+						Zahl neue_zahl = dividiere(GanzeZahl(zwischenresultat), alte_zahl);
+
+						resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
+						break ots;
+
+					case WertTyp.ZAHL:
+						Zahl alte_zahl = *cast(Zahl*) momentaner_wert.wert;
+
+						Zahl neue_zahl = dividiere(Zahl(zwischenresultat), alte_zahl);
+
+						resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
+						break ots;
+
+					default:
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+
+				case WertTyp.GANZE_ZAHL:
+					GanzeZahl zwischenresultat = *cast(GanzeZahl*) resultat.wert;
+					switch (momentaner_wert.typ)
+					{
+					case WertTyp.NATÜRLICHE_ZAHL:
+						GanzeZahl alte_zahl = GanzeZahl(
+							*cast(NatürlicheZahl*) momentaner_wert.wert);
+
+						Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+
+						resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
+						break ots;
+
+					case WertTyp.GANZE_ZAHL:
+						GanzeZahl alte_zahl = *cast(GanzeZahl*) momentaner_wert.wert;
+
+						Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+
+						resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
+
+						break ots;
+
+					case WertTyp.ZAHL:
+						Zahl alte_zahl = *cast(Zahl*) momentaner_wert.wert;
+
+						Zahl neue_zahl = dividiere(Zahl(zwischenresultat), alte_zahl);
+
+						resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
+						break ots;
+
+					default:
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+
+					}
+
+				case WertTyp.ZAHL:
+					Zahl zwischenresultat = *cast(Zahl*) resultat.wert;
+
+					switch (momentaner_wert.typ)
+					{
+					case WertTyp.NATÜRLICHE_ZAHL:
+						Zahl alte_zahl = Zahl(*cast(NatürlicheZahl*) momentaner_wert.wert);
+
+						Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+
+						resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
+						break ots;
+
+					case WertTyp.GANZE_ZAHL:
+						Zahl alte_zahl = Zahl(*cast(GanzeZahl*) momentaner_wert.wert);
+
+						Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+
+						resultat.wert = new Zahl(neue_zahl);
+						break ots;
+
+					case WertTyp.ZAHL:
+						Zahl alte_zahl = *cast(Zahl*) momentaner_wert.wert;
+
+						Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+
+						resultat.wert = new Zahl(neue_zahl);
+						break ots;
+
+					default:
+						throw new Operation_TypenFehler(this.operationenTyp,
+							resultat.typ, momentaner_wert.typ);
+					}
+
+				default:
+					throw new Fehler(
+						"Man kann nicht anderes Plusrechnen" ~ operationenTyp.to!dstring);
+				}
 
 			case OperatorenTyp.GLEICH:
 				if (resultat.typ == momentaner_wert.typ)

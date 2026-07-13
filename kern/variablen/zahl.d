@@ -6,7 +6,6 @@ import variablen.wert;
 import std.algorithm : max, remove, canFind, find;
 import std.range : retro, split;
 import std.bigint : BigInt;
-import std.digest : toHexString;
 import std.algorithm.mutation : reverse;
 import std.bitmanip : littleEndianToNative;
 import std.stdio : write, writeln;
@@ -20,30 +19,35 @@ struct Zahl
 	ubyte[] werte;
 	Bruch nach_komma;
 
-	pure nothrow this(Zahl z)
+	pure
+	this(Zahl z)
 	{
-		this.negativ = z.negativ;
-		this.nach_komma = z.nach_komma;
-		this.werte = z.werte;
+		this(z.negativ, z.nach_komma, z.werte);
 	}
 
-	pure nothrow this(GanzeZahl gz)
+	pure nothrow
+	this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
 		this.werte = gz.werte;
 	}
 
-	pure nothrow this(NatürlicheZahl nz)
+	pure nothrow
+	this(NatürlicheZahl nz)
 	{
 		this.negativ = false;
 		this.werte = nz.werte;
 	}
 
-	pure nothrow this(bool negativ, Bruch nach_komma, ubyte[] werte)
+	pure
+	this(bool negativ, Bruch nach_komma, ubyte[] werte)
 	{
 		this.negativ = negativ;
-		this.werte = werte;
-		this.nach_komma = nach_komma;
+		DivisionResultat dr = dividiere(nach_komma.zähler, nach_komma.nenner, false);
+
+		this.werte = addiere(werte, dr.quotient);
+		this.nach_komma = Bruch(dr.rest, nach_komma.nenner);
+
 	}
 }
 
@@ -91,22 +95,18 @@ struct Bruch
 	ubyte[] zähler;
 	ubyte[] nenner;
 
-	pure nothrow this(ubyte[] nzähler, ubyte[] nnenner)
+	pure nothrow
+	this(ubyte[] nzähler, ubyte[] nnenner)
 	{
 		zähler = nzähler;
 		nenner = nnenner;
 	}
 
-	pure nothrow this(Bruch bruch)
+	pure nothrow
+	this(Bruch bruch)
 	{
 		zähler = bruch.zähler;
 		nenner = bruch.nenner;
-	}
-
-	pure nothrow this(NatürlicheZahl nz)
-	{
-		zähler = nz.werte;
-		nenner = [1];
 	}
 }
 
@@ -158,19 +158,9 @@ private pure nothrow ubyte[] right_unpad(ubyte[] num)
 	return unpadded.reverse;
 }
 
-//MARK: Bruch zusammenfassen
-private pure Bruch zusammengefasst(Bruch x)
-{
-	while (x.ist_grösser_gleich_1)
-	{
-		x.zähler = x.zähler.subtrahiere(x.nenner);
-	}
-
-	return x;
-}
-
 //MARK: COMPARE
-pure bool ist_grösser(ubyte[] x, ubyte[] y) // x > y => TRUE
+pure
+bool ist_grösser(ubyte[] x, ubyte[] y) // x > y => TRUE
 {
 	if (x.length < y.length)
 	{
@@ -180,6 +170,11 @@ pure bool ist_grösser(ubyte[] x, ubyte[] y) // x > y => TRUE
 	if (x.length > y.length)
 	{
 		return true;
+	}
+
+	if (x.length == 0)
+	{
+		return false;
 	}
 
 	if (x[$ - 1] > y[$ - 1])
@@ -192,7 +187,8 @@ pure bool ist_grösser(ubyte[] x, ubyte[] y) // x > y => TRUE
 	}
 }
 
-pure bool is_equal(ubyte[] x, ubyte[] y)
+pure
+bool is_equal(ubyte[] x, ubyte[] y)
 {
 	x = left_pad(x, y.length);
 	y = left_pad(y, x.length);
@@ -205,7 +201,8 @@ pure bool is_equal(ubyte[] x, ubyte[] y)
 	return true;
 }
 
-private pure bool ist_grösser_gleich_1(Bruch bruch)
+pure
+private bool ist_grösser_gleich_1(Bruch bruch)
 {
 	if (is_equal(bruch.nenner, bruch.zähler))
 		return true;
@@ -216,7 +213,8 @@ private pure bool ist_grösser_gleich_1(Bruch bruch)
 	return false;
 }
 
-private pure bool ist_grösser(Bruch num1, Bruch num2)
+pure
+private bool ist_grösser(Bruch num1, Bruch num2)
 {
 	ubyte[] zähler1 = multipliziere(num1.zähler, num2.nenner);
 	ubyte[] zähler2 = multipliziere(num2.zähler, num1.nenner);
@@ -224,8 +222,20 @@ private pure bool ist_grösser(Bruch num1, Bruch num2)
 	return ist_grösser(zähler1, zähler2);
 }
 
+pure nothrow
+private bool ist_null(ubyte[] num)
+{
+	num = num.right_unpad;
+
+	if (num.length == 0)
+		return true;
+
+	return false;
+}
+
 //MARK: ADDIERE
-private pure nothrow ubyte[] addiere(ubyte[] num1, ubyte[] num2)
+pure nothrow
+private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 {
 	num1 = right_pad(num1, num2.length); // Pad ubyte array.
 	num2 = right_pad(num2, num1.length);
@@ -250,8 +260,15 @@ private pure nothrow ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 	return resultat;
 }
 
-private pure nothrow Bruch addiere(Bruch num1, Bruch num2)
+pure nothrow
+private Bruch addiere(Bruch num1, Bruch num2)
 {
+	if (num2.zähler.ist_null)
+		return num1;
+
+	else if (num1.zähler.ist_null)
+		return num2;
+
 	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
 
 	ubyte[] summand1 = multipliziere(num1.zähler, num2.nenner);
@@ -276,7 +293,7 @@ pure Zahl addiere(Zahl num1, Zahl num2)
 					.nenner);
 		}
 
-		return Zahl(num1.negativ, neuer_bruch.zusammengefasst, neuer_vor_komma_wert);
+		return Zahl(num1.negativ, neuer_bruch, neuer_vor_komma_wert);
 	}
 
 	if (num1.negativ && num2.negativ == false)
@@ -385,18 +402,18 @@ pure Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 	{
 		ubyte[] summe = addiere(minuend.werte, subtrahend.werte);
 		Bruch summe_auch = addiere(minuend.nach_komma, subtrahend.nach_komma);
-		return Zahl(true, summe_auch.zusammengefasst, summe);
+		return Zahl(true, summe_auch, summe);
 	}
 	else if (minuend.negativ == false && subtrahend.negativ)
 	{
 		ubyte[] summe_vor = addiere(minuend.werte, subtrahend.werte);
 		Bruch summe_nach = addiere(minuend.nach_komma, subtrahend.nach_komma);
-		return Zahl(false, summe_nach.zusammengefasst, summe_vor);
+		return Zahl(false, summe_nach, summe_vor);
 	}
 	else if (minuend.negativ && subtrahend.negativ)
 	{
 		Zahl summe = addiere(minuend, Zahl(false, subtrahend.nach_komma, subtrahend.werte));
-		return Zahl(false, summe.nach_komma.zusammengefasst, summe.werte);
+		return Zahl(false, summe.nach_komma, summe.werte);
 	}
 
 	bool inverted = false;
@@ -424,7 +441,7 @@ pure Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 		sub_nach = subtrahiere(minuend.nach_komma, subtrahend.nach_komma);
 	}
 
-	return Zahl(inverted, sub_nach.zusammengefasst, sub_vor);
+	return Zahl(inverted, sub_nach, sub_vor);
 }
 
 pure GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
@@ -466,15 +483,31 @@ pure GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 }
 
 //MARK: MULTIPLIKATION
-private pure nothrow ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
+pure nothrow
+private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
 {
 	ubyte[][] matrix;
-	matrix.length = 1;
+
+	if (num1.length == 0 || num2.length == 0)
+		return [0];
+
+	if ((num1.length == 1 && num1[0] == 0) || (num2.length == 1 && num2[0] == 0))
+		return [0];
+
+	if (num1.length == 0 || num2.length == 0)
+		return [0];
 
 	for (ulong i = 0; i < num2.length; i++)
 	{
 		ubyte[] zwischenresultat = [];
 		ubyte überschuss = 0;
+
+		ulong repeat = i;
+		while (repeat != 0)
+		{
+			zwischenresultat ~= 0;
+			repeat--;
+		}
 
 		for (ulong j = 0; j < num1.length; j++)
 		{
@@ -486,13 +519,6 @@ private pure nothrow ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktio
 		if (überschuss > 0)
 		{
 			zwischenresultat ~= überschuss;
-		}
-
-		ulong repeat = i;
-		while (repeat != 0)
-		{
-			zwischenresultat = 0 ~ zwischenresultat;
-			repeat--;
 		}
 
 		matrix ~= zwischenresultat;
@@ -507,13 +533,15 @@ private pure nothrow ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktio
 	return matrix[0];
 }
 
-pure private Bruch multipliziere(Bruch num1, Bruch num2)
+pure
+private Bruch multipliziere(Bruch num1, Bruch num2)
 {
-	return Bruch(multipliziere(num1.zähler, num2.zähler), multipliziere(num1.nenner, num1
-			.zähler));
+	return Bruch(multipliziere(num1.zähler, num2.zähler),
+		multipliziere(num1.nenner, num2.zähler));
 }
 
-pure Zahl multipliziere(Zahl num1, Zahl num2)
+pure
+Zahl multipliziere(Zahl num1, Zahl num2)
 {
 	bool negativ = true;
 	if ((num1.negativ && num2.negativ) ||
@@ -524,15 +552,7 @@ pure Zahl multipliziere(Zahl num1, Zahl num2)
 
 	ubyte[] neuer_vor_komma_wert = multipliziere(num1.werte, num2.werte);
 
-	while (neuer_bruch.ist_grösser_gleich_1)
-	{
-		neuer_vor_komma_wert = neuer_vor_komma_wert.addiere([1]);
-		neuer_bruch = Bruch(
-			subtrahiere(neuer_bruch.zähler, neuer_bruch.nenner), neuer_bruch
-				.nenner);
-	}
-
-	return Zahl(negativ, neuer_bruch.zusammengefasst, neuer_vor_komma_wert);
+	return Zahl(negativ, neuer_bruch, neuer_vor_komma_wert);
 }
 
 GanzeZahl multipliziere(GanzeZahl num1, GanzeZahl num2)
@@ -559,23 +579,119 @@ pure nothrow Bruch dividiere(Bruch num1, Bruch num2)
 			.zähler));
 }
 
-/// dividiere => ubyte[] / ubyte[] = ubyte[];
-/// der Rest wird einfach weggeschmissen.
-/// 0en am Anfang werden nicht weggestrichen.
-pure ubyte[] dividiere(ubyte[] num1, ubyte[] num2)
+struct DivisionResultat
 {
-	if (num2.right_unpad.length == 0)
-		throw new Exception("Division durch 0");
+	ubyte[] quotient;
+	ubyte[] rest;
+}
 
-	if (num1 == num2)
-		return [0];
+/// Essentiel ein grosser ByteShift nach Unten.
+pure ubyte[] int_div_by2(ubyte[] num)
+{
+	num = num.reverse();
 
-	throw new Error("Not Implemented!");
+	bool übertragung = false;
+
+	for (ulong i = 0; num.length > i; i++)
+	{
+		ubyte temp = num[i];
+
+		num[i] = temp >> 1;
+
+		if (übertragung)
+			num[i] += 0b_1000_0000;
+
+		übertragung = (temp % 2) != 0;
+	}
+
+	return reverse(num).right_unpad;
+}
+
+/// dividiere => ubyte[] / ubyte[] = DivisionResultat;
+/// 0en am Anfang werden nicht weggestrichen.
+/// Ich verstehe diesen Algorithmus nicht, aber er funktioniert.
+/// => Fast recursive division
+pure DivisionResultat dividiere(ubyte[] num1, ubyte[] num2, bool throw_error = true)
+{
+	if (num2.right_unpad.length == 0 || num2 == [0])
+	{
+		if (throw_error)
+			throw new Exception("Division durch 0");
+		else
+			return DivisionResultat([], []);
+	}
+
+	num1 = num1.right_unpad();
+	num2 = num2.right_unpad();
+
+	if (num1 == [0] || num1.length == 0)
+		return DivisionResultat([0], [0]);
+
+	else if (num1 == num2)
+		return DivisionResultat([1], [0]);
+
+	bool ist_ungerade = (num1[0] % 2) != 0;
+
+	DivisionResultat dr = dividiere(int_div_by2(num1), num2);
+
+	dr.quotient = multipliziere(dr.quotient, [2]);
+	dr.rest = multipliziere(dr.rest, [2]);
+
+	if (ist_ungerade)
+		dr.rest = addiere(dr.rest, [1]);
+
+	if (ist_grösser(dr.rest, num2) || is_equal(dr.rest, num2))
+	{
+		dr.rest = subtrahiere(dr.rest, num2);
+		dr.quotient = addiere(dr.quotient, [1]);
+	}
+
+	return dr;
 }
 
 pure Zahl dividiere(Zahl num1, Zahl num2)
 {
-	throw new Error("Not Implemented!");
+	bool negativ = (num1.negativ != num2.negativ);
+
+	// num1 als Bruch
+	Bruch vor_komma1 = Bruch(num1.werte, [1]);
+	Bruch bruch1 = addiere(vor_komma1, num1.nach_komma);
+
+	// num2 als Bruch
+	Bruch vor_komma2 = Bruch(num2.werte, [1]);
+	Bruch bruch2 = addiere(vor_komma2, num2.nach_komma);
+
+	Bruch resultat = dividiere(bruch1, bruch2);
+
+	DivisionResultat dr = dividiere(resultat.zähler, resultat.nenner);
+
+	return Zahl(
+		negativ,
+		Bruch(dr.rest, resultat.nenner),
+		dr.quotient
+	);
+}
+
+pure Zahl dividiere(GanzeZahl num1, GanzeZahl num2)
+{
+	DivisionResultat dr = dividiere(num1.werte, num2.werte);
+	bool negativ = (num1.negativ != num2.negativ);
+
+	return Zahl(
+		negativ,
+		Bruch(dr.rest, num2.werte),
+		dr.quotient
+	);
+}
+
+pure Zahl dividiere(NatürlicheZahl num1, NatürlicheZahl num2)
+{
+	DivisionResultat dr = dividiere(num1.werte, num2.werte);
+	return Zahl(
+		false,
+		Bruch(dr.rest, num2.werte),
+		dr.quotient
+	);
 }
 
 //MARK: POTENTIERUNG
@@ -681,11 +797,9 @@ Zahl als_zahl(dstring wort)
 }
 
 //MARK: als_string
-string als_string(NatürlicheZahl n)
+string als_string(ubyte[] num)
 {
-	ubyte[] werte = n.werte;
-
-	if (werte.length == 0)
+	if (num.length == 0)
 	{
 		return "0";
 	}
@@ -693,7 +807,7 @@ string als_string(NatürlicheZahl n)
 	ubyte[] digits;
 	digits ~= 0;
 
-	foreach (uint rest; werte.retro)
+	foreach (uint rest; num.retro)
 	{
 		for (size_t j = 0; j < digits.length; j++)
 		{
@@ -718,6 +832,11 @@ string als_string(NatürlicheZahl n)
 	return cast(string) result;
 }
 
+string als_string(NatürlicheZahl n)
+{
+	return als_string(n.werte);
+}
+
 string als_string(GanzeZahl g)
 {
 	if (g.negativ)
@@ -728,6 +847,7 @@ string als_string(GanzeZahl g)
 
 string als_string(Zahl z)
 {
+	z = Zahl(z);
 	string result = "";
 
 	if (z.negativ)
@@ -746,35 +866,7 @@ string als_string(Zahl z)
 
 string als_string(Bruch b, ulong maxLen = 100)
 {
-	if (b.ist_grösser_gleich_1)
-	{
-		writeln(b);
-
-		throw new Exception("Jemand hat nicht richtig aufgeräumt!");
-	}
-
-	BigInt zähler = BigInt(b.zähler.length ? "0x" ~ b.zähler.toHexString().idup : "0");
-	BigInt nenner = BigInt(b.nenner.length ? "0x" ~ b.nenner.toHexString().idup : "0");
-
-	if (nenner == 0)
-		throw new Exception("Division durch Null!");
-
-	string res;
-	BigInt rem = zähler % nenner;
-
-	if (rem == 0)
-		return res;
-
-	foreach (_; 0 .. maxLen)
-	{
-		rem *= 10;
-		res ~= (rem / nenner).to!string;
-		rem %= nenner;
-		if (rem == 0)
-			break;
-	}
-
-	return res;
+	return "(" ~ b.zähler.als_string ~ " / " ~ b.nenner.als_string ~ ")";
 }
 
 //MARK: als_std_zahl
