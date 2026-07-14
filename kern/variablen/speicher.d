@@ -103,14 +103,16 @@ bool bereich_existiert(uint bereich_num)
 	return true;
 }
 
-nothrow @safe
+nothrow
 void lösche_bereich(uint bereich_num)
 {
-
+	if (bereiche.length > bereich_num)
+		bereiche[bereich_num] = null;
 }
 
 //MARK: VARIABLEN
-private nothrow bool variable_existiert(uint bereich_num, dstring var_name)
+nothrow
+private bool variable_existiert(uint bereich_num, dstring var_name)
 {
 	if (!bereich_num.bereich_existiert)
 		return false;
@@ -301,6 +303,9 @@ debug
 	{
 		foreach (Bereich* key; bereiche)
 		{
+			if (key == null)
+				continue;
+
 			write(key.name ~ " ("d ~ key.uid.to!dstring ~ "): ["d);
 
 			bool first = true;

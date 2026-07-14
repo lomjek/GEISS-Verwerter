@@ -3,6 +3,7 @@ module fehler;
 import interpreter;
 import operatoren;
 import variablen.wert;
+import glied;
 
 import std.conv : to;
 import std.array : join;
@@ -21,6 +22,25 @@ class Fehler : Exception
 		{
 			super(msg.to!string, file_name.to!string, line, null);
 		}
+	}
+}
+
+//MARK: Syntax Fehler
+abstract class SyntaxFehler : Fehler
+{
+	this(dstring msg, size_t line = __LINE__)
+	{
+		super(msg, line);
+	}
+}
+
+class PositionFehler : Fehler
+{
+	this(Glied glied, ulong position, ulong line = __LINE__)
+	{
+		dstring msg = "Das Glied " ~ glied.to!dstring ~ " kann nicht an Position " ~ position.to!dstring ~ " stehen";
+
+		super(msg, line);
 	}
 }
 

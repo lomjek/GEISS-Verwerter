@@ -2,6 +2,7 @@ module glied.funktion_glied;
 
 import glied.glied;
 import glied.block_glied;
+import glied.variablen_glied;
 
 import variablen.wert;
 import variablen.speicher;
@@ -18,7 +19,7 @@ import std.conv : to;
 
 class Funktion_Abrufen_Glied : Glied
 {
-	Glied[] argument;
+	Glied[] argumente;
 	dstring identifier;
 
 	override public void schreibe_baum()
@@ -26,7 +27,7 @@ class Funktion_Abrufen_Glied : Glied
 		write("[FUNKTION]{");
 		write(identifier);
 		write(", ");
-		argument.to!string;
+		argumente.to!string;
 		write("}");
 	}
 
@@ -41,10 +42,29 @@ class Funktion_Abrufen_Glied : Glied
 		}
 
 		Funktion_Glied fg = cast(Funktion_Glied) var.wert;
-		fg.parameter = argument[0]; //TODO: Fix this bandaid
+
+		dstring[] namen;
+
+		foreach (Erstelle_Variable_Glied evg; fg.parameter)
+		{
+			evg.verwerte(neuer_bereich);
+			namen ~= evg.var_name;
+		}
+
+		if (argumente.length != namen.length)
+		{
+			throw new Fehler("Die Anzahl Argumenten ist nicht richtg.");
+		}
+
+		for (ulong i = 0; i < argumente.length; i++)
+		{
+			Wert* argument = new Wert(argumente[i].verwerte(neuer_bereich));
+			setze_variable(neuer_bereich, namen[i], argument);
+		}
 
 		Wert resultat = fg.verwerte(neuer_bereich);
 		lösche_bereich(neuer_bereich);
+
 		return resultat;
 	}
 
@@ -55,26 +75,31 @@ class Funktion_Abrufen_Glied : Glied
 
 	override string toString() const @safe pure
 	{
-		return "G(" ~ identifier.to!string ~ " | " ~ argument.length.to!string ~ ")";
+		return "G(" ~ identifier.to!string ~ " | " ~ argumente.length.to!string ~ ")";
 	}
 
-	this(dstring funk_name, Glied[] argument)
+	this(dstring funk_name, Glied[] argumente)
 	{
 		identifier = funk_name;
-		this.argument = argument;
+		this.argumente = argumente;
 	}
 }
 
 class Funktion_Glied : Glied
 {
-	Glied parameter;
+	Erstelle_Variable_Glied[] parameter;
 
+	this(Erstelle_Variable_Glied[] parameter)
+	{
+		this.parameter = parameter;
+	}
 }
 
 //MARK: Native func
 enum MethodenTyp
 {
-	PRINT
+	PRINT,
+	ALS_TEXT,
 }
 
 // Muss ein BlockGlied sein, damit es in eine Funktion_Glied funktion reinpasst.
@@ -84,12 +109,11 @@ class EingebauteFunktion_Glied : Funktion_Glied
 
 	override public Wert verwerte(uint bereich)
 	{
-		Wert argumente = parameter.verwerte(bereich);
-
 		switch (typ)
 		{
 		case MethodenTyp.PRINT:
-			schreibe_schön_wert(argumente);
+			Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+			schreibe_schön_wert(text);
 			writeln;
 			goto default;
 
@@ -114,5 +138,15 @@ class EingebauteFunktion_Glied : Funktion_Glied
 	this(MethodenTyp funktion)
 	{
 		this.typ = typ;
+
+		Erstelle_Variable_Glied[] parameter;
+
+		if (typ == MethodenTyp.PRINT)
+		{
+			Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.TEXT);
+			parameter ~= evg;
+		}
+
+		super(parameter);
 	}
 }

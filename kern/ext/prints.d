@@ -71,7 +71,8 @@ string als_schön_string(Wert wert)
 
 	case WertTyp.TEXT:
 		str = "\"";
-		str ~= (*cast(dstring*) wert.wert).to!string;
+		if (wert.wert != null)
+			str ~= (*cast(dstring*) wert.wert).to!string;
 		str ~= "\"";
 		break;
 
