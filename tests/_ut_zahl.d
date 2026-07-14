@@ -28,9 +28,8 @@ unittest
 
 	// Test overflow carrying (2/3 + 2/3 = 1 + 3/9)
 	Zahl z_zwei_drittel = Zahl(false, Bruch([2], [3]), [0]);
-	assert(addiere(z_zwei_drittel, z_zwei_drittel) == Zahl(false, Bruch([3], [9]), [
-				1
-			]));
+	assert(addiere(z_zwei_drittel, z_zwei_drittel) ==
+			Zahl(false, Bruch([3], [9]), [1]));
 	writeln("läuft");
 
 	write("Testing als_zahl(\"3\")... ");
@@ -63,13 +62,16 @@ unittest
 	);
 	writeln("läuft");
 
-	write("Testing dividiere(Zahl 3, Zahl 2)... ");
+	write("Testing dividiere(Zahl 3000, Zahl 2000)... ");
 	assert(
-		dividiere(Zahl(drei), Zahl(false, Bruch(), [2])) == Zahl(
-			false,
-			Bruch([1], [2]),
-			[1]
-	)
+		dividiere(
+			Zahl(false, Bruch(), [0xB8, 0x0B]),
+			Zahl(false, Bruch(), [0xD0, 0x07])) ==
+			Zahl(
+				false,
+				Bruch([0xE8, 0x03], [0xD0, 0x07]),
+				[1]
+			)
 	);
 	writeln("läuft");
 

@@ -19,27 +19,25 @@ struct Zahl
 	ubyte[] werte;
 	Bruch nach_komma;
 
-	pure
 	this(Zahl z)
 	{
 		this(z.negativ, z.nach_komma, z.werte);
 	}
 
-	pure nothrow
+	nothrow
 	this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
 		this.werte = gz.werte;
 	}
 
-	pure nothrow
+	nothrow
 	this(NatürlicheZahl nz)
 	{
 		this.negativ = false;
 		this.werte = nz.werte;
 	}
 
-	pure
 	this(bool negativ, Bruch nach_komma, ubyte[] werte)
 	{
 		this.negativ = negativ;
@@ -48,6 +46,8 @@ struct Zahl
 		this.werte = addiere(werte, dr.quotient);
 		this.nach_komma = Bruch(dr.rest, nach_komma.nenner);
 
+		if (this.nach_komma.zähler.ist_null)
+			this.nach_komma.nenner = [];
 	}
 }
 
@@ -56,19 +56,19 @@ struct GanzeZahl
 	bool negativ;
 	ubyte[] werte;
 
-	pure nothrow this(NatürlicheZahl nz)
+	nothrow this(NatürlicheZahl nz)
 	{
 		this.negativ = false;
 		this.werte = nz.werte;
 	}
 
-	pure nothrow this(GanzeZahl gz)
+	nothrow this(GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
 		this.werte = gz.werte;
 	}
 
-	pure nothrow this(bool negativ, ubyte[] werte)
+	nothrow this(bool negativ, ubyte[] werte)
 	{
 		this.negativ = negativ;
 		this.werte = werte;
@@ -79,12 +79,12 @@ struct NatürlicheZahl
 {
 	ubyte[] werte;
 
-	pure nothrow this(NatürlicheZahl nz)
+	nothrow this(NatürlicheZahl nz)
 	{
 		this.werte = nz.werte;
 	}
 
-	pure nothrow this(ubyte[] werte)
+	nothrow this(ubyte[] werte)
 	{
 		this.werte = werte;
 	}
@@ -95,14 +95,14 @@ struct Bruch
 	ubyte[] zähler;
 	ubyte[] nenner;
 
-	pure nothrow
+	nothrow
 	this(ubyte[] nzähler, ubyte[] nnenner)
 	{
 		zähler = nzähler;
 		nenner = nnenner;
 	}
 
-	pure nothrow
+	nothrow
 	this(Bruch bruch)
 	{
 		zähler = bruch.zähler;
@@ -111,7 +111,7 @@ struct Bruch
 }
 
 //MARK: PADDING
-private pure ubyte[] left_pad(ubyte[] num, ulong desired_length)
+private ubyte[] left_pad(ubyte[] num, ulong desired_length)
 {
 	if (num.length >= desired_length)
 	{
@@ -123,7 +123,8 @@ private pure ubyte[] left_pad(ubyte[] num, ulong desired_length)
 	return padded;
 }
 
-private pure nothrow ubyte[] right_pad(ubyte[] num, ulong desired_length)
+nothrow
+private ubyte[] right_pad(ubyte[] num, ulong desired_length)
 {
 	if (num.length >= desired_length)
 	{
@@ -135,14 +136,22 @@ private pure nothrow ubyte[] right_pad(ubyte[] num, ulong desired_length)
 	return padded;
 }
 
-private pure nothrow ubyte[] right_unpad(ubyte[] num)
+nothrow
+private ubyte[] right_pad(const ubyte[] num, ulong desired_length)
 {
-	num.reverse();
+	return right_pad(num.dup, desired_length);
+}
+
+nothrow
+private ubyte[] right_unpad(const ubyte[] num)
+{
+	ubyte[] arr = num.dup;
+	arr.reverse();
 	ubyte[] unpadded;
 
 	bool encountered_int = false;
 
-	foreach (ubyte key; num)
+	foreach (ubyte key; arr)
 	{
 		if (encountered_int)
 		{
@@ -159,35 +168,24 @@ private pure nothrow ubyte[] right_unpad(ubyte[] num)
 }
 
 //MARK: COMPARE
-pure
+
 bool ist_grösser(ubyte[] x, ubyte[] y) // x > y => TRUE
 {
-	if (x.length < y.length)
+	ulong max_len = x.length > y.length ? x.length : y.length;
+	ubyte[] px = right_pad(x, max_len);
+	ubyte[] py = right_pad(y, max_len);
+
+	for (long i = cast(long) max_len - 1; i >= 0; i--)
 	{
-		return false;
+		if (px[i] > py[i])
+			return true;
+		if (px[i] < py[i])
+			return false;
 	}
 
-	if (x.length > y.length)
-	{
-		return true;
-	}
-
-	if (x.length == 0)
-	{
-		return false;
-	}
-
-	if (x[$ - 1] > y[$ - 1])
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
-pure
 bool is_equal(ubyte[] x, ubyte[] y)
 {
 	x = left_pad(x, y.length);
@@ -201,7 +199,6 @@ bool is_equal(ubyte[] x, ubyte[] y)
 	return true;
 }
 
-pure
 private bool ist_grösser_gleich_1(Bruch bruch)
 {
 	if (is_equal(bruch.nenner, bruch.zähler))
@@ -213,7 +210,6 @@ private bool ist_grösser_gleich_1(Bruch bruch)
 	return false;
 }
 
-pure
 private bool ist_grösser(Bruch num1, Bruch num2)
 {
 	ubyte[] zähler1 = multipliziere(num1.zähler, num2.nenner);
@@ -222,23 +218,23 @@ private bool ist_grösser(Bruch num1, Bruch num2)
 	return ist_grösser(zähler1, zähler2);
 }
 
-pure nothrow
-private bool ist_null(ubyte[] num)
+nothrow
+private bool ist_null(const ubyte[] num)
 {
-	num = num.right_unpad;
-
-	if (num.length == 0)
-		return true;
-
-	return false;
+	foreach (ubyte b; num)
+	{
+		if (b != 0)
+			return false;
+	}
+	return true;
 }
 
 //MARK: ADDIERE
-pure nothrow
-private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
+nothrow
+private ubyte[] addiere(const ubyte[] nummer1, const ubyte[] nummer2)
 {
-	num1 = right_pad(num1, num2.length); // Pad ubyte array.
-	num2 = right_pad(num2, num1.length);
+	ubyte[] num1 = right_pad(nummer1, nummer2.length); // Pad ubyte array.
+	ubyte[] num2 = right_pad(nummer2, nummer1.length);
 
 	ubyte[] resultat;
 	ubyte überschuss = 0;
@@ -260,7 +256,7 @@ private ubyte[] addiere(ubyte[] num1, ubyte[] num2)
 	return resultat;
 }
 
-pure nothrow
+nothrow
 private Bruch addiere(Bruch num1, Bruch num2)
 {
 	if (num2.zähler.ist_null)
@@ -277,7 +273,7 @@ private Bruch addiere(Bruch num1, Bruch num2)
 	return Bruch(addiere(summand1, summand2), neuer_nenner);
 }
 
-pure Zahl addiere(Zahl num1, Zahl num2)
+Zahl addiere(Zahl num1, Zahl num2)
 {
 	if ((num1.negativ && num2.negativ) ||
 		(!num1.negativ && !num2.negativ))
@@ -309,7 +305,7 @@ pure Zahl addiere(Zahl num1, Zahl num2)
 	throw new Exception("Es sollte nie hier ankommen...");
 }
 
-pure GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
+GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
 {
 	if (num1.negativ && num2.negativ)
 	{
@@ -333,21 +329,21 @@ pure GanzeZahl addiere(GanzeZahl num1, GanzeZahl num2)
 	throw new Exception("Es sollte nie hier ankommen...");
 }
 
-pure NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
+NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
 {
 	return NatürlicheZahl(addiere(x.werte, y.werte));
 }
 
 //MARK: SUBTRAHIERE
-private pure ubyte[] subtrahiere(ubyte[] num1, ubyte[] num2)
+private ubyte[] subtrahiere(const ubyte[] num1, const ubyte[] num2)
 {
-	if (num2.ist_grösser(num1))
+	if (num2.dup.ist_grösser(num1.dup))
 	{
 		throw new Exception("Es gäbe einen Underflow");
 	}
 
-	ubyte[] min = right_pad(num1, num2.length);
-	ubyte[] sub = right_pad(num2, num1.length);
+	ubyte[] min = right_pad(num1.dup, num2.length);
+	ubyte[] sub = right_pad(num2.dup, num1.length);
 
 	if (is_equal(sub, min))
 	{
@@ -377,14 +373,13 @@ private pure ubyte[] subtrahiere(ubyte[] num1, ubyte[] num2)
 	}
 
 	if (carry_over != 0)
-		throw new Exception(
-			"Es gibt ein Underflow von: " ~ carry_over
-				.to!string);
+		throw new Exception("Es gibt ein Underflow von: "
+				~ carry_over.to!string ~ " : " ~ min.als_string ~ ", " ~ sub.als_string);
 
 	return resultat;
 }
 
-private pure Bruch subtrahiere(Bruch num1, Bruch num2)
+private Bruch subtrahiere(Bruch num1, Bruch num2)
 {
 	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
 
@@ -396,7 +391,7 @@ private pure Bruch subtrahiere(Bruch num1, Bruch num2)
 	return Bruch(neuer_zähler, neuer_nenner);
 }
 
-pure Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
+Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 {
 	if (minuend.negativ && subtrahend.negativ == false)
 	{
@@ -444,7 +439,7 @@ pure Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 	return Zahl(inverted, sub_nach, sub_vor);
 }
 
-pure GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
+GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y 
 {
 	if (minuend.negativ && subtrahend.negativ == false)
 	{
@@ -477,14 +472,14 @@ pure GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y
 	return GanzeZahl(inverted, subtrahiere(min, sub));
 }
 
-pure GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
+GanzeZahl subtrahiere(NatürlicheZahl x, NatürlicheZahl y) // x - y
 {
 	return subtrahiere(GanzeZahl(x), GanzeZahl(y));
 }
 
 //MARK: MULTIPLIKATION
-pure nothrow
-private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
+nothrow
+private ubyte[] multipliziere(const ubyte[] num1, const ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
 {
 	ubyte[][] matrix;
 
@@ -533,14 +528,12 @@ private ubyte[] multipliziere(ubyte[] num1, ubyte[] num2) //Funktioniert nur mit
 	return matrix[0];
 }
 
-pure
 private Bruch multipliziere(Bruch num1, Bruch num2)
 {
 	return Bruch(multipliziere(num1.zähler, num2.zähler),
 		multipliziere(num1.nenner, num2.zähler));
 }
 
-pure
 Zahl multipliziere(Zahl num1, Zahl num2)
 {
 	bool negativ = true;
@@ -573,7 +566,7 @@ NatürlicheZahl multipliziere(NatürlicheZahl num1, NatürlicheZahl num2)
 
 /// dividiere => Bruch / Bruch = Bruch
 /// Funktioniert eigentlich durch multiplikation.
-pure nothrow Bruch dividiere(Bruch num1, Bruch num2)
+nothrow Bruch dividiere(Bruch num1, Bruch num2)
 {
 	return Bruch(multipliziere(num1.zähler, num2.nenner), multipliziere(num1.nenner, num2
 			.zähler));
@@ -586,34 +579,35 @@ struct DivisionResultat
 }
 
 /// Essentiel ein grosser ByteShift nach Unten.
-pure ubyte[] int_div_by2(ubyte[] num)
+
+ubyte[] int_div_by2(const ubyte[] num)
 {
-	num = num.reverse();
+	ubyte[] nummer = num.dup.reverse;
 
 	bool übertragung = false;
 
-	for (ulong i = 0; num.length > i; i++)
+	for (ulong i = 0; nummer.length > i; i++)
 	{
-		ubyte temp = num[i];
+		ubyte temp = nummer[i];
 
-		num[i] = temp >> 1;
+		nummer[i] = temp >> 1;
 
 		if (übertragung)
-			num[i] += 0b_1000_0000;
+			nummer[i] += 0b_1000_0000;
 
 		übertragung = (temp % 2) != 0;
 	}
 
-	return reverse(num).right_unpad;
+	return reverse(nummer).right_unpad;
 }
 
 /// dividiere => ubyte[] / ubyte[] = DivisionResultat;
 /// 0en am Anfang werden nicht weggestrichen.
 /// Ich verstehe diesen Algorithmus nicht, aber er funktioniert.
 /// => Fast recursive division
-pure DivisionResultat dividiere(ubyte[] num1, ubyte[] num2, bool throw_error = true)
+DivisionResultat dividiere(const ubyte[] nummer1, const ubyte[] nummer2, bool throw_error = true)
 {
-	if (num2.right_unpad.length == 0 || num2 == [0])
+	if (nummer2.ist_null)
 	{
 		if (throw_error)
 			throw new Exception("Division durch 0");
@@ -621,14 +615,17 @@ pure DivisionResultat dividiere(ubyte[] num1, ubyte[] num2, bool throw_error = t
 			return DivisionResultat([], []);
 	}
 
-	num1 = num1.right_unpad();
-	num2 = num2.right_unpad();
+	ubyte[] num1 = nummer1.dup.right_unpad();
+	ubyte[] num2 = nummer2.dup.right_unpad();
 
 	if (num1 == [0] || num1.length == 0)
 		return DivisionResultat([0], [0]);
 
 	else if (num1 == num2)
 		return DivisionResultat([1], [0]);
+
+	else if (ist_grösser(num2, num1))
+		return DivisionResultat([0], num1);
 
 	bool ist_ungerade = (num1[0] % 2) != 0;
 
@@ -640,16 +637,18 @@ pure DivisionResultat dividiere(ubyte[] num1, ubyte[] num2, bool throw_error = t
 	if (ist_ungerade)
 		dr.rest = addiere(dr.rest, [1]);
 
-	if (ist_grösser(dr.rest, num2) || is_equal(dr.rest, num2))
+	while (ist_grösser(dr.rest, num2) || is_equal(dr.rest, num2))
 	{
 		dr.rest = subtrahiere(dr.rest, num2);
 		dr.quotient = addiere(dr.quotient, [1]);
 	}
 
+	writeln(dr.quotient.als_string, " : ", dr.rest.als_string);
+
 	return dr;
 }
 
-pure Zahl dividiere(Zahl num1, Zahl num2)
+Zahl dividiere(Zahl num1, Zahl num2)
 {
 	bool negativ = (num1.negativ != num2.negativ);
 
@@ -662,17 +661,24 @@ pure Zahl dividiere(Zahl num1, Zahl num2)
 	Bruch bruch2 = addiere(vor_komma2, num2.nach_komma);
 
 	Bruch resultat = dividiere(bruch1, bruch2);
+	write("R:");
+	writeln(resultat);
 
-	DivisionResultat dr = dividiere(resultat.zähler, resultat.nenner);
-
-	return Zahl(
+	Zahl z = Zahl(
 		negativ,
-		Bruch(dr.rest, resultat.nenner),
-		dr.quotient
+		resultat,
+		[]
 	);
+
+	write("z:");
+	writeln(z);
+	Zahl y = Zahl(z);
+	write("Y:");
+	writeln(y);
+	return z;
 }
 
-pure Zahl dividiere(GanzeZahl num1, GanzeZahl num2)
+Zahl dividiere(GanzeZahl num1, GanzeZahl num2)
 {
 	DivisionResultat dr = dividiere(num1.werte, num2.werte);
 	bool negativ = (num1.negativ != num2.negativ);
@@ -684,7 +690,7 @@ pure Zahl dividiere(GanzeZahl num1, GanzeZahl num2)
 	);
 }
 
-pure Zahl dividiere(NatürlicheZahl num1, NatürlicheZahl num2)
+Zahl dividiere(NatürlicheZahl num1, NatürlicheZahl num2)
 {
 	DivisionResultat dr = dividiere(num1.werte, num2.werte);
 	return Zahl(
@@ -698,7 +704,7 @@ pure Zahl dividiere(NatürlicheZahl num1, NatürlicheZahl num2)
 
 /// potenz => ubyte[] ^ ubyte[] = ubyte[];
 /// die zweite Zahl wird kopiert...
-pure ubyte[] potenz(ubyte[] num1, ubyte[] num2)
+ubyte[] potenz(ubyte[] num1, ubyte[] num2)
 {
 	while (ist_grösser(num2, [1]))
 	{
@@ -710,7 +716,7 @@ pure ubyte[] potenz(ubyte[] num1, ubyte[] num2)
 }
 
 //MARK: ist_zahl
-pure nothrow bool ist_zahl(dstring wort)
+nothrow bool ist_zahl(dstring wort)
 {
 	bool allDigits = wort.length > 0;
 
@@ -729,21 +735,21 @@ pure nothrow bool ist_zahl(dstring wort)
 //MARK: als_zahl
 
 /// ALS ZAHL str => ubyte[]
-private pure ubyte[] als_zahl_us(dstring wort)
+private ubyte[] als_zahl_us(dstring wort)
 {
 	BigInt bgi = BigInt(wort);
 	return als_zahl_ub(bgi);
 }
 
 /// ALS ZAHL ulong => ubyte[]
-private pure ubyte[] als_zahl_uu(ulong num)
+private ubyte[] als_zahl_uu(ulong num)
 {
 	BigInt bgi = BigInt(num);
 	return als_zahl_ub(bgi);
 }
 
 /// ALS ZAHL BigInt => ubyte[]
-private pure ubyte[] als_zahl_ub(BigInt bgi)
+private ubyte[] als_zahl_ub(BigInt bgi)
 {
 	ubyte[] resultat;
 
@@ -847,6 +853,7 @@ string als_string(GanzeZahl g)
 
 string als_string(Zahl z)
 {
+	writeln(z);
 	z = Zahl(z);
 	string result = "";
 
