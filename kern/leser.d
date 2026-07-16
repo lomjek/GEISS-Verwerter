@@ -11,10 +11,9 @@ import glied.operation_glied;
 import schlüsselwörter;
 import operatoren;
 import zahl;
+import text;
 
 import variablen.wert;
-
-import core.memory;
 
 import std.array;
 import std.algorithm : startsWith, endsWith, remove, canFind, filter;
@@ -102,7 +101,7 @@ dstring[] string_delims = [
 	"\\\'"d, "\\\""d, "\'"d, "\""d
 ];
 
-private nothrow Verifizierung ist_string(dstring wort)
+private nothrow Verifizierung ist_text(dstring wort)
 {
 	foreach (dstring delim; string_delims)
 	{
@@ -130,9 +129,9 @@ private nothrow Verifizierung ist_wert(dstring wort)
 	{
 		return Verifizierung.ja;
 	}
-	else if (wort.ist_string != Verifizierung.nein)
+	else if (wort.ist_text != Verifizierung.nein)
 	{
-		return wort.ist_string;
+		return wort.ist_text;
 	}
 	else if (wort == "wahr"d || wort == "falsch"d)
 	{
@@ -143,23 +142,6 @@ private nothrow Verifizierung ist_wert(dstring wort)
 }
 
 //MARK: Wert - als!
-private Wert als_wert_string(dstring wort)
-{
-	if ((wort.startsWith("'") && wort.endsWith("'")) || (wort.startsWith('"') && wort.endsWith('"')))
-	{
-		wort = wort[1 .. $ - 1];
-	}
-	else if ((wort.startsWith("\\'") && wort.endsWith("\\'")) || (wort.startsWith("\\\"") && wort.endsWith(
-			"\\\"")))
-	{
-		wort = wort[2 .. $ - 2];
-	}
-
-	dstring* heapSlice = cast(dstring*) GC.malloc(dstring.sizeof);
-	*heapSlice = wort;
-	return Wert(WertTyp.TEXT, heapSlice);
-}
-
 private Wert als_wert_wahrheit(dstring wort)
 {
 	bool* wahr = new bool;
@@ -180,9 +162,9 @@ private Wert als_wert_wahrheit(dstring wort)
 
 private Wert als_wert(dstring wort)
 {
-	if (wort.ist_string == Verifizierung.ja)
+	if (wort.ist_text == Verifizierung.ja)
 	{
-		return als_wert_string(wort);
+		return als_wert_text(wort);
 	}
 	else if (wort == "wahr"d || wort == "falsch"d)
 	{

@@ -8,7 +8,6 @@ import std.range : retro, split;
 import std.bigint : BigInt;
 import std.algorithm.mutation : reverse;
 import std.bitmanip : littleEndianToNative;
-import std.stdio : write, writeln;
 import std.conv : to;
 
 // @ {} [] # \ || != ~
@@ -643,8 +642,6 @@ DivisionResultat dividiere(const ubyte[] nummer1, const ubyte[] nummer2, bool th
 		dr.quotient = addiere(dr.quotient, [1]);
 	}
 
-	writeln(dr.quotient.als_string, " : ", dr.rest.als_string);
-
 	return dr;
 }
 
@@ -661,21 +658,12 @@ Zahl dividiere(Zahl num1, Zahl num2)
 	Bruch bruch2 = addiere(vor_komma2, num2.nach_komma);
 
 	Bruch resultat = dividiere(bruch1, bruch2);
-	write("R:");
-	writeln(resultat);
 
-	Zahl z = Zahl(
+	return Zahl(
 		negativ,
 		resultat,
 		[]
 	);
-
-	write("z:");
-	writeln(z);
-	Zahl y = Zahl(z);
-	write("Y:");
-	writeln(y);
-	return z;
 }
 
 Zahl dividiere(GanzeZahl num1, GanzeZahl num2)
@@ -853,7 +841,6 @@ string als_string(GanzeZahl g)
 
 string als_string(Zahl z)
 {
-	writeln(z);
 	z = Zahl(z);
 	string result = "";
 

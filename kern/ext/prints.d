@@ -4,11 +4,12 @@ import operatoren : OperatorenTyp;
 
 import liste;
 import zahl;
-import std.conv : to;
+import text;
 
 import variablen.wert;
 
 import std.stdio : write, writeln;
+import std.conv : to;
 
 // @ {} [] # \ || != ~
 
@@ -71,8 +72,8 @@ string als_schön_string(Wert wert)
 
 	case WertTyp.TEXT:
 		str = "\"";
-		if (wert.wert != null)
-			str ~= (*cast(dstring*) wert.wert).to!string;
+		Text text = *cast(Text*) wert.wert;
+		str ~= text.payload;
 		str ~= "\"";
 		break;
 
@@ -112,14 +113,17 @@ void schreibe_hilfe()
 {
 	set_pen_trait(TextTrait.fgGreen);
 	writeln("Schön dich hier zu sehen. Vor dir hast du GEISS, meine kleine Programmiersprache");
+	set_pen_trait();
 	writeln("Falls du dieses Program zum ersten Mal benutzt, wäre es gescheit ein keines Bis-");
 	writeln("chen meiner Dokumentation zu lesen, wenn du aber zu faul bist, dann hier einige");
 	writeln("nützliche Informationen:");
 	writeln;
-	set_pen_trait();
 	writeln("varbiable x // Damit erstellst du eine Variable.");
 	writeln("x <- 'Hallo Welt' // So kannst du einen Wert in die Variable schreiben");
 	writeln("schreibe x // So kannst du deinen Text in die Ausgabe schreiben.");
+	writeln;
+	writeln("Um dies Programm zu verlassen, schreibe 'beende programm' in die Eingabe,");
+	writeln("oder drücke ctrl+C auf deiner Tastatur.");
 	writeln;
 	writeln("Viel Spass");
 }

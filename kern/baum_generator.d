@@ -278,7 +278,7 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
 							arr_length = glieder_liste.length;
 							i--;
-							continue;
+							continue main_loop;
 						}
 
 					}

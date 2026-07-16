@@ -61,7 +61,14 @@ static this()
 				"schreibe"d,
 				VariablenTyp.FUNKTION,
 				cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.PRINT))
-			) //Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
+			), // Schreibe geht momentan nur für strings.
+			Variable(
+				"als_text"d,
+				VariablenTyp.FUNKTION,
+				cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ALS_TEXT))
+			) // Zahl => Text 
+
+			//Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
 		]);
 }
 

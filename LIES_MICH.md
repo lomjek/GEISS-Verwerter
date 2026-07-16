@@ -4,6 +4,13 @@ Dateien beginnend mit _ut sind unit tests. Sie sind weder wichtig noch ge-
 winnerbringend für das Projekt. Sie sind einfach dazu da, damit ich weiss,
 dass ich keine Denkfehler gemacht habe.
 
+## Über das Projekt
+
+Ich gehe in Zürich zur Schule und hier mussten wir eine Maturaarbeit zum
+Abschluss der Schule schreiben. Man konnte wählen, was einem das Herz be-
+gehrte und ich hatte schön länger den Wunsch, einmal in meinem Leben eine
+Programmiersprache zu bauen. 
+
 ## Bauen des Projektes
 
 Um aus diesem Quellencode ein benutzbares, ausführbares Programm zu machen, 

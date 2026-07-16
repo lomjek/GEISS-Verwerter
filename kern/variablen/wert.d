@@ -2,6 +2,7 @@ module variablen.wert;
 
 import std.conv : to;
 import zahl;
+import text;
 
 struct Wert
 {
@@ -41,7 +42,7 @@ struct Wert
 		else if (this.typ == WertTyp.TEXT)
 		{
 			wert_str = "\"";
-			wert_str ~= (*cast(dstring*) this.wert).to!string;
+			wert_str ~= (*cast(Text*) this.wert).payload;
 			wert_str ~= "\"";
 		}
 		else if (this.typ == WertTyp.WAHRHEIT)
