@@ -250,50 +250,11 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				switch (opg.operationenTyp)
 				{
 				case OperatorenTyp.KLAMMER_AUF:
-					if (i > 0)
-					{
-						if (glieder_liste[i - 1].instanceof!Lese_Variable_Glied)
-						{
-							Glied[] argumente = konstruiere_argumente(glieder_liste, i);
-
-							Glied[] präfix = glieder_liste[0 .. i - 1];
-							Glied[] suffix = glieder_liste[(i + argumente.length + 2) .. $];
-
-							Funktion_Abrufen_Glied fag = new Funktion_Abrufen_Glied(
-								(cast(Lese_Variable_Glied) glieder_liste[i - 1])
-									.var_name,
-									argumente
-							);
-
-							glieder_liste = präfix ~ fag ~ suffix;
-
-							debug
-							{
-								write("GL (2.F): ");
-
-								set_pen_trait(TextTrait.fgGrey);
-								writeln(glieder_liste);
-								set_pen_trait(TextTrait.reset);
-							}
-
-							arr_length = glieder_liste.length;
-							i--;
-							continue main_loop;
-						}
-
-					}
-
 					klammern_offen++;
-					glieder_liste = glieder_liste.remove(i);
-					arr_length--;
-					i--;
 					continue main_loop;
 
 				case OperatorenTyp.KLAMMER_ZU:
 					klammern_offen--;
-					glieder_liste = glieder_liste.remove(i);
-					arr_length--;
-					i--;
 					continue main_loop;
 
 				case OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF:
@@ -414,47 +375,20 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		{
 			set_pen_trait(TextTrait.fgGrey);
 			write("MPO "); //MAX PRIO OP
+			write(glied.toString);
+			write(" ");
 			write(max_priority_operation);
 			write(" an index ");
 			write(max_priority_index);
 			write(" in List ");
 			writeln(glieder_liste);
-			set_pen_trait(
-				TextTrait.reset);
+			set_pen_trait(TextTrait.reset);
 		}
 
 		//MARK: Build that node
-		if (glied.instanceof!Wert_Glied)
-		{
-			//TODO: Es sollte eigentlich nie hier ankommen.
-			// Exception?
-			continue;
-		}
-
 		if (glied.instanceof!OperationGlied)
 		{
-			OperationGlied op_glied = cast(OperationGlied) glied;
-
-			if (!(max_priority_index > 0 && max_priority_index < (
-					arr_length - 1)))
-			{
-				throw new Fehler(
-					"Die Operation ist zu weit vorne oder zu weit hinten..."d);
-			}
-
-			Glied gl1 = glieder_liste[max_priority_index - 1];
-			Glied gl2 = glieder_liste[max_priority_index + 1];
-			// Falls die Operationen nicht immer die zwei Objekte daneben einnehmen sollen, muss hier ein if  Block hin
-			op_glied.werte ~= gl1;
-			op_glied.werte ~= gl2;
-			op_glied.populated = true;
-
-			glieder_liste[max_priority_index] = op_glied;
-			glieder_liste = glieder_liste.remove(
-				max_priority_index + 1);
-			glieder_liste = glieder_liste.remove(
-				max_priority_index - 1);
-			arr_length -= 2;
+			glieder_liste = parse_glied(glieder_liste, max_priority_index);
 			continue;
 		}
 
@@ -698,4 +632,35 @@ Glied[] konstruiere_argumente(Glied[] glieder_liste, ulong klammer_auf_position)
 	}
 
 	throw new Error("Not implemented!");
+}
+
+//MARK: Glied generation
+Glied[] parse_glied(Glied[] glieder_liste, ulong glied_index)
+{
+	Glied glied = glieder_liste[glied_index];
+
+	if (glied.instanceof!OperationGlied)
+		return parse_glied_OperationenGlied(cast(OperationGlied) glied, glieder_liste, glied_index);
+
+	return glieder_liste;
+}
+
+Glied[] parse_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_liste, ulong glied_index)
+{
+	if (glied_index <= 0 || glied_index >= glieder_liste.length)
+		throw new Fehler("Eine Operation kann nicht das erste oder letzte Glied sein.");
+
+	if (op_glied.ist_vollständig)
+		throw new Fehler("Das hier wurde schon geparst, kann nicht noch einmal");
+
+	Glied wert1 = glieder_liste[glied_index - 1];
+	Glied wert2 = glieder_liste[glied_index + 1];
+
+	op_glied.werte[0] = wert1;
+	op_glied.werte[1] = wert2;
+
+	glieder_liste = glieder_liste.remove(glied_index + 1);
+	glieder_liste = glieder_liste.remove(glied_index - 1);
+
+	return glieder_liste;
 }

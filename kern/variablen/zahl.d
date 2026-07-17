@@ -380,6 +380,9 @@ private ubyte[] subtrahiere(const ubyte[] num1, const ubyte[] num2)
 
 private Bruch subtrahiere(Bruch num1, Bruch num2)
 {
+	if (ist_grösser(num2, num1))
+		throw new Exception("Man kann nicht das grössere vom kleinern Subtrahieren");
+
 	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
 
 	ubyte[] summand1 = multipliziere(num1.zähler, num2.nenner);
@@ -415,6 +418,14 @@ Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 	ubyte[] min = minuend.werte;
 	ubyte[] sub = subtrahend.werte;
 
+	Bruch sub_nach;
+
+	if (ist_grösser(subtrahend.nach_komma, minuend.nach_komma))
+	{
+		sub_nach = subtrahiere(subtrahend.nach_komma, minuend.nach_komma);
+		sub = addiere(sub, [1]);
+	}
+
 	if (ist_grösser(sub, min))
 	{
 		ubyte[] zwischenspeicher = sub;
@@ -425,15 +436,6 @@ Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 	}
 
 	ubyte[] sub_vor = subtrahiere(min, sub);
-	Bruch sub_nach;
-	if (inverted)
-	{
-		sub_nach = subtrahiere(subtrahend.nach_komma, minuend.nach_komma);
-	}
-	else
-	{
-		sub_nach = subtrahiere(minuend.nach_komma, subtrahend.nach_komma);
-	}
 
 	return Zahl(inverted, sub_nach, sub_vor);
 }

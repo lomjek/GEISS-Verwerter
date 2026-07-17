@@ -59,7 +59,7 @@ class Funktion_Abrufen_Glied : Glied
 
 		for (ulong i = 0; i < argumente.length; i++)
 		{
-			Wert* argument = new Wert(argumente[i].verwerte(neuer_bereich));
+			Wert* argument = new Wert(argumente[i].verwerte(bereich));
 			setze_variable(neuer_bereich, namen[i], argument);
 		}
 
