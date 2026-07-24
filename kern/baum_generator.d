@@ -20,7 +20,7 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
-private enum Operation_priorities
+private enum Aktion_Gewicht
 {
 	INVALID,
 
@@ -34,8 +34,12 @@ private enum Operation_priorities
 	SETZE_VARIABLE,
 
 	GLEICH,
+
 	GRÖSSER_ALS,
+	GRÖSSER_GLEICH,
+
 	KLEINER_ALS,
+	KLEINER_GLEICH,
 
 	PLUS_MINUS,
 	MAL_DURCH,
@@ -43,9 +47,28 @@ private enum Operation_priorities
 
 }
 
+Aktion_Gewicht[OperatorenTyp] operatoren_Gewicht = [
+	OperatorenTyp.PLUS: Aktion_Gewicht.PLUS_MINUS,
+	OperatorenTyp.MINUS: Aktion_Gewicht.PLUS_MINUS,
+
+	OperatorenTyp.MAL: Aktion_Gewicht.MAL_DURCH,
+	OperatorenTyp.GETEILT: Aktion_Gewicht.MAL_DURCH,
+
+	OperatorenTyp.HOCH: Aktion_Gewicht.HOCH,
+
+	OperatorenTyp.GLEICH: Aktion_Gewicht.GLEICH,
+
+	OperatorenTyp.GRÖSSER_ALS: Aktion_Gewicht.GRÖSSER_ALS,
+	//TODO: GRÖSSER GLEICH
+
+	OperatorenTyp.KLEINER_ALS: Aktion_Gewicht.KLEINER_ALS,
+	//TODO: KLEINER_GLEICH
+];
+
+nothrow @safe @nogc
 private uint get_op_prio_length()
 {
-	return Operation_priorities.max - Operation_priorities.min + 1;
+	return Aktion_Gewicht.max - Aktion_Gewicht.min + 1;
 }
 
 private bool ist_fertig(Glied[] glieder_liste)
@@ -163,11 +186,11 @@ uint sonst_block_priority_addition = 0;
 uint klammer_zusatz = 0;
 // Für den Zusatz an Priorität, wegen Klammern.
 
-void passe_mpo_an(Operation_priorities op, ulong index)
+void passe_mpo_an(Aktion_Gewicht op, ulong index)
 {
 	if (max_priority_operation < (op + klammer_zusatz + sonst_block_priority_addition))
 	{
-		max_priority_operation = Operation_priorities.PLUS_MINUS + klammer_zusatz + sonst_block_priority_addition;
+		max_priority_operation = Aktion_Gewicht.PLUS_MINUS + klammer_zusatz + sonst_block_priority_addition;
 		max_priority_index = index;
 	}
 }
@@ -266,28 +289,13 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
 				case OperatorenTyp.PLUS:
 				case OperatorenTyp.MINUS:
-					passe_mpo_an(Operation_priorities.PLUS_MINUS, i);
-					break op_typ_switch;
-
 				case OperatorenTyp.MAL:
 				case OperatorenTyp.GETEILT:
-					passe_mpo_an(Operation_priorities.MAL_DURCH, i);
-					break op_typ_switch;
-
 				case OperatorenTyp.HOCH:
-					passe_mpo_an(Operation_priorities.HOCH, i);
-					break op_typ_switch;
-
 				case OperatorenTyp.GLEICH:
-					passe_mpo_an(Operation_priorities.GLEICH, i);
-					break op_typ_switch;
-
 				case OperatorenTyp.GRÖSSER_ALS:
-					passe_mpo_an(Operation_priorities.GRÖSSER_ALS, i);
-					break op_typ_switch;
-
 				case OperatorenTyp.KLEINER_ALS:
-					passe_mpo_an(Operation_priorities.KLEINER_ALS, i);
+					passe_mpo_an(operatoren_Gewicht[opg.operationenTyp], i);
 					break op_typ_switch;
 
 				default:
@@ -297,48 +305,41 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			else if (glieder_liste[i].instanceof!Setze_Variable_Glied)
 			{
 				if (max_priority_operation < (
-						Operation_priorities.SETZE_VARIABLE + klammer_zusatz + sonst_block_priority_addition))
+						Aktion_Gewicht.SETZE_VARIABLE + klammer_zusatz + sonst_block_priority_addition))
 				{
-					max_priority_operation = Operation_priorities.SETZE_VARIABLE + klammer_zusatz + sonst_block_priority_addition;
+					max_priority_operation = Aktion_Gewicht.SETZE_VARIABLE + klammer_zusatz + sonst_block_priority_addition;
 					max_priority_index = i;
 				}
+			}
+			else if (glieder_liste[i].instanceof!Falls_BlockGlied)
+			{
+				if ((i + 2) >= arr_length)
+				{
+					throw new Fehler(
+						"Das Wort Falls ist zu nahe am Ende...");
+				}
+
+				passe_mpo_an(Aktion_Gewicht.FALLS, i);
+			}
+			else if (glieder_liste[i].instanceof!Sonst_BlockGlied)
+			{
+				if ((cast(Sonst_BlockGlied) glieder_liste[i]).aktionen.length > 0)
+					continue;
+
+				if ((i + 1) >= glieder_liste.length)
+				{
+					throw new Exception(
+						"Das Wort Sonst ist zu nahe am Ende...");
+				}
+
+				passe_mpo_an(Aktion_Gewicht.FALLS, i);
+				sonst_block_priority_addition++;
 			}
 			else if (glieder_liste[i].instanceof!SW_Glied)
 			{
 				SchlüsselWort sw = (cast(SW_Glied) glieder_liste[i])
 					.sw;
-				if (sw == SchlüsselWort.FALLS)
-				{
-					if ((i + 2) >= arr_length)
-					{
-						throw new Exception(
-							"Das Wort Falls ist zu nahe am Ende...");
-					}
-
-					if (max_priority_operation < (
-							Operation_priorities.FALLS + klammer_zusatz + sonst_block_priority_addition))
-					{
-						max_priority_operation = Operation_priorities.FALLS + klammer_zusatz + sonst_block_priority_addition;
-						max_priority_index = i;
-					}
-				}
-				else if (sw == SchlüsselWort.SONST)
-				{
-					if ((i + 1) >= arr_length)
-					{
-						throw new Exception(
-							"Das Wort Sonst ist zu nahe am Ende...");
-					}
-
-					if (max_priority_operation < (
-							Operation_priorities.SONST + klammer_zusatz + sonst_block_priority_addition))
-					{
-						max_priority_operation = Operation_priorities.SONST + klammer_zusatz + sonst_block_priority_addition;
-						sonst_block_priority_addition++;
-						max_priority_index = i;
-					}
-				}
-				else if (sw == SchlüsselWort.SOLANGE)
+				if (sw == SchlüsselWort.SOLANGE)
 				{
 					if ((i + 2) >= arr_length)
 					{
@@ -347,9 +348,9 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 					}
 
 					if (max_priority_operation < (
-							Operation_priorities.SONST + klammer_zusatz + sonst_block_priority_addition))
+							Aktion_Gewicht.SONST + klammer_zusatz + sonst_block_priority_addition))
 					{
-						max_priority_operation = Operation_priorities.SONST + klammer_zusatz + sonst_block_priority_addition;
+						max_priority_operation = Aktion_Gewicht.SONST + klammer_zusatz + sonst_block_priority_addition;
 						max_priority_index = i;
 					}
 				}
@@ -386,139 +387,9 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		}
 
 		//MARK: Build that node
-		if (glied.instanceof!OperationGlied)
-		{
-			glieder_liste = parse_glied(glieder_liste, max_priority_index);
-			continue;
-		}
 
-		if (glied.instanceof!Setze_Variable_Glied)
-		{
-			Setze_Variable_Glied svglied = cast(
-				Setze_Variable_Glied) glied;
-
-			if (max_priority_index < 1)
-				throw new PositionFehler(glied, max_priority_index);
-
-			if (max_priority_index >= glieder_liste.length)
-				throw new Exception("Der Pfeil kann nicht das letzte Element der Linie sein");
-
-			Glied vorher_glied = glieder_liste[max_priority_index - 1];
-			Glied naher_glied = glieder_liste[max_priority_index + 1];
-
-			if (vorher_glied.instanceof!Erstelle_Variable_Glied)
-			{
-				Erstelle_Variable_Glied evg = cast(
-					Erstelle_Variable_Glied) vorher_glied;
-				svglied.var_name = evg.var_name;
-				svglied.assign_wert = naher_glied;
-				glieder_liste = glieder_liste.remove(
-					max_priority_index + 1);
-				arr_length--;
-			}
-			else if (vorher_glied.instanceof!Lese_Variable_Glied)
-			{
-				Lese_Variable_Glied lvg = cast(
-					Lese_Variable_Glied) vorher_glied;
-				svglied.var_name = lvg.var_name;
-				svglied.assign_wert = naher_glied;
-
-				glieder_liste = glieder_liste.remove(max_priority_index + 1);
-				glieder_liste = glieder_liste.remove(max_priority_index - 1);
-
-				arr_length -= 2;
-			}
-			else
-			{
-				throw new Exception("Variablennamen unbekannt!");
-			}
-		}
-
-		if (glied.instanceof!SW_Glied)
-		{
-			SchlüsselWort sw = (
-				cast(SW_Glied) glied).sw;
-			if (sw == SchlüsselWort.FALLS)
-			{
-				if (
-					(max_priority_index + 2) >= arr_length)
-				{
-					throw new Exception(
-						"Das Wort Falls ist zu nahe am Ende...");
-				}
-
-				Falls_BlockGlied falls_block_glied = new Falls_BlockGlied();
-				falls_block_glied.aktionen = (cast(
-						BlockGlied) glieder_liste[max_priority_index + 2])
-					.aktionen;
-				falls_block_glied.bedingung = glieder_liste[max_priority_index + 1];
-
-				glieder_liste[max_priority_index] = falls_block_glied;
-				glieder_liste = glieder_liste.remove(
-					max_priority_index + 2);
-				glieder_liste = glieder_liste.remove(
-					max_priority_index + 1);
-				arr_length -= 2;
-			}
-			else if (sw == SchlüsselWort.SONST)
-			{
-				if (
-					(max_priority_index + 1) >= arr_length)
-				{
-					throw new Exception(
-						"Das Wort Sonst ist zu nahe am Ende...");
-				}
-				if (glieder_liste[max_priority_index + 1].instanceof!BlockGlied)
-				{
-					Sonst_BlockGlied sonst_block = new Sonst_BlockGlied();
-					sonst_block.aktionen = (
-						cast(BlockGlied) glieder_liste[max_priority_index + 1])
-						.aktionen;
-
-					glieder_liste[max_priority_index] = sonst_block;
-					glieder_liste = glieder_liste.remove(
-						max_priority_index + 1);
-					arr_length--;
-				}
-				else if (glieder_liste[max_priority_index + 1].instanceof!Falls_BlockGlied)
-				{
-					Sonst_BlockGlied sonst_block = new Sonst_BlockGlied();
-					sonst_block.aktionen ~= glieder_liste[max_priority_index + 1];
-
-					glieder_liste[max_priority_index] = sonst_block;
-					glieder_liste = glieder_liste.remove(
-						max_priority_index + 1);
-					arr_length--;
-				}
-				else
-				{
-					throw new Fehler("Das nächste Glied hat nicht den Richtigen Typ, es ist "d ~ glieder_liste[max_priority_index + 1]
-							.toString.to!dstring);
-				}
-			}
-			else if (sw == SchlüsselWort.SOLANGE)
-			{
-				if (
-					(max_priority_index + 2) >= arr_length)
-				{
-					throw new Exception(
-						"Das Wort SOOLANGE ist zu nahe am Ende...");
-				}
-
-				Solange_BlockGlied solange_block_glied = new Solange_BlockGlied();
-				solange_block_glied.aktionen = (cast(
-						BlockGlied) glieder_liste[max_priority_index + 2])
-					.aktionen;
-				solange_block_glied.bedingung = glieder_liste[max_priority_index + 1];
-
-				glieder_liste[max_priority_index] = solange_block_glied;
-				glieder_liste = glieder_liste.remove(
-					max_priority_index + 2);
-				glieder_liste = glieder_liste.remove(
-					max_priority_index + 1);
-				arr_length -= 2;
-			}
-		}
+		glieder_liste = baue_glied(glieder_liste, max_priority_index);
+		arr_length = glieder_liste.length;
 
 		//Zusammenziehen von Falls_Sonst Blocks
 		for (ulong i = 0; (i + 1) < arr_length; i++)
@@ -634,18 +505,31 @@ Glied[] konstruiere_argumente(Glied[] glieder_liste, ulong klammer_auf_position)
 	throw new Error("Not implemented!");
 }
 
-//MARK: Glied generation
-Glied[] parse_glied(Glied[] glieder_liste, ulong glied_index)
+//MARK: baue_glied
+Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
 {
 	Glied glied = glieder_liste[glied_index];
 
 	if (glied.instanceof!OperationGlied)
-		return parse_glied_OperationenGlied(cast(OperationGlied) glied, glieder_liste, glied_index);
+		return baue_glied_OperationenGlied(cast(OperationGlied) glied, glieder_liste, glied_index);
 
+	else if (glied.instanceof!Setze_Variable_Glied)
+		return baue_glied_SetzeVarGlied(cast(Setze_Variable_Glied) glied, glieder_liste, glied_index);
+
+	else if (glied.instanceof!Falls_BlockGlied)
+		return baue_glied_Falls_Glied(cast(Falls_BlockGlied) glied, glieder_liste, glied_index);
+
+	else if (glied.instanceof!Sonst_BlockGlied)
+		return baue_glied_Sonst_Glied(cast(Sonst_BlockGlied) glied, glieder_liste, glied_index);
+
+	else if (glied.instanceof!SW_Glied)
+		return baue_glied_SWGlied(cast(SW_Glied) glied, glieder_liste, glied_index);
+
+	writeln("WARNUNG: Nichts wurde geparst.");
 	return glieder_liste;
 }
 
-Glied[] parse_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_liste, ulong glied_index)
 {
 	if (glied_index <= 0 || glied_index >= glieder_liste.length)
 		throw new Fehler("Eine Operation kann nicht das erste oder letzte Glied sein.");
@@ -662,5 +546,102 @@ Glied[] parse_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_li
 	glieder_liste = glieder_liste.remove(glied_index + 1);
 	glieder_liste = glieder_liste.remove(glied_index - 1);
 
+	return glieder_liste;
+}
+
+Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste, ulong glied_index)
+{
+	if (glied_index < 1)
+		throw new PositionFehler(svg, glied_index);
+
+	if (glied_index >= glieder_liste.length)
+		throw new PositionFehler(svg, glied_index);
+
+	Glied vorher_glied = glieder_liste[glied_index - 1];
+	Glied naher_glied = glieder_liste[glied_index + 1];
+
+	if (vorher_glied.instanceof!Erstelle_Variable_Glied)
+	{
+		Erstelle_Variable_Glied evg = cast(Erstelle_Variable_Glied) vorher_glied;
+		svg.var_name = evg.var_name;
+		svg.assign_wert = naher_glied;
+		glieder_liste = glieder_liste.remove(glied_index + 1);
+	}
+	else if (vorher_glied.instanceof!Lese_Variable_Glied)
+	{
+		Lese_Variable_Glied lvg = cast(Lese_Variable_Glied) vorher_glied;
+		svg.var_name = lvg.var_name;
+		svg.assign_wert = naher_glied;
+
+		glieder_liste = glieder_liste.remove(glied_index + 1);
+		glieder_liste = glieder_liste.remove(glied_index - 1);
+	}
+	else
+	{
+		throw new Fehler("Variablennamen unbekannt!");
+	}
+
+	return glieder_liste;
+}
+
+Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+{
+	if ((glied_index + 2) >= glieder_liste.length)
+	{
+		writeln(glied_index, glieder_liste);
+		throw new Fehler(
+			"Das Wort Falls ist zu nahe am Ende...");
+	}
+
+	if (glieder_liste[glied_index + 2].instanceof!BlockGlied)
+		glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 2]).aktionen;
+	else
+		glied.aktionen ~= glieder_liste[glied_index + 2];
+
+	glied.bedingung = glieder_liste[max_priority_index + 1];
+
+	glieder_liste = glieder_liste.remove(glied_index + 2);
+	glieder_liste = glieder_liste.remove(glied_index + 1);
+
+	return glieder_liste;
+}
+
+Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+{
+	if ((glied_index + 1) >= glieder_liste.length)
+	{
+		throw new Fehler(
+			"Das Wort Sonst ist zu nahe am Ende...");
+	}
+
+	if (glieder_liste[max_priority_index + 1].instanceof!BlockGlied)
+		glied.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 1]).aktionen;
+
+	else
+		glied.aktionen ~= glieder_liste[max_priority_index + 1];
+
+	glieder_liste = glieder_liste.remove(max_priority_index + 1);
+	return glieder_liste;
+}
+
+Glied[] baue_glied_SWGlied(SW_Glied glied, Glied[] glieder_liste, ulong glied_index)
+{
+	SchlüsselWort sw = (cast(SW_Glied) glied).sw;
+	if (sw == SchlüsselWort.SOLANGE)
+	{
+		if ((max_priority_index + 2) >= glieder_liste.length)
+		{
+			throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
+		}
+
+		Solange_BlockGlied solange_block_glied = new Solange_BlockGlied();
+		solange_block_glied.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 2])
+			.aktionen;
+		solange_block_glied.bedingung = glieder_liste[max_priority_index + 1];
+
+		glieder_liste[max_priority_index] = solange_block_glied;
+		glieder_liste = glieder_liste.remove(max_priority_index + 2);
+		glieder_liste = glieder_liste.remove(max_priority_index + 1);
+	}
 	return glieder_liste;
 }

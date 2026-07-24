@@ -11,6 +11,8 @@ import glied.glied;
 import std.stdio : write;
 import std.conv : to;
 
+// @ {} [] # \ || != ~
+
 class Erstelle_Variable_Glied : Glied
 {
 	private WertTyp wert_typ;

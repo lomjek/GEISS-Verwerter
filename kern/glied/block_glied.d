@@ -121,7 +121,7 @@ class Falls_BlockGlied : BlockGlied
 
 	override public bool ist_vollständig()
 	{
-		return true;
+		return (bedingung !is null) && (aktionen.length !is 0);
 	}
 
 	override string toString() const

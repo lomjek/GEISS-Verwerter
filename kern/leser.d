@@ -309,7 +309,7 @@ Glied[] lese_linie(dstring linie)
 
 		if (wort.ist_sw == Verifizierung.ja)
 		{
-			token_liste ~= new SW_Glied(wort.als_sw);
+			token_liste ~= baue_richtiges_sw_glied(wort.als_sw);
 			continue;
 		}
 
