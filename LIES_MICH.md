@@ -9,7 +9,8 @@ dass ich keine Denkfehler gemacht habe.
 Ich gehe in Zürich zur Schule und hier mussten wir eine Maturaarbeit zum
 Abschluss der Schule schreiben. Man konnte wählen, was einem das Herz be-
 gehrte und ich hatte schön länger den Wunsch, einmal in meinem Leben eine
-Programmiersprache zu bauen. 
+Programmiersprache zu bauen. Also habe ich meine Maturaarbeit zum Anlass
+genommen, eine Programmiersprache zu erstellen.
 
 ## Bauen des Projektes
 

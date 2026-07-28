@@ -58,7 +58,7 @@ class OperationGlied : Glied
 
 					NatürlicheZahl neue_zahl = addiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new NatürlicheZahl(neue_zahl);
+					resultat = Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -92,7 +92,7 @@ class OperationGlied : Glied
 
 					GanzeZahl neue_zahl = addiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new GanzeZahl(neue_zahl);
+					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -100,7 +100,7 @@ class OperationGlied : Glied
 
 					GanzeZahl neue_zahl = addiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new GanzeZahl(neue_zahl);
+					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -127,7 +127,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = addiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -135,7 +135,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = addiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -143,7 +143,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = addiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				default:
@@ -176,7 +176,7 @@ class OperationGlied : Glied
 
 					GanzeZahl neue_zahl = subtrahiere(GanzeZahl(zwischenresultat), alte_zahl);
 
-					resultat.wert = new GanzeZahl(neue_zahl);
+					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -201,7 +201,7 @@ class OperationGlied : Glied
 
 					GanzeZahl neue_zahl = subtrahiere(zwischenresultat, GanzeZahl(alte_zahl));
 
-					resultat.wert = new GanzeZahl(neue_zahl);
+					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -209,7 +209,7 @@ class OperationGlied : Glied
 
 					GanzeZahl neue_zahl = subtrahiere(GanzeZahl(zwischenresultat), alte_zahl);
 
-					resultat.wert = new GanzeZahl(neue_zahl);
+					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -233,7 +233,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = subtrahiere(zwischenresultat, Zahl(alte_zahl));
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -241,7 +241,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = subtrahiere(zwischenresultat, Zahl(alte_zahl));
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -249,7 +249,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = subtrahiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				default:
@@ -275,7 +275,7 @@ class OperationGlied : Glied
 
 					NatürlicheZahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new NatürlicheZahl(neue_zahl);
+					resultat = Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -309,7 +309,7 @@ class OperationGlied : Glied
 
 					GanzeZahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new GanzeZahl(neue_zahl);
+					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -317,7 +317,7 @@ class OperationGlied : Glied
 
 					GanzeZahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new GanzeZahl(neue_zahl);
+					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -344,7 +344,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
@@ -352,7 +352,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -360,7 +360,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				default:
@@ -465,7 +465,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
@@ -473,7 +473,7 @@ class OperationGlied : Glied
 
 					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
 
-					resultat.wert = new Zahl(neue_zahl);
+					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				default:
@@ -487,26 +487,28 @@ class OperationGlied : Glied
 			}
 
 		case OperatorenTyp.GLEICH:
-			if (resultat.typ == wert2.typ)
+			if (wert1.typ == wert2.typ)
 			{
-				if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
+				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
 					NatürlicheZahl num1 = *cast(NatürlicheZahl*) wert1.wert;
 					NatürlicheZahl num2 = *cast(NatürlicheZahl*) wert2.wert;
-					bool gleich = is_equal(num1.werte, num2.werte);
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(gleich));
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
 					break ots;
 				}
-				else if (resultat.typ == WertTyp.GANZE_ZAHL)
+				else if (wert1.typ == WertTyp.GANZE_ZAHL)
 				{
 					GanzeZahl num1 = *cast(GanzeZahl*) wert1.wert;
 					GanzeZahl num2 = *cast(GanzeZahl*) wert2.wert;
-					bool gleich = num1.negativ == num2.negativ;
-					if (gleich)
-					{
-						gleich = is_equal(num1.werte, num2.werte);
-					}
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(gleich));
+
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
+					break ots;
+				}
+				else if (wert1.typ == WertTyp.ZAHL)
+				{
+					Zahl num1 = *cast(Zahl*) wert1.wert;
+					Zahl num2 = *cast(Zahl*) wert2.wert;
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
 					break ots;
 				}
 
@@ -518,28 +520,54 @@ class OperationGlied : Glied
 			break ots; // TODO: Warum braucht es das hier?
 
 		case OperatorenTyp.GRÖSSER_ALS:
-			if (resultat.typ == wert2.typ)
+			if (wert1.typ == wert2.typ)
 			{
-				if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
+				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
 					NatürlicheZahl num1 = *cast(NatürlicheZahl*) wert1.wert;
 					NatürlicheZahl num2 = *cast(NatürlicheZahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(ist_grösser(num1.werte, num2
-							.werte)));
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
+					break ots;
+				}
+				else if (wert1.typ == WertTyp.GANZE_ZAHL)
+				{
+					GanzeZahl num1 = *cast(GanzeZahl*) wert1.wert;
+					GanzeZahl num2 = *cast(GanzeZahl*) wert2.wert;
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
+					break ots;
+				}
+				else if (wert1.typ == WertTyp.ZAHL)
+				{
+					Zahl num1 = *cast(Zahl*) wert1.wert;
+					Zahl num2 = *cast(Zahl*) wert2.wert;
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
 					break ots;
 				}
 			}
 			break ots;
 
 		case OperatorenTyp.KLEINER_ALS:
-			if (resultat.typ == wert2.typ)
+			if (wert1.typ == wert2.typ)
 			{
-				if (resultat.typ == WertTyp.NATÜRLICHE_ZAHL)
+				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
 					NatürlicheZahl num1 = *cast(NatürlicheZahl*) wert1.wert;
 					NatürlicheZahl num2 = *cast(NatürlicheZahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(ist_grösser(num2.werte, num1
-							.werte)));
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
+					break ots;
+				}
+				else if (wert1.typ == WertTyp.GANZE_ZAHL)
+				{
+					GanzeZahl num1 = *cast(GanzeZahl*) wert1.wert;
+					GanzeZahl num2 = *cast(GanzeZahl*) wert2.wert;
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
+					break ots;
+				}
+				else if (wert1.typ == WertTyp.ZAHL)
+				{
+					Zahl num1 = *cast(Zahl*) wert1.wert;
+					Zahl num2 = *cast(Zahl*) wert2.wert;
+					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
 					break ots;
 				}
 			}
@@ -549,7 +577,7 @@ class OperationGlied : Glied
 			throw new Fehler(
 				"Dieser Operator wurde nicht implementiert..." ~ operationenTyp.to!dstring);
 		}
-
+		writeln(resultat);
 		return resultat;
 	}
 

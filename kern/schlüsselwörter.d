@@ -1,7 +1,7 @@
 module schlüsselwörter;
 
 import glied.glied : SW_Glied, Glied;
-import glied.block_glied : Falls_BlockGlied, Sonst_BlockGlied;
+import glied.block_glied : Falls_BlockGlied, Sonst_BlockGlied, Solange_BlockGlied;
 
 // @ {} [] # \ || != ~
 
@@ -39,6 +39,9 @@ Glied baue_richtiges_sw_glied(SchlüsselWort sw)
 
 	case SchlüsselWort.SONST:
 		return new Sonst_BlockGlied();
+
+	case SchlüsselWort.SOLANGE:
+		return new Solange_BlockGlied();
 
 	default:
 		return new SW_Glied(sw);

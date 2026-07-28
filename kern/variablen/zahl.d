@@ -48,6 +48,19 @@ struct Zahl
 		if (this.nach_komma.zähler.ist_null)
 			this.nach_komma.nenner = [];
 	}
+
+	int opCmp(const ref Zahl other) const
+	{
+		GanzeZahl g1 = GanzeZahl(this.negativ, this.werte);
+		GanzeZahl g2 = GanzeZahl(other.negativ, other.werte);
+
+		int integerCmp = g1.opCmp(g2);
+		if (integerCmp != 0)
+			return integerCmp;
+
+		int fracCmp = this.nach_komma.opCmp(other.nach_komma);
+		return this.negativ ? -fracCmp : fracCmp;
+	}
 }
 
 struct GanzeZahl
@@ -67,10 +80,41 @@ struct GanzeZahl
 		this.werte = gz.werte;
 	}
 
-	nothrow this(bool negativ, ubyte[] werte)
+	nothrow this(const bool negativ, const ubyte[] werte)
 	{
 		this.negativ = negativ;
-		this.werte = werte;
+		this.werte = werte.dup;
+	}
+
+	int opCmp(const ref GanzeZahl other) const
+	{
+		ubyte[] num1 = right_unpad(this.werte.dup);
+		ubyte[] num2 = right_unpad(other.werte.dup);
+
+		if (num1.length == 0 && num2.length == 0)
+			return 0;
+
+		if (this.negativ != other.negativ)
+			return this.negativ ? -1 : 1;
+
+		int cmp = 0;
+		if (num1.length != num2.length)
+		{
+			cmp = num1.length < num2.length ? -1 : 1;
+		}
+		else
+		{
+			foreach_reverse (i; 0 .. num1.length)
+			{
+				if (num1[i] != num2[i])
+				{
+					cmp = num1[i] < num2[i] ? -1 : 1;
+					break;
+				}
+			}
+		}
+
+		return this.negativ ? -cmp : cmp;
 	}
 }
 
@@ -86,6 +130,23 @@ struct NatürlicheZahl
 	nothrow this(ubyte[] werte)
 	{
 		this.werte = werte;
+	}
+
+	int opCmp(const NatürlicheZahl other) const
+	{
+		ubyte[] num1 = right_unpad(werte.dup);
+		ubyte[] num2 = right_unpad(other.werte.dup);
+
+		if (num1.length != num2.length)
+			return num1.length < num2.length ? -1 : 1;
+
+		foreach_reverse (i; 0 .. num1.length)
+		{
+			if (num1[i] != num2[i])
+				return num1[i] < num2[i] ? -1 : 1;
+		}
+
+		return 0;
 	}
 }
 
@@ -106,6 +167,14 @@ struct Bruch
 	{
 		zähler = bruch.zähler;
 		nenner = bruch.nenner;
+	}
+
+	int opCmp(const Bruch other) const
+	{
+		ubyte[] zähler1 = multipliziere(this.zähler, other.nenner);
+		ubyte[] zähler2 = multipliziere(other.zähler, this.nenner);
+
+		return NatürlicheZahl(zähler1).opCmp(NatürlicheZahl(zähler2));
 	}
 }
 
@@ -167,54 +236,18 @@ private ubyte[] right_unpad(const ubyte[] num)
 }
 
 //MARK: COMPARE
-
-bool ist_grösser(ubyte[] x, ubyte[] y) // x > y => TRUE
-{
-	ulong max_len = x.length > y.length ? x.length : y.length;
-	ubyte[] px = right_pad(x, max_len);
-	ubyte[] py = right_pad(y, max_len);
-
-	for (long i = cast(long) max_len - 1; i >= 0; i--)
-	{
-		if (px[i] > py[i])
-			return true;
-		if (px[i] < py[i])
-			return false;
-	}
-
-	return false;
-}
-
-bool is_equal(ubyte[] x, ubyte[] y)
-{
-	x = left_pad(x, y.length);
-	y = left_pad(y, x.length);
-
-	for (ulong i = 0; i < x.length; i++)
-	{
-		if (x[i] != y[i])
-			return false;
-	}
-	return true;
-}
-
 private bool ist_grösser_gleich_1(Bruch bruch)
 {
-	if (is_equal(bruch.nenner, bruch.zähler))
+	if (bruch.nenner.length == 0 && bruch.zähler.length == 0)
+		return false;
+
+	if (NatürlicheZahl(bruch.zähler) == NatürlicheZahl(bruch.nenner))
 		return true;
 
-	if (ist_grösser(bruch.zähler, bruch.nenner))
+	if (NatürlicheZahl(bruch.zähler) > NatürlicheZahl(bruch.nenner))
 		return true;
 
 	return false;
-}
-
-private bool ist_grösser(Bruch num1, Bruch num2)
-{
-	ubyte[] zähler1 = multipliziere(num1.zähler, num2.nenner);
-	ubyte[] zähler2 = multipliziere(num2.zähler, num1.nenner);
-
-	return ist_grösser(zähler1, zähler2);
 }
 
 nothrow
@@ -232,21 +265,18 @@ private bool ist_null(const ubyte[] num)
 nothrow
 private ubyte[] addiere(const ubyte[] nummer1, const ubyte[] nummer2)
 {
-	ubyte[] num1 = right_pad(nummer1, nummer2.length); // Pad ubyte array.
-	ubyte[] num2 = right_pad(nummer2, nummer1.length);
+	ulong max_len = nummer1.length > nummer2.length ? nummer1.length : nummer2.length;
+	ubyte[] num1 = right_pad(nummer1, max_len);
+	ubyte[] num2 = right_pad(nummer2, max_len);
 
 	ubyte[] resultat;
 	ubyte überschuss = 0;
 
-	if (num1.length != num2.length)
-		throw new Error(
-			"Es sollte nie passieren. Beim addieren von zwei Zahlen wurden sie nicht richtig gepaddet.");
-
-	for (ulong i = 0; i < num1.length; i++)
+	for (ulong i = 0; i < max_len; i++)
 	{
-		ushort summe = num1[i] + num2[i] + überschuss;
-		überschuss = cast(ubyte)(summe >> 8); //oberer Byte des ushort, was übertragen wird...
-		resultat ~= cast(ubyte)(summe & 0xFF); // tieferer Byte des ushorts, was an der Stelle eingetragen wird.
+		ushort summe = cast(ushort)(num1[i] + num2[i] + überschuss);
+		überschuss = cast(ubyte)(summe >> 8);
+		resultat ~= cast(ubyte)(summe & 0xFF);
 	}
 
 	if (überschuss)
@@ -336,7 +366,7 @@ NatürlicheZahl addiere(NatürlicheZahl x, NatürlicheZahl y)
 //MARK: SUBTRAHIERE
 private ubyte[] subtrahiere(const ubyte[] num1, const ubyte[] num2)
 {
-	if (num2.dup.ist_grösser(num1.dup))
+	if (NatürlicheZahl(num2.dup) > NatürlicheZahl(num1.dup))
 	{
 		throw new Exception("Es gäbe einen Underflow");
 	}
@@ -344,7 +374,7 @@ private ubyte[] subtrahiere(const ubyte[] num1, const ubyte[] num2)
 	ubyte[] min = right_pad(num1.dup, num2.length);
 	ubyte[] sub = right_pad(num2.dup, num1.length);
 
-	if (is_equal(sub, min))
+	if (NatürlicheZahl(min) == NatürlicheZahl(sub))
 	{
 		return [0];
 	}
@@ -380,7 +410,7 @@ private ubyte[] subtrahiere(const ubyte[] num1, const ubyte[] num2)
 
 private Bruch subtrahiere(Bruch num1, Bruch num2)
 {
-	if (ist_grösser(num2, num1))
+	if (num2 > num1)
 		throw new Exception("Man kann nicht das grössere vom kleinern Subtrahieren");
 
 	ubyte[] neuer_nenner = multipliziere(num1.nenner, num2.nenner);
@@ -420,13 +450,13 @@ Zahl subtrahiere(Zahl minuend, Zahl subtrahend) // x - y
 
 	Bruch sub_nach;
 
-	if (ist_grösser(subtrahend.nach_komma, minuend.nach_komma))
+	if (subtrahend.nach_komma > minuend.nach_komma)
 	{
 		sub_nach = subtrahiere(subtrahend.nach_komma, minuend.nach_komma);
 		sub = addiere(sub, [1]);
 	}
 
-	if (ist_grösser(sub, min))
+	if (NatürlicheZahl(sub) > NatürlicheZahl(min))
 	{
 		ubyte[] zwischenspeicher = sub;
 		sub = min;
@@ -461,7 +491,7 @@ GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y
 	ubyte[] min = minuend.werte;
 	ubyte[] sub = subtrahend.werte;
 
-	if (ist_grösser(sub, min))
+	if (NatürlicheZahl(sub) > NatürlicheZahl(min))
 	{
 		ubyte[] zwischenspeicher = sub;
 		sub = min;
@@ -625,7 +655,7 @@ DivisionResultat dividiere(const ubyte[] nummer1, const ubyte[] nummer2, bool th
 	else if (num1 == num2)
 		return DivisionResultat([1], [0]);
 
-	else if (ist_grösser(num2, num1))
+	else if (NatürlicheZahl(num2) > NatürlicheZahl(num1))
 		return DivisionResultat([0], num1);
 
 	bool ist_ungerade = (num1[0] % 2) != 0;
@@ -638,7 +668,7 @@ DivisionResultat dividiere(const ubyte[] nummer1, const ubyte[] nummer2, bool th
 	if (ist_ungerade)
 		dr.rest = addiere(dr.rest, [1]);
 
-	while (ist_grösser(dr.rest, num2) || is_equal(dr.rest, num2))
+	while (NatürlicheZahl(dr.rest) >= NatürlicheZahl(num2))
 	{
 		dr.rest = subtrahiere(dr.rest, num2);
 		dr.quotient = addiere(dr.quotient, [1]);
@@ -696,7 +726,7 @@ Zahl dividiere(NatürlicheZahl num1, NatürlicheZahl num2)
 /// die zweite Zahl wird kopiert...
 ubyte[] potenz(ubyte[] num1, ubyte[] num2)
 {
-	while (ist_grösser(num2, [1]))
+	while (NatürlicheZahl(num2) > NatürlicheZahl([1]))
 	{
 		num1 = num1.multipliziere(num1);
 		num2 = subtrahiere(num2, [1]);

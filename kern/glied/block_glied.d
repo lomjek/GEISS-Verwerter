@@ -237,4 +237,9 @@ class Solange_BlockGlied : BlockGlied
 	{
 		return true;
 	}
+
+	override string toString() const
+	{
+		return "G(SOLANGE | " ~ aktionen.length.to!string ~ ")";
+	}
 }

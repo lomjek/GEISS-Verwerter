@@ -26,10 +26,10 @@ private enum Aktion_Gewicht
 
 	FUNKTION_ABRUFEN,
 
+	SOLANGE,
+
 	SONST,
 	FALLS,
-
-	SOLANGE,
 
 	SETZE_VARIABLE,
 
@@ -522,8 +522,8 @@ Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
 	else if (glied.instanceof!Sonst_BlockGlied)
 		return baue_glied_Sonst_Glied(cast(Sonst_BlockGlied) glied, glieder_liste, glied_index);
 
-	else if (glied.instanceof!SW_Glied)
-		return baue_glied_SWGlied(cast(SW_Glied) glied, glieder_liste, glied_index);
+	else if (glied.instanceof!Solange_BlockGlied)
+		return baue_Solange_Glied(cast(Solange_BlockGlied) glied, glieder_liste, glied_index);
 
 	writeln("WARNUNG: Nichts wurde geparst.");
 	return glieder_liste;
@@ -624,24 +624,16 @@ Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ul
 	return glieder_liste;
 }
 
-Glied[] baue_glied_SWGlied(SW_Glied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
 {
-	SchlüsselWort sw = (cast(SW_Glied) glied).sw;
-	if (sw == SchlüsselWort.SOLANGE)
-	{
-		if ((max_priority_index + 2) >= glieder_liste.length)
-		{
-			throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
-		}
+	if ((glieder_liste.length + 2) >= glieder_liste.length)
+		throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
 
-		Solange_BlockGlied solange_block_glied = new Solange_BlockGlied();
-		solange_block_glied.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 2])
-			.aktionen;
-		solange_block_glied.bedingung = glieder_liste[max_priority_index + 1];
+	glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 2]).aktionen;
+	glied.bedingung = glieder_liste[glied_index + 1];
 
-		glieder_liste[max_priority_index] = solange_block_glied;
-		glieder_liste = glieder_liste.remove(max_priority_index + 2);
-		glieder_liste = glieder_liste.remove(max_priority_index + 1);
-	}
+	glieder_liste = glieder_liste.remove(glied_index + 2);
+	glieder_liste = glieder_liste.remove(glied_index + 1);
+
 	return glieder_liste;
 }
