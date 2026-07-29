@@ -187,7 +187,7 @@ class Falls_Sonst_BlockGlied : Falls_BlockGlied
 
 	override public bool ist_vollständig()
 	{
-		return true;
+		return (bedingung !is null) && (aktionen.length !is 0) && (sonst_aktionen.length != 0);
 	}
 
 	this(Falls_BlockGlied f_bgl, Sonst_BlockGlied s_bgl)
@@ -235,7 +235,7 @@ class Solange_BlockGlied : BlockGlied
 
 	override public bool ist_vollständig()
 	{
-		return true;
+		return (bedingung !is null) && (aktionen.length !is 0);
 	}
 
 	override string toString() const

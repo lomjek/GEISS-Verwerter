@@ -40,6 +40,23 @@ unittest
 	assert((cast(Sonst_BlockGlied) glied_liste_sonst[0]).aktionen[0] == nullg);
 	writeln("läuft");
 
+	write("Testiere finde_MPO...");
+	{
+		Glied[] glieder_liste = [
+			new Wert_Glied(Wert()),
+			new OperationGlied(OperatorenTyp.PLUS),
+			new Wert_Glied(Wert()),
+			new OperationGlied(OperatorenTyp.MAL),
+			new Wert_Glied(Wert())
+		];
+
+		MPO mpo = finde_MPO(glieder_liste);
+
+		assert(mpo.index == 3);
+	}
+
+	writeln("läuft");
+
 	writeln("========================================");
 	writeln("Der Parser funktioniert!");
 	writeln("========================================");

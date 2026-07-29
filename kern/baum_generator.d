@@ -20,7 +20,7 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
-private enum Aktion_Gewicht
+enum Aktion_Gewicht
 {
 	INVALID,
 
@@ -190,7 +190,7 @@ void passe_mpo_an(Aktion_Gewicht op, ulong index)
 {
 	if (max_priority_operation < (op + klammer_zusatz + sonst_block_priority_addition))
 	{
-		max_priority_operation = Aktion_Gewicht.PLUS_MINUS + klammer_zusatz + sonst_block_priority_addition;
+		max_priority_operation = op + klammer_zusatz + sonst_block_priority_addition;
 		max_priority_index = index;
 	}
 }
@@ -265,60 +265,8 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
 			klammer_zusatz = (klammern_offen * get_op_prio_length);
 
-			if (glieder_liste[i].instanceof!OperationGlied)
+			if (glieder_liste[i].instanceof!Falls_BlockGlied)
 			{
-				OperationGlied opg = cast(OperationGlied) glieder_liste[i];
-
-			op_typ_switch:
-				switch (opg.operationenTyp)
-				{
-				case OperatorenTyp.KLAMMER_AUF:
-					klammern_offen++;
-					continue main_loop;
-
-				case OperatorenTyp.KLAMMER_ZU:
-					klammern_offen--;
-					continue main_loop;
-
-				case OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF:
-					geschw_klammern_offen++;
-					glieder_liste = glieder_liste.remove(i);
-					arr_length--;
-					i--;
-					continue main_loop;
-
-				case OperatorenTyp.PLUS:
-				case OperatorenTyp.MINUS:
-				case OperatorenTyp.MAL:
-				case OperatorenTyp.GETEILT:
-				case OperatorenTyp.HOCH:
-				case OperatorenTyp.GLEICH:
-				case OperatorenTyp.GRÖSSER_ALS:
-				case OperatorenTyp.KLEINER_ALS:
-					passe_mpo_an(operatoren_Gewicht[opg.operationenTyp], i);
-					break op_typ_switch;
-
-				default:
-					break op_typ_switch;
-				}
-			}
-			else if (glieder_liste[i].instanceof!Setze_Variable_Glied)
-			{
-				if (max_priority_operation < (
-						Aktion_Gewicht.SETZE_VARIABLE + klammer_zusatz + sonst_block_priority_addition))
-				{
-					max_priority_operation = Aktion_Gewicht.SETZE_VARIABLE + klammer_zusatz + sonst_block_priority_addition;
-					max_priority_index = i;
-				}
-			}
-			else if (glieder_liste[i].instanceof!Falls_BlockGlied)
-			{
-				if ((i + 2) >= arr_length)
-				{
-					throw new Fehler(
-						"Das Wort Falls ist zu nahe am Ende...");
-				}
-
 				passe_mpo_an(Aktion_Gewicht.FALLS, i);
 			}
 			else if (glieder_liste[i].instanceof!Sonst_BlockGlied)
@@ -505,6 +453,61 @@ Glied[] konstruiere_argumente(Glied[] glieder_liste, ulong klammer_auf_position)
 	throw new Error("Not implemented!");
 }
 
+//MARK: finde_mpo
+
+/// Max Priority Operation
+/// Hält den Wert und den index zum Glied, welches am dringendsten gebaut werden muss.
+struct MPO
+{
+	ulong value = 0;
+	ulong index = 0;
+}
+
+void passe_mpo_an(MPO* mpo, Aktion_Gewicht op, ulong index)
+{
+	if (mpo.value < op)
+	{
+		mpo.value = op;
+		mpo.index = index;
+	}
+}
+
+MPO finde_MPO(Glied[] glieder_liste)
+{
+	MPO current_mpo = MPO();
+
+	if (glieder_liste.length == 0)
+		return current_mpo;
+
+	for (ulong i = glieder_liste.length; i > 0; i--)
+	{
+		Glied glied = glieder_liste[i - 1];
+
+		if (glied.ist_vollständig)
+			continue;
+
+		if (glied.instanceof!OperationGlied)
+		{
+			OperationGlied op_glied = cast(OperationGlied) glied;
+			if (op_glied.operationenTyp in operatoren_Gewicht)
+				(&current_mpo).passe_mpo_an(operatoren_Gewicht[op_glied.operationenTyp], i);
+			else
+				throw new Fehler("Dieser Operator hat keine Option. Das nicht gut."); // TODO: Sollte nie hier sein.
+		}
+		else if (glied.instanceof!Setze_Variable_Glied)
+			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SETZE_VARIABLE, i);
+		else if (glied.instanceof!Falls_BlockGlied)
+			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS, i);
+		else if (glied.instanceof!Sonst_BlockGlied)
+			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SONST, i);
+
+	}
+
+	current_mpo.index -= 1;
+
+	return current_mpo;
+}
+
 //MARK: baue_glied
 Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
 {
@@ -598,7 +601,7 @@ Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ul
 	else
 		glied.aktionen ~= glieder_liste[glied_index + 2];
 
-	glied.bedingung = glieder_liste[max_priority_index + 1];
+	glied.bedingung = glieder_liste[glied_index + 1];
 
 	glieder_liste = glieder_liste.remove(glied_index + 2);
 	glieder_liste = glieder_liste.remove(glied_index + 1);
@@ -614,13 +617,12 @@ Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ul
 			"Das Wort Sonst ist zu nahe am Ende...");
 	}
 
-	if (glieder_liste[max_priority_index + 1].instanceof!BlockGlied)
-		glied.aktionen = (cast(BlockGlied) glieder_liste[max_priority_index + 1]).aktionen;
-
+	if (glieder_liste[glied_index + 1].instanceof!BlockGlied)
+		glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 1]).aktionen;
 	else
-		glied.aktionen ~= glieder_liste[max_priority_index + 1];
+		glied.aktionen ~= glieder_liste[glied_index + 1];
 
-	glieder_liste = glieder_liste.remove(max_priority_index + 1);
+	glieder_liste = glieder_liste.remove(glied_index + 1);
 	return glieder_liste;
 }
 
@@ -629,7 +631,11 @@ Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, ulon
 	if ((glieder_liste.length + 2) >= glieder_liste.length)
 		throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
 
-	glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 2]).aktionen;
+	if (glieder_liste[glied_index + 1].instanceof!BlockGlied)
+		glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 1]).aktionen;
+	else
+		glied.aktionen ~= glieder_liste[glied_index + 1];
+
 	glied.bedingung = glieder_liste[glied_index + 1];
 
 	glieder_liste = glieder_liste.remove(glied_index + 2);

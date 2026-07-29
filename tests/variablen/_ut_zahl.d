@@ -14,7 +14,8 @@ unittest
 	NatürlicheZahl drei = NatürlicheZahl([3]);
 
 	write("Testiere ist_grösser(Bruch)... ");
-	assert(ist_grösser(b_drittel, b_viertel));
+	assert(b_drittel > b_viertel);
+	assert(b_drittel >= b_viertel);
 	writeln("läuft");
 
 	write("Testiere addiere(Bruch)... ");

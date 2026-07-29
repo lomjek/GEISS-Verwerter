@@ -262,7 +262,7 @@ class OperationGlied : Glied
 						.typ.to!dstring);
 			}
 		case OperatorenTyp.MAL:
-			switch (resultat.typ)
+			switch (wert1.typ)
 			{
 			case WertTyp.NATÜRLICHE_ZAHL:
 				NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) wert1.wert;
@@ -336,6 +336,7 @@ class OperationGlied : Glied
 
 			case WertTyp.ZAHL:
 				Zahl zwischenresultat = *cast(Zahl*) wert1.wert;
+				writeln(1);
 
 				switch (wert2.typ)
 				{
@@ -370,11 +371,13 @@ class OperationGlied : Glied
 
 			default:
 				throw new Fehler(
-					"Man kann nicht anderes Plusrechnen" ~ operationenTyp.to!dstring);
+					"MAL geht für volgendes Typ nicht: "d ~
+						wert1.toString.to!dstring ~ " " ~ operationenTyp.to!dstring ~ " "
+						~ wert2.toString.to!dstring);
 			}
 
-		case OperatorenTyp.GETEILT: //TODO
-			switch (resultat.typ)
+		case OperatorenTyp.GETEILT:
+			switch (wert1.typ)
 			{
 			case WertTyp.NATÜRLICHE_ZAHL:
 				NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) wert1.wert;
