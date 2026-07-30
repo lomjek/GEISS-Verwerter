@@ -1,5 +1,7 @@
 module operatoren;
 
+// @ {} [] # \ || != ~
+
 enum OperatorenTyp
 {
 	INVALID,
@@ -67,4 +69,16 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
 
 	OperatorenTyp.NEUE_LINIE: '\n',
 	OperatorenTyp.ANFANG_LINIE: '\r'
+];
+
+immutable OperatorenTyp[] KLAMMERN_AUF = [
+	OperatorenTyp.KLAMMER_AUF,
+	OperatorenTyp.ECKIGE_KLAMMER_AUF,
+	OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF // Ev brauche ich auch < kleiner als.
+];
+
+immutable OperatorenTyp[] KLAMMERN_ZU = [
+	OperatorenTyp.KLAMMER_ZU,
+	OperatorenTyp.ECKIGE_KLAMMER_ZU,
+	OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU // Ev brauche ich auch < kleiner als.
 ];

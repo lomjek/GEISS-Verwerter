@@ -174,140 +174,98 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 }
 
 //MARK: generiere_baum
-
-// Finde die Anwendung mit max. Prioriäten;
-ulong max_priority_operation = 0;
-ulong max_priority_index = 0;
-
-uint sonst_block_priority_addition = 0;
-// Diese Variable ist dazu da, damit man die Sonst Blöcke von hinten nach 
-// vorne parst, was wichtig ist für verkettungen.
-
-uint klammer_zusatz = 0;
-// Für den Zusatz an Priorität, wegen Klammern.
-
-void passe_mpo_an(Aktion_Gewicht op, ulong index)
-{
-	if (max_priority_operation < (op + klammer_zusatz + sonst_block_priority_addition))
-	{
-		max_priority_operation = op + klammer_zusatz + sonst_block_priority_addition;
-		max_priority_index = index;
-	}
-}
-
 Glied[] generiere_baum(Glied[] glieder_liste)
 {
-	debug
+	Glied[][] matrix;
+	ulong depth = 0;
+
+	foreach (Glied glied; glieder_liste)
 	{
-		write("GL (2.0): ");
-		set_pen_trait(TextTrait.fgGrey);
-		writeln(glieder_liste);
-		set_pen_trait(TextTrait.reset);
+		if (glied.instanceof!OperationGlied) // Könnte Klammer sein -> Subblock
+		{
+			OperatorenTyp op_typ = (cast(OperationGlied) glied).operationenTyp;
+
+			if (KLAMMERN_AUF.canFind(op_typ))
+			{
+				depth++;
+				continue;
+			}
+			else if (KLAMMERN_ZU.canFind(op_typ))
+			{
+				if (op_typ == OperatorenTyp.KLAMMER_ZU)
+				{
+					//TODO: if previous glied is lies_variable parse for argumente
+
+					Glied[] geparste_teil = generiere_linie(matrix[depth]);
+					// Der geparste Teil sollte theoretisch nur ein lang sein...
+					matrix[depth - 1] ~= geparste_teil;
+				}
+				else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
+				{
+					//TODO: KLAMMER ZU Liste Handling
+					depth--;
+					continue;
+				}
+				else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
+				{
+					Glied[] geparste_teil = generiere_linie(matrix[depth]);
+					matrix[depth - 1] ~= new BlockGlied(geparste_teil);
+
+				}
+
+				matrix[depth] = []; // Leere das jetzt nicht mehr benötigte array.
+
+				depth--;
+				continue;
+			}
+			// Ev. brauche ich noch Spitze Klammer zu für nacher. 
+		}
+
+		while (matrix.length <= depth)
+		{
+			matrix.length = depth + 1;
+		}
+
+		matrix[depth] ~= glied;
 	}
 
+	debug
+	{
+		write("Matrix: ");
+		writeln(matrix);
+	}
+
+	return generiere_linie(matrix[0]);
+}
+
+//MARK: generiere_linie
+debug ulong encounters = 0;
+
+Glied[] generiere_linie(Glied[] glieder_liste)
+{
 	uint _Op_wiederholungen = 0;
+	MPO wiederholtes_MPO = MPO();
 	// Diese Variable ist dazu da, dass wenn der Parser keine Aktion findet,
 	// aber der Baum noch nich abgeschlossen ist, er sich nicht in einer
 	// endlosen Schleife verhaddert. 
 
-	ulong arr_length = glieder_liste.length;
-
-	uint klammern_offen = 0;
-	// Diese Zahl ist dazu da, dass man zu der Maximalen priorität noch durch
-	// Klamern einen Zusatz geben kann, also man kann die Priorität von Operationen 
-	// wichtiger machen.
-
-	uint geschw_klammern_offen = 0;
-	Glied[] unter_block;
-	// Diese zwei Variablen dienen dazu, dass man die Unterblöcke, welche mit
-	// geschwungenen Klammern kennzeichnet rekrusiv abgerufen werden. 
-
-	main_loop: while (!glieder_liste.ist_fertig) // Muss vermutlich geändert werden.
+	while (!glieder_liste.ist_fertig) // Muss vermutlich geändert werden.
 	{
-		element_loop: for (ulong i = 0; i < arr_length; i++)
+		debug
 		{
-			//MARK: Subblock bauen
-			if (geschw_klammern_offen != 0)
-			{
-				if (glieder_liste[i].instanceof!OperationGlied)
-				{
-					OperationGlied op_gl = cast(OperationGlied) glieder_liste[i];
-					if (op_gl.operationenTyp == OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF)
-					{
-						geschw_klammern_offen++;
-					}
-					else if (op_gl.operationenTyp == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
-					{
-						geschw_klammern_offen--;
-						if (geschw_klammern_offen == 0)
-						{
-							BlockGlied bl_gl = new BlockGlied;
-							bl_gl.aktionen = generiere_baum(unter_block);
-
-							glieder_liste[i] = bl_gl;
-							unter_block = [];
-
-							continue main_loop;
-						}
-					}
-				}
-
-				unter_block ~= glieder_liste[i];
-				glieder_liste = glieder_liste.remove(i);
-				arr_length--;
-				i--;
-				continue element_loop;
-			}
-
-			//MARK: Find MPO
-			if (glieder_liste[i].ist_vollständig)
-				continue;
-
-			klammer_zusatz = (klammern_offen * get_op_prio_length);
-
-			if (glieder_liste[i].instanceof!Falls_BlockGlied)
-			{
-				passe_mpo_an(Aktion_Gewicht.FALLS, i);
-			}
-			else if (glieder_liste[i].instanceof!Sonst_BlockGlied)
-			{
-				if ((cast(Sonst_BlockGlied) glieder_liste[i]).aktionen.length > 0)
-					continue;
-
-				if ((i + 1) >= glieder_liste.length)
-				{
-					throw new Exception(
-						"Das Wort Sonst ist zu nahe am Ende...");
-				}
-
-				passe_mpo_an(Aktion_Gewicht.FALLS, i);
-				sonst_block_priority_addition++;
-			}
-			else if (glieder_liste[i].instanceof!SW_Glied)
-			{
-				SchlüsselWort sw = (cast(SW_Glied) glieder_liste[i])
-					.sw;
-				if (sw == SchlüsselWort.SOLANGE)
-				{
-					if ((i + 2) >= arr_length)
-					{
-						throw new Exception(
-							"Das Wort Solange ist zu nahe am Ende...");
-					}
-
-					if (max_priority_operation < (
-							Aktion_Gewicht.SONST + klammer_zusatz + sonst_block_priority_addition))
-					{
-						max_priority_operation = Aktion_Gewicht.SONST + klammer_zusatz + sonst_block_priority_addition;
-						max_priority_index = i;
-					}
-				}
-			}
+			write("GL (2.");
+			write(encounters);
+			write("): ");
+			set_pen_trait(TextTrait.fgGrey);
+			writeln(glieder_liste);
+			set_pen_trait(TextTrait.reset);
+			encounters++;
 		}
 
-		Glied glied = glieder_liste[max_priority_index];
+		MPO mpo = finde_MPO(glieder_liste);
+		ulong max_priority_index = mpo.index;
 
-		if (max_priority_index == 0 && max_priority_operation == 0)
+		if (mpo == wiederholtes_MPO)
 			_Op_wiederholungen++;
 		else
 			_Op_wiederholungen = 0; // Wenn man keine Operation findet, macht man diese Zahl grösser.
@@ -319,28 +277,22 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			throw new Fehler(
 				"Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen."d);
 		}
+		wiederholtes_MPO = mpo;
 
 		debug
 		{
 			set_pen_trait(TextTrait.fgGrey);
-			write("MPO "); //MAX PRIO OP
-			write(glied.toString);
-			write(" ");
-			write(max_priority_operation);
-			write(" an index ");
-			write(max_priority_index);
+			write(mpo);
 			write(" in List ");
 			writeln(glieder_liste);
 			set_pen_trait(TextTrait.reset);
 		}
 
-		//MARK: Build that node
-
 		glieder_liste = baue_glied(glieder_liste, max_priority_index);
-		arr_length = glieder_liste.length;
 
 		//Zusammenziehen von Falls_Sonst Blocks
-		for (ulong i = 0; (i + 1) < arr_length; i++)
+		//TODO: Migration nach konstruktor von FALLS Blöcken.
+		for (ulong i = 0; (i + 1) < glieder_liste.length; i++)
 		{
 			if (glieder_liste[i].instanceof!Falls_BlockGlied &&
 				glieder_liste[i + 1].instanceof!Sonst_BlockGlied)
@@ -352,7 +304,6 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
 				glieder_liste[i] = fsbgl;
 				glieder_liste = glieder_liste.remove(i + 1);
-				arr_length--;
 				continue;
 			}
 		}
@@ -404,13 +355,15 @@ Glied[] listen_zusammenfassen(Glied[] glieder_liste)
 				eckige_klammern_offen++;
 				continue;
 			}
-			else if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_ZU)
+			else if ((cast(OperationGlied) glied)
+				.operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_ZU)
 			{
 				if (eckige_klammern_offen == 0)
 					throw new Fehler("Es werden mehr Klammern zu als aufgemacht.");
 
 				eckige_klammern_offen--;
-				neue_gl[eckige_klammern_offen] ~= liste_erstellen(neue_gl[eckige_klammern_offen + 1]);
+				neue_gl[eckige_klammern_offen] ~= liste_erstellen(
+					neue_gl[eckige_klammern_offen + 1]);
 				neue_gl[eckige_klammern_offen + 1] = [];
 				continue;
 			}
@@ -427,32 +380,6 @@ Glied[] listen_zusammenfassen(Glied[] glieder_liste)
 	return neue_gl[0];
 }
 
-//MARK: Argumente Parsing
-
-//TODO: Muss noch richtig umgesetzt werden.
-Glied[] konstruiere_argumente(Glied[] glieder_liste, ulong klammer_auf_position)
-{
-	if (glieder_liste.length > klammer_auf_position + 1 &&
-		glieder_liste[klammer_auf_position + 1].instanceof!OperationGlied &&
-		(cast(OperationGlied) glieder_liste[klammer_auf_position + 1])
-		.operationenTyp == OperatorenTyp
-		.KLAMMER_ZU)
-	{
-		return [];
-	}
-
-	else if (glieder_liste.length > klammer_auf_position + 2 &&
-		glieder_liste[klammer_auf_position + 2].instanceof!OperationGlied &&
-		(cast(OperationGlied) glieder_liste[klammer_auf_position + 2])
-		.operationenTyp == OperatorenTyp
-		.KLAMMER_ZU)
-	{
-		return [glieder_liste[klammer_auf_position + 1]];
-	}
-
-	throw new Error("Not implemented!");
-}
-
 //MARK: finde_mpo
 
 /// Max Priority Operation
@@ -461,6 +388,11 @@ struct MPO
 {
 	ulong value = 0;
 	ulong index = 0;
+
+	string toString() const @safe pure nothrow
+	{
+		return "MPO(" ~ value.to!string ~ " at index " ~ index.to!string ~ ")";
+	}
 }
 
 void passe_mpo_an(MPO* mpo, Aktion_Gewicht op, ulong index)

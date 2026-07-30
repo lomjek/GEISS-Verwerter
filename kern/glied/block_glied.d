@@ -74,6 +74,15 @@ class BlockGlied : Glied
 	{
 		return "G(BLOCK | " ~ aktionen.length.to!string ~ ")";
 	}
+
+	this()
+	{
+	}
+
+	this(Glied[] glieder_liste)
+	{
+		this.aktionen = glieder_liste;
+	}
 }
 
 class Programm_BlockGlied : BlockGlied
