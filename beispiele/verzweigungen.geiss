@@ -1,0 +1,14 @@
+zahl x <- 1.2
+
+falls x = 2 {
+	schreibe("x ist 2")
+}
+sonst falls x > 2 {
+	schreibe("x ist grösser als 2")
+} 
+sonst falls x < 2 {
+	schreibe("x ist kleiner als 2")
+}
+sonst {
+	schreibe("x ist nicht")
+}

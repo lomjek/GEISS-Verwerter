@@ -6,6 +6,8 @@ import std.conv : to;
 import std.string : indexOf;
 import std.stdio : writeln;
 
+// @ {} [] # \ || != ~
+
 dchar[] replaceAll(dchar[] input, dchar to_replace, dchar[] with_replace)
 {
 	dchar[] result;

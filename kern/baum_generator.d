@@ -26,12 +26,11 @@ enum Aktion_Gewicht
 
 	FUNKTION_ABRUFEN,
 
+	SETZE_VARIABLE,
+
 	SOLANGE,
 
-	SONST,
-	FALLS,
-
-	SETZE_VARIABLE,
+	FALLS_SONST,
 
 	GLEICH,
 
@@ -232,7 +231,9 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 	debug
 	{
 		write("Matrix: ");
+		set_pen_trait(TextTrait.fgGrey);
 		writeln(matrix);
+		set_pen_trait();
 	}
 
 	return generiere_linie(matrix[0]);
@@ -294,18 +295,7 @@ Glied[] generiere_linie(Glied[] glieder_liste)
 		//TODO: Migration nach konstruktor von FALLS Blöcken.
 		for (ulong i = 0; (i + 1) < glieder_liste.length; i++)
 		{
-			if (glieder_liste[i].instanceof!Falls_BlockGlied &&
-				glieder_liste[i + 1].instanceof!Sonst_BlockGlied)
-			{
-				Falls_BlockGlied fbgl = cast(Falls_BlockGlied) glieder_liste[i];
-				Sonst_BlockGlied sbgl = cast(Sonst_BlockGlied) glieder_liste[i + 1];
 
-				Falls_Sonst_BlockGlied fsbgl = new Falls_Sonst_BlockGlied(fbgl, sbgl);
-
-				glieder_liste[i] = fsbgl;
-				glieder_liste = glieder_liste.remove(i + 1);
-				continue;
-			}
 		}
 	}
 
@@ -429,11 +419,14 @@ MPO finde_MPO(Glied[] glieder_liste)
 		else if (glied.instanceof!Setze_Variable_Glied)
 			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SETZE_VARIABLE, i);
 		else if (glied.instanceof!Falls_BlockGlied)
-			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS, i);
+			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
 		else if (glied.instanceof!Sonst_BlockGlied)
-			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SONST, i);
+			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
 
 	}
+
+	if (current_mpo.index == 0)
+		throw new Fehler("Kein MPO gefunden");
 
 	current_mpo.index -= 1;
 
@@ -538,6 +531,16 @@ Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ul
 	glieder_liste = glieder_liste.remove(glied_index + 2);
 	glieder_liste = glieder_liste.remove(glied_index + 1);
 
+	if (glieder_liste[glied_index + 1].instanceof!Sonst_BlockGlied)
+	{
+		Sonst_BlockGlied sbgl = cast(Sonst_BlockGlied) glieder_liste[glied_index + 1];
+
+		Falls_Sonst_BlockGlied fsbgl = new Falls_Sonst_BlockGlied(glied, sbgl);
+
+		glieder_liste[glied_index] = fsbgl;
+		glieder_liste = glieder_liste.remove(glied_index + 1);
+	}
+
 	return glieder_liste;
 }
 
@@ -549,7 +552,7 @@ Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ul
 			"Das Wort Sonst ist zu nahe am Ende...");
 	}
 
-	if (glieder_liste[glied_index + 1].instanceof!BlockGlied)
+	if (glieder_liste[glied_index + 1].is_class!BlockGlied)
 		glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 1]).aktionen;
 	else
 		glied.aktionen ~= glieder_liste[glied_index + 1];
@@ -563,7 +566,7 @@ Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, ulon
 	if ((glieder_liste.length + 2) >= glieder_liste.length)
 		throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
 
-	if (glieder_liste[glied_index + 1].instanceof!BlockGlied)
+	if (glieder_liste[glied_index + 1].is_class!BlockGlied)
 		glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 1]).aktionen;
 	else
 		glied.aktionen ~= glieder_liste[glied_index + 1];

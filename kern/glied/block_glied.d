@@ -111,7 +111,8 @@ class Falls_BlockGlied : BlockGlied
 	override public void schreibe_baum()
 	{
 		write("[FALLS ");
-		bedingung.schreibe_baum();
+		if (bedingung !is null)
+			bedingung.schreibe_baum();
 		write("]{");
 		schreibe_glied_liste(aktionen);
 		write("}");
@@ -153,7 +154,7 @@ class Sonst_BlockGlied : BlockGlied
 
 	override public bool ist_vollständig()
 	{
-		return false;
+		return aktionen.length > 0;
 	}
 
 	override string toString() const
