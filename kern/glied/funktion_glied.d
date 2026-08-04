@@ -39,7 +39,7 @@ class Funktion_Abrufen_Glied : Glied
 
 		if (var.var_typ != VariablenTyp.FUNKTION)
 		{
-			throw new Fehler("Variable "d ~ var.to!dstring ~ " ist keine Funktion!"d);
+			throw new Fehler("Variable " ~ var.to!string ~ " ist keine Funktion!");
 		}
 
 		Funktion_Glied fg = cast(Funktion_Glied) var.wert;

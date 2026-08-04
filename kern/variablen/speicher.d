@@ -214,7 +214,7 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
 
 		default:
 			throw new Fehler(
-				"Dieser Typ sollte nicht existieren: " ~ init_wert.typ.to!dstring);
+				"Dieser Typ sollte nicht existieren: " ~ init_wert.typ.to!string);
 		}
 	}
 

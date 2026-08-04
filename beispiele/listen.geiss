@@ -1,0 +1,3 @@
+liste simpsons <- ["Homer", "Lisa", "Brian", , "-"]
+
+schreibe(simpsons)

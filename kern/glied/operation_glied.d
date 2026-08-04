@@ -153,7 +153,7 @@ class OperationGlied : Glied
 
 			default:
 				throw new Fehler(
-					"Man kann nicht anderes Plusrechnen" ~ operationenTyp.to!dstring);
+					"Man kann nicht anderes Plusrechnen" ~ operationenTyp.to!string);
 			}
 
 		case OperatorenTyp.MINUS:
@@ -259,7 +259,7 @@ class OperationGlied : Glied
 			default:
 				throw new Fehler(
 					"Es wurde für folgende Typ noch nicht Minus implementiert..." ~ resultat
-						.typ.to!dstring);
+						.typ.to!string);
 			}
 		case OperatorenTyp.MAL:
 			switch (wert1.typ)
@@ -371,9 +371,9 @@ class OperationGlied : Glied
 
 			default:
 				throw new Fehler(
-					"MAL geht für volgendes Typ nicht: "d ~
-						wert1.toString.to!dstring ~ " " ~ operationenTyp.to!dstring ~ " "
-						~ wert2.toString.to!dstring);
+					"MAL geht für volgendes Typ nicht: " ~
+						wert1.toString.to!string ~ " " ~ operationenTyp.to!string ~ " "
+						~ wert2.toString.to!string);
 			}
 
 		case OperatorenTyp.GETEILT:
@@ -486,7 +486,7 @@ class OperationGlied : Glied
 
 			default:
 				throw new Fehler(
-					"Man kann nicht anderes Plusrechnen" ~ operationenTyp.to!dstring);
+					"Man kann nicht anderes Plusrechnen" ~ operationenTyp.to!string);
 			}
 
 		case OperatorenTyp.GLEICH:
@@ -578,7 +578,7 @@ class OperationGlied : Glied
 
 		default:
 			throw new Fehler(
-				"Dieser Operator wurde nicht implementiert..." ~ operationenTyp.to!dstring);
+				"Dieser Operator wurde nicht implementiert..." ~ operationenTyp.to!string);
 		}
 		writeln(resultat);
 		return resultat;

@@ -115,15 +115,15 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 
 	if (offene_klammern != 0)
 	{
-		throw new Fehler("FEHLER: Nicht alle Klammern sind zu!"d);
+		throw new Parse_Fehler("FEHLER: Nicht alle Klammern sind zu!");
 	}
 	if (offene_eckige_klammern != 0)
 	{
-		throw new Fehler("FEHLER: Nicht alle eckigen Klammern sind zu!"d);
+		throw new Parse_Fehler("FEHLER: Nicht alle eckigen Klammern sind zu!");
 	}
 	if (offene_geschwungene_klammern != 0)
 	{
-		throw new Fehler("FEHLER: Nicht alle geschwungenen Klammern sind zu!"d);
+		throw new Parse_Fehler("FEHLER: Nicht alle geschwungenen Klammern sind zu!");
 	}
 	//endregion
 
@@ -153,8 +153,6 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 			length--;
 		}
 	}
-
-	glieder_liste = listen_zusammenfassen(glieder_liste);
 
 	Programm_BlockGlied bgl = new Programm_BlockGlied();
 
@@ -201,15 +199,13 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				}
 				else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
 				{
-					//TODO: KLAMMER ZU Liste Handling
-					depth--;
-					continue;
+					ListeWert_Glied geparste_teil = liste_erstellen(matrix[depth]);
+					matrix[depth - 1] ~= geparste_teil;
 				}
 				else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
 				{
 					Glied[] geparste_teil = generiere_linie(matrix[depth]);
 					matrix[depth - 1] ~= new BlockGlied(geparste_teil);
-
 				}
 
 				matrix[depth] = []; // Leere das jetzt nicht mehr benötigte array.
@@ -226,14 +222,6 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 		}
 
 		matrix[depth] ~= glied;
-	}
-
-	debug
-	{
-		write("Matrix: ");
-		set_pen_trait(TextTrait.fgGrey);
-		writeln(matrix);
-		set_pen_trait();
 	}
 
 	return generiere_linie(matrix[0]);
@@ -275,8 +263,8 @@ Glied[] generiere_linie(Glied[] glieder_liste)
 		// hilft mir das Extrem beim Debuggen. // TODO: Braucht es das am Schluss?
 		if (_Op_wiederholungen >= 10)
 		{
-			throw new Fehler(
-				"Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen."d);
+			throw new Parse_Fehler(
+				"Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen.");
 		}
 		wiederholtes_MPO = mpo;
 
@@ -311,63 +299,38 @@ ListeWert_Glied liste_erstellen(Glied[] glieder_liste)
 {
 	Glied[] werte;
 
+	bool sollte_komma_sein = false;
+
 	foreach (Glied glied; glieder_liste)
 	{
-		if (glied.instanceof!OperationGlied)
+		if (sollte_komma_sein)
 		{
-			if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.KOMMA)
+			if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied)
+				.operationenTyp == OperatorenTyp.KOMMA)
 			{
+				sollte_komma_sein = false;
 				continue;
 			}
+			else
+				throw new ListeSeparatorNichtGetrennt_Fehler();
 		}
+		else
+		{
+			if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied)
+				.operationenTyp == OperatorenTyp.KOMMA)
+			{
+				werte ~= new Wert_Glied(Wert(WertTyp.INVALID, null));
+				sollte_komma_sein = false;
+				continue;
+			}
+			else
+				werte ~= glied;
 
-		werte ~= glied;
+			sollte_komma_sein = true;
+		}
 	}
 
 	return new ListeWert_Glied(werte);
-}
-
-Glied[] listen_zusammenfassen(Glied[] glieder_liste)
-{
-	ulong eckige_klammern_offen = 0;
-	Glied[][] neue_gl;
-
-	ulong arr_length = glieder_liste.length;
-
-	for (ulong i = 0; i < arr_length; i++)
-	{
-		Glied glied = glieder_liste[i];
-
-		if (glied.instanceof!OperationGlied)
-		{
-			if ((cast(OperationGlied) glied).operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_AUF)
-			{
-				eckige_klammern_offen++;
-				continue;
-			}
-			else if ((cast(OperationGlied) glied)
-				.operationenTyp == OperatorenTyp.ECKIGE_KLAMMER_ZU)
-			{
-				if (eckige_klammern_offen == 0)
-					throw new Fehler("Es werden mehr Klammern zu als aufgemacht.");
-
-				eckige_klammern_offen--;
-				neue_gl[eckige_klammern_offen] ~= liste_erstellen(
-					neue_gl[eckige_klammern_offen + 1]);
-				neue_gl[eckige_klammern_offen + 1] = [];
-				continue;
-			}
-		}
-
-		if (neue_gl.length != (1 + eckige_klammern_offen))
-		{
-			neue_gl.length = eckige_klammern_offen + 1;
-		}
-
-		neue_gl[eckige_klammern_offen] ~= glieder_liste[i];
-	}
-
-	return neue_gl[0];
 }
 
 //MARK: finde_mpo
@@ -414,7 +377,7 @@ MPO finde_MPO(Glied[] glieder_liste)
 			if (op_glied.operationenTyp in operatoren_Gewicht)
 				(&current_mpo).passe_mpo_an(operatoren_Gewicht[op_glied.operationenTyp], i);
 			else
-				throw new Fehler("Dieser Operator hat keine Option. Das nicht gut."); // TODO: Sollte nie hier sein.
+				throw new Parse_Fehler("Dieser Operator hat keine Option. Das nicht gut."); // TODO: Sollte nie hier sein.
 		}
 		else if (glied.instanceof!Setze_Variable_Glied)
 			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SETZE_VARIABLE, i);
@@ -426,7 +389,7 @@ MPO finde_MPO(Glied[] glieder_liste)
 	}
 
 	if (current_mpo.index == 0)
-		throw new Fehler("Kein MPO gefunden");
+		throw new Parse_Fehler("Kein MPO gefunden");
 
 	current_mpo.index -= 1;
 
@@ -460,10 +423,10 @@ Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
 Glied[] baue_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_liste, ulong glied_index)
 {
 	if (glied_index <= 0 || glied_index >= glieder_liste.length)
-		throw new Fehler("Eine Operation kann nicht das erste oder letzte Glied sein.");
+		throw new Parse_Fehler("Eine Operation kann nicht das erste oder letzte Glied sein.");
 
 	if (op_glied.ist_vollständig)
-		throw new Fehler("Das hier wurde schon geparst, kann nicht noch einmal");
+		throw new Parse_Fehler("Das hier wurde schon geparst, kann nicht noch einmal");
 
 	Glied wert1 = glieder_liste[glied_index - 1];
 	Glied wert2 = glieder_liste[glied_index + 1];
@@ -480,10 +443,10 @@ Glied[] baue_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_lis
 Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste, ulong glied_index)
 {
 	if (glied_index < 1)
-		throw new PositionFehler(svg, glied_index);
+		throw new Position_Fehler(svg, glied_index);
 
 	if (glied_index >= glieder_liste.length)
-		throw new PositionFehler(svg, glied_index);
+		throw new Position_Fehler(svg, glied_index);
 
 	Glied vorher_glied = glieder_liste[glied_index - 1];
 	Glied naher_glied = glieder_liste[glied_index + 1];
@@ -506,7 +469,7 @@ Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste
 	}
 	else
 	{
-		throw new Fehler("Variablennamen unbekannt!");
+		throw new Parse_Fehler("Variablennamen unbekannt!");
 	}
 
 	return glieder_liste;
@@ -517,7 +480,7 @@ Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ul
 	if ((glied_index + 2) >= glieder_liste.length)
 	{
 		writeln(glied_index, glieder_liste);
-		throw new Fehler(
+		throw new Parse_Fehler(
 			"Das Wort Falls ist zu nahe am Ende...");
 	}
 
@@ -548,7 +511,7 @@ Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ul
 {
 	if ((glied_index + 1) >= glieder_liste.length)
 	{
-		throw new Fehler(
+		throw new Parse_Fehler(
 			"Das Wort Sonst ist zu nahe am Ende...");
 	}
 
