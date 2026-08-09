@@ -25,5 +25,20 @@
 				"-static"
 			]
 		}
-	]
+	],
+	"buildTypes": {
+		"release": {
+			"dflags": [
+				"-Os",
+				"-flto=full"
+			]
+		},
+		"debug": {
+			"dflags": [
+				"-O0",
+				"-gc",
+				"--d-debug"
+			]
+		}
+	}
 }

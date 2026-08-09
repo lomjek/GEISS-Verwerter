@@ -1,0 +1,5 @@
+zahl x <- 2
+
+solange x < 10 { x <- x + 1 }
+
+schreibe(als_text(x))

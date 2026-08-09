@@ -336,7 +336,6 @@ class OperationGlied : Glied
 
 			case WertTyp.ZAHL:
 				Zahl zwischenresultat = *cast(Zahl*) wert1.wert;
-				writeln(1);
 
 				switch (wert2.typ)
 				{
@@ -580,7 +579,6 @@ class OperationGlied : Glied
 			throw new Fehler(
 				"Dieser Operator wurde nicht implementiert..." ~ operationenTyp.to!string);
 		}
-		writeln(resultat);
 		return resultat;
 	}
 

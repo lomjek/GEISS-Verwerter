@@ -4,3 +4,7 @@ zahl y <- 393241661696127888888888888888888888888888888888888888888888888888
 zahl b <- x - 2 * y
 
 schreibe(als_text(b))
+
+zahl z <- 1
+z <- z + 1
+schreibe(als_text(z))

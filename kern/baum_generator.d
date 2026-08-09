@@ -199,7 +199,7 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				}
 				else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
 				{
-					ListeWert_Glied geparste_teil = liste_erstellen(matrix[depth]);
+					ListeWert_Glied geparste_teil = generiere_liste(matrix[depth]);
 					matrix[depth - 1] ~= geparste_teil;
 				}
 				else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
@@ -295,7 +295,7 @@ Glied[] generiere_linie(Glied[] glieder_liste)
 /// Nimmt eine Liste ohne eckigen Klammern und gibt daraus
 /// ein ListeWert_Glied mit der gegebenen Liste. Alle 
 /// Kommas werden einfach rausfiltriert.
-ListeWert_Glied liste_erstellen(Glied[] glieder_liste)
+ListeWert_Glied generiere_liste(Glied[] glieder_liste)
 {
 	Glied[] werte;
 
@@ -385,6 +385,8 @@ MPO finde_MPO(Glied[] glieder_liste)
 			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
 		else if (glied.instanceof!Sonst_BlockGlied)
 			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
+		else if (glied.instanceof!Solange_BlockGlied)
+			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SOLANGE, i);
 
 	}
 
@@ -526,13 +528,13 @@ Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ul
 
 Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
 {
-	if ((glieder_liste.length + 2) >= glieder_liste.length)
-		throw new Exception("Das Wort SOOLANGE ist zu nahe am Ende...");
+	if ((glied_index + 2) >= glieder_liste.length)
+		throw new Parse_Fehler("Das Wort SOLANGE ist zu nahe am Ende...");
 
-	if (glieder_liste[glied_index + 1].is_class!BlockGlied)
-		glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 1]).aktionen;
+	if (glieder_liste[glied_index + 2].is_class!BlockGlied)
+		glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 2]).aktionen;
 	else
-		glied.aktionen ~= glieder_liste[glied_index + 1];
+		glied.aktionen ~= glieder_liste[glied_index + 2];
 
 	glied.bedingung = glieder_liste[glied_index + 1];
 
