@@ -18,6 +18,7 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
+//MARK: F...Abrufen_Glied
 class Funktion_Abrufen_Glied : Glied
 {
 	Glied[] argumente;
@@ -86,6 +87,7 @@ class Funktion_Abrufen_Glied : Glied
 	}
 }
 
+//MARK: Funktion_Glied
 class Funktion_Glied : Glied
 {
 	Erstelle_Variable_Glied[] parameter;

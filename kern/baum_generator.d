@@ -26,11 +26,11 @@ enum Aktion_Gewicht
 
 	FUNKTION_ABRUFEN,
 
-	SETZE_VARIABLE,
-
 	SOLANGE,
 
 	FALLS_SONST,
+
+	SETZE_VARIABLE,
 
 	GLEICH,
 
@@ -85,48 +85,6 @@ private bool ist_fertig(Glied[] glieder_liste)
 //MARK: master_baum
 Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 {
-	//region Sind alle Klammern geschlossen?
-	uint offene_klammern = 0;
-	uint offene_eckige_klammern = 0;
-	uint offene_geschwungene_klammern = 0;
-
-	foreach (Glied glied; glieder_liste)
-	{
-		if (!glied.instanceof!OperationGlied)
-		{
-			continue;
-		}
-
-		OperatorenTyp op_typ = (cast(OperationGlied) glied).operationenTyp;
-		if (op_typ == OperatorenTyp.KLAMMER_AUF)
-			offene_klammern++;
-		else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_AUF)
-			offene_eckige_klammern++;
-		else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF)
-			offene_geschwungene_klammern++;
-
-		else if (op_typ == OperatorenTyp.KLAMMER_ZU)
-			offene_klammern--;
-		else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
-			offene_eckige_klammern--;
-		else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
-			offene_geschwungene_klammern--;
-	}
-
-	if (offene_klammern != 0)
-	{
-		throw new Parse_Fehler("FEHLER: Nicht alle Klammern sind zu!");
-	}
-	if (offene_eckige_klammern != 0)
-	{
-		throw new Parse_Fehler("FEHLER: Nicht alle eckigen Klammern sind zu!");
-	}
-	if (offene_geschwungene_klammern != 0)
-	{
-		throw new Parse_Fehler("FEHLER: Nicht alle geschwungenen Klammern sind zu!");
-	}
-	//endregion
-
 	ulong length = glieder_liste.length;
 	for (ulong i = 0; i < length; i++)
 	{
@@ -176,8 +134,10 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 	Glied[][] matrix;
 	ulong depth = 0;
 
-	foreach (Glied glied; glieder_liste)
+	for (ulong i = 0; i < glieder_liste.length; i++)
 	{
+		Glied glied = glieder_liste[i];
+
 		if (glied.instanceof!OperationGlied) // Könnte Klammer sein -> Subblock
 		{
 			OperatorenTyp op_typ = (cast(OperationGlied) glied).operationenTyp;
@@ -185,17 +145,31 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			if (KLAMMERN_AUF.canFind(op_typ))
 			{
 				depth++;
-				continue;
+				continue; // TODO: Muss geändert werden wegen Klammern mismatch.
 			}
 			else if (KLAMMERN_ZU.canFind(op_typ))
 			{
+				if (depth == 0)
+					throw new Parse_Fehler("Zu viele Klammern wurden geschlossen");
+
 				if (op_typ == OperatorenTyp.KLAMMER_ZU)
 				{
-					//TODO: if previous glied is lies_variable parse for argumente
+					if (matrix[depth - 1].length > 0 &&
+						matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
+					{
+						ListeWert_Glied argumente = generiere_liste(matrix[depth]);
 
-					Glied[] geparste_teil = generiere_linie(matrix[depth]);
-					// Der geparste Teil sollte theoretisch nur ein lang sein...
-					matrix[depth - 1] ~= geparste_teil;
+						Lese_Variable_Glied lvg = cast(Lese_Variable_Glied) matrix[depth - 1][$ - 1];
+
+						matrix[depth - 1][$ - 1] =
+							new Funktion_Abrufen_Glied(lvg.var_name, argumente.werte);
+					}
+					else
+					{
+						Glied[] geparste_teil = generiere_linie(matrix[depth]);
+						// Der geparste Teil sollte theoretisch nur ein lang sein...
+						matrix[depth - 1] ~= geparste_teil;
+					}
 				}
 				else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
 				{
@@ -223,6 +197,9 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
 		matrix[depth] ~= glied;
 	}
+
+	if (depth != 0)
+		throw new Parse_Fehler("Nicht alle Klammern wurden geschlossen.");
 
 	return generiere_linie(matrix[0]);
 }
@@ -471,6 +448,7 @@ Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste
 	}
 	else
 	{
+		writeln(vorher_glied);
 		throw new Parse_Fehler("Variablennamen unbekannt!");
 	}
 
