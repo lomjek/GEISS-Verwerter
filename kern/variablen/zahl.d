@@ -1,7 +1,6 @@
 module zahl;
 
 import ext.prints;
-import variablen.wert;
 
 import std.algorithm : max, remove, canFind, find;
 import std.range : retro, split;
@@ -18,48 +17,75 @@ struct Zahl
 	ubyte[] werte;
 	Bruch nach_komma;
 
-	this(Zahl z)
+	this(const Zahl z)
 	{
 		this(z.negativ, z.nach_komma, z.werte);
 	}
 
 	nothrow
-	this(GanzeZahl gz)
+	this(const GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
-		this.werte = gz.werte;
+		this.werte = gz.werte.dup;
 	}
 
 	nothrow
-	this(NatürlicheZahl nz)
+	this(const NatürlicheZahl nz)
 	{
 		this.negativ = false;
-		this.werte = nz.werte;
+		this.werte = nz.werte.dup;
 	}
 
-	this(bool negativ, Bruch nach_komma, ubyte[] werte)
+	this(const bool negativ, const Bruch nach_komma, const ubyte[] werte)
 	{
 		this.negativ = negativ;
 		DivisionResultat dr = dividiere(nach_komma.zähler, nach_komma.nenner, false);
 
 		this.werte = addiere(werte, dr.quotient);
-		this.nach_komma = Bruch(dr.rest, nach_komma.nenner);
+		this.nach_komma = Bruch(dr.rest, nach_komma.nenner.dup);
 
 		if (this.nach_komma.zähler.ist_null)
 			this.nach_komma.nenner = [];
 	}
 
-	int opCmp(const ref Zahl other) const
+	int opCmp(R)(const R other) const
 	{
-		GanzeZahl g1 = GanzeZahl(this.negativ, this.werte);
-		GanzeZahl g2 = GanzeZahl(other.negativ, other.werte);
+		static if (is(R == NatürlicheZahl))
+			return this.opCmp(Zahl(other));
 
-		int integerCmp = g1.opCmp(g2);
-		if (integerCmp != 0)
-			return integerCmp;
+		else static if (is(R == GanzeZahl))
+			return this.opCmp(Zahl(other));
 
-		int fracCmp = this.nach_komma.opCmp(other.nach_komma);
-		return this.negativ ? -fracCmp : fracCmp;
+		else static if (is(R == Zahl))
+		{
+			GanzeZahl g1 = GanzeZahl(this.negativ, this.werte);
+			GanzeZahl g2 = GanzeZahl(other.negativ, other.werte);
+
+			int integerCmp = g1.opCmp(g2);
+			if (integerCmp != 0)
+				return integerCmp;
+
+			int fracCmp = this.nach_komma.opCmp(other.nach_komma);
+			return this.negativ ? -fracCmp : fracCmp;
+		}
+		else
+			throw new Exception(
+				"TYPENFEHLER: man kann typ " ~ R.toString ~ " nicht mit einer Natürlichen Zahl vergleichen");
+	}
+
+	bool opEquals(R)(const R other) const
+	{
+		static if (is(R == NatürlicheZahl))
+			return this.opEquals(Zahl(other));
+
+		else static if (is(R == GanzeZahl))
+			return this.opEquals(Zahl(other));
+
+		else static if (is(R == Zahl))
+			return this.opCmp(other) == 0;
+
+		else
+			return false;
 	}
 }
 
@@ -68,53 +94,79 @@ struct GanzeZahl
 	bool negativ;
 	ubyte[] werte;
 
-	nothrow this(NatürlicheZahl nz)
+	nothrow
+	this(const NatürlicheZahl nz)
 	{
 		this.negativ = false;
-		this.werte = nz.werte;
+		this.werte = nz.werte.dup;
 	}
 
-	nothrow this(GanzeZahl gz)
+	nothrow
+	this(const GanzeZahl gz)
 	{
 		this.negativ = gz.negativ;
-		this.werte = gz.werte;
+		this.werte = gz.werte.dup;
 	}
 
-	nothrow this(const bool negativ, const ubyte[] werte)
+	nothrow
+	this(const bool negativ, const ubyte[] werte)
 	{
 		this.negativ = negativ;
 		this.werte = werte.dup;
 	}
 
-	int opCmp(const ref GanzeZahl other) const
+	int opCmp(R)(const R other) const
 	{
-		ubyte[] num1 = right_unpad(this.werte.dup);
-		ubyte[] num2 = right_unpad(other.werte.dup);
+		static if (is(R == NatürlicheZahl))
+			return this.opCmp(GanzeZahl(other));
 
-		if (num1.length == 0 && num2.length == 0)
-			return 0;
-
-		if (this.negativ != other.negativ)
-			return this.negativ ? -1 : 1;
-
-		int cmp = 0;
-		if (num1.length != num2.length)
+		else static if (is(R == GanzeZahl))
 		{
-			cmp = num1.length < num2.length ? -1 : 1;
-		}
-		else
-		{
-			foreach_reverse (i; 0 .. num1.length)
+			ubyte[] num1 = right_unpad(this.werte.dup);
+			ubyte[] num2 = right_unpad(other.werte.dup);
+
+			if (num1.length == 0 && num2.length == 0)
+				return 0;
+
+			if (this.negativ != other.negativ)
+				return this.negativ ? -1 : 1;
+
+			int cmp = 0;
+			if (num1.length != num2.length)
 			{
-				if (num1[i] != num2[i])
+				cmp = num1.length < num2.length ? -1 : 1;
+			}
+			else
+			{
+				foreach_reverse (i; 0 .. num1.length)
 				{
-					cmp = num1[i] < num2[i] ? -1 : 1;
-					break;
+					if (num1[i] != num2[i])
+					{
+						cmp = num1[i] < num2[i] ? -1 : 1;
+						break;
+					}
 				}
 			}
-		}
 
-		return this.negativ ? -cmp : cmp;
+			return this.negativ ? -cmp : cmp;
+		}
+		else static if (is(R == Zahl))
+			return other.opCmp(Zahl(this));
+	}
+
+	bool opEquals(R)(const R other) const
+	{
+		static if (is(R == NatürlicheZahl))
+			return this.opCmp(GanzeZahl(other)) == 0;
+
+		else static if (is(R == GanzeZahl))
+			return this.opCmp(other) == 0;
+
+		else static if (is(R == Zahl))
+			return other.opCmp(Zahl(this)) == 0;
+
+		else
+			return false;
 	}
 }
 
@@ -122,31 +174,60 @@ struct NatürlicheZahl
 {
 	ubyte[] werte;
 
-	nothrow this(NatürlicheZahl nz)
+	nothrow
+	this(const NatürlicheZahl nz)
 	{
-		this.werte = nz.werte;
+		this.werte = nz.werte.dup;
 	}
 
-	nothrow this(ubyte[] werte)
+	nothrow
+	this(const ubyte[] werte)
 	{
-		this.werte = werte;
+		this.werte = werte.dup;
 	}
 
-	int opCmp(const NatürlicheZahl other) const
+	int opCmp(R)(const R other) const
 	{
-		ubyte[] num1 = right_unpad(werte.dup);
-		ubyte[] num2 = right_unpad(other.werte.dup);
-
-		if (num1.length != num2.length)
-			return num1.length < num2.length ? -1 : 1;
-
-		foreach_reverse (i; 0 .. num1.length)
+		static if (is(R == NatürlicheZahl))
 		{
-			if (num1[i] != num2[i])
-				return num1[i] < num2[i] ? -1 : 1;
-		}
+			ubyte[] num1 = right_unpad(werte.dup);
+			ubyte[] num2 = right_unpad(other.werte.dup);
 
-		return 0;
+			if (num1.length != num2.length)
+				return num1.length < num2.length ? -1 : 1;
+
+			foreach_reverse (i; 0 .. num1.length)
+			{
+				if (num1[i] != num2[i])
+					return num1[i] < num2[i] ? -1 : 1;
+			}
+
+			return 0;
+		}
+		else static if (is(R == GanzeZahl))
+			return other.opCmp(GanzeZahl(this));
+
+		else static if (is(R == Zahl))
+			return other.opCmp(Zahl(this));
+
+		else
+			throw new Exception(
+				"TYPENFEHLER: man kann typ " ~ R.toString ~ " nicht mit einer Natürlichen Zahl vergleichen");
+	}
+
+	bool opEquals(R)(const R other) const
+	{
+		static if (is(R == NatürlicheZahl))
+			return this.opCmp(other) == 0;
+
+		else static if (is(R == GanzeZahl))
+			return other.opEquals(GanzeZahl(this));
+
+		else static if (is(R == Zahl))
+			return other.opEquals(Zahl(this));
+
+		else
+			return false;
 	}
 }
 
@@ -175,6 +256,11 @@ struct Bruch
 		ubyte[] zähler2 = multipliziere(other.zähler, this.nenner);
 
 		return NatürlicheZahl(zähler1).opCmp(NatürlicheZahl(zähler2));
+	}
+
+	bool opEquals(Bruch other) const
+	{
+		return this.opCmp(other) == 0;
 	}
 }
 
@@ -724,15 +810,23 @@ Zahl dividiere(NatürlicheZahl num1, NatürlicheZahl num2)
 
 /// potenz => ubyte[] ^ ubyte[] = ubyte[];
 /// die zweite Zahl wird kopiert...
-ubyte[] potenz(ubyte[] num1, ubyte[] num2)
+ubyte[] potenz(const ubyte[] num1, const ubyte[] num2)
 {
-	while (NatürlicheZahl(num2) > NatürlicheZahl([1]))
+	ubyte[] z1 = num1.dup;
+	ubyte[] z2 = num2.dup;
+
+	while (NatürlicheZahl(z2) > NatürlicheZahl([1]))
 	{
-		num1 = num1.multipliziere(num1);
-		num2 = subtrahiere(num2, [1]);
+		z1 = num1.multipliziere(z1);
+		z2 = subtrahiere(z2, [1]);
 	}
 
-	return num1;
+	return z1;
+}
+
+NatürlicheZahl potenz(const NatürlicheZahl num1, const NatürlicheZahl num2)
+{
+	return NatürlicheZahl(potenz(num1.werte, num2.werte));
 }
 
 //MARK: ist_zahl

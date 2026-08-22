@@ -82,3 +82,9 @@ immutable OperatorenTyp[] KLAMMERN_ZU = [
 	OperatorenTyp.ECKIGE_KLAMMER_ZU,
 	OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU // Ev brauche ich auch < kleiner als.
 ];
+
+immutable OperatorenTyp[OperatorenTyp] JEWEILIG_SCHLIESSENDE_KLAMMER = [
+	OperatorenTyp.KLAMMER_AUF : OperatorenTyp.KLAMMER_ZU,
+	OperatorenTyp.ECKIGE_KLAMMER_AUF : OperatorenTyp.ECKIGE_KLAMMER_ZU,
+	OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF : OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU
+];

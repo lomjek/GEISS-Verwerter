@@ -1,5 +1,6 @@
 liste simpsons <- ["Homer", "Lisa", "Brian", , "-"]
 liste simpson <- ["Bart"]
+liste zahlen <- [2, 3, 5 + 2, , 8 / 0.5]
 
 schreibe(simpsons)
 schreibe(simpson)

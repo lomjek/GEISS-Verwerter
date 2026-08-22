@@ -133,7 +133,7 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 //MARK: generiere_baum
 Glied[] generiere_baum(Glied[] glieder_liste)
 {
-	Glied[][] matrix;
+	Glied[][] matrix = [[]];
 	ulong depth = 0;
 
 	for (ulong i = 0; i < glieder_liste.length; i++)
@@ -147,19 +147,30 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 			if (KLAMMERN_AUF.canFind(op_typ))
 			{
 				depth++;
-				continue; // TODO: Muss geändert werden wegen Klammern mismatch.
+
+				while (matrix.length <= depth) //Enlarge array
+				{
+					matrix.length = depth + 1;
+				}
 			}
 			else if (KLAMMERN_ZU.canFind(op_typ))
 			{
 				if (depth == 0)
 					throw new Parse_Fehler("Zu viele Klammern wurden geschlossen");
 
+				OperatorenTyp auf_op_typ = (cast(OperationGlied) matrix[depth][0]).operationenTyp;
+
+				if (JEWEILIG_SCHLIESSENDE_KLAMMER[auf_op_typ] != op_typ)
+					throw new Parse_Fehler("Die Klammer wurde mit einer anderen Klammer zugemacht.");
+
+				Glied[] rohe_glied_linie = (matrix[depth])[1 .. $];
+
 				if (op_typ == OperatorenTyp.KLAMMER_ZU)
 				{
-					if (matrix[depth - 1].length > 0 &&
+					if (matrix[depth - 1].length > 0 &&  // Wenn argumente für funktion
 						matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
 					{
-						ListeWert_Glied argumente = generiere_liste(matrix[depth]);
+						ListeWert_Glied argumente = generiere_liste(rohe_glied_linie);
 
 						Lese_Variable_Glied lvg = cast(Lese_Variable_Glied) matrix[depth - 1][$ - 1];
 
@@ -168,19 +179,19 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 					}
 					else
 					{
-						Glied[] geparste_teil = generiere_linie(matrix[depth]);
+						Glied[] geparste_teil = generiere_linie(rohe_glied_linie);
 						// Der geparste Teil sollte theoretisch nur ein lang sein...
 						matrix[depth - 1] ~= geparste_teil;
 					}
 				}
 				else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
 				{
-					ListeWert_Glied geparste_teil = generiere_liste(matrix[depth]);
+					ListeWert_Glied geparste_teil = generiere_liste(rohe_glied_linie);
 					matrix[depth - 1] ~= geparste_teil;
 				}
 				else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
 				{
-					Glied[] geparste_teil = generiere_linie(matrix[depth]);
+					Glied[] geparste_teil = generiere_linie(rohe_glied_linie);
 					matrix[depth - 1] ~= new BlockGlied(geparste_teil);
 				}
 
@@ -190,11 +201,6 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 				continue;
 			}
 			// Ev. brauche ich noch Spitze Klammer zu für nacher. 
-		}
-
-		while (matrix.length <= depth)
-		{
-			matrix.length = depth + 1;
 		}
 
 		matrix[depth] ~= glied;
@@ -257,13 +263,6 @@ Glied[] generiere_linie(Glied[] glieder_liste)
 		}
 
 		glieder_liste = baue_glied(glieder_liste, max_priority_index);
-
-		//Zusammenziehen von Falls_Sonst Blocks
-		//TODO: Migration nach konstruktor von FALLS Blöcken.
-		for (ulong i = 0; (i + 1) < glieder_liste.length; i++)
-		{
-
-		}
 	}
 
 	return glieder_liste;
@@ -278,35 +277,30 @@ ListeWert_Glied generiere_liste(Glied[] glieder_liste)
 {
 	Glied[] werte;
 
-	bool sollte_komma_sein = false;
+	Glied[] roher_zwischenwert;
 
 	foreach (Glied glied; glieder_liste)
 	{
-		if (sollte_komma_sein)
+		if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied).operationenTyp == OperatorenTyp.KOMMA)
 		{
-			if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied)
-				.operationenTyp == OperatorenTyp.KOMMA)
-			{
-				sollte_komma_sein = false;
-				continue;
-			}
-			else
-				throw new ListeSeparatorNichtGetrennt_Fehler();
-		}
-		else
-		{
-			if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied)
-				.operationenTyp == OperatorenTyp.KOMMA)
-			{
+			if (roher_zwischenwert.length == 0)
 				werte ~= new Wert_Glied(Wert(WertTyp.INVALID, null));
-				sollte_komma_sein = false;
-				continue;
-			}
-			else
-				werte ~= glied;
+			
+			else{
+				Glied[] geparste_linie = generiere_linie(roher_zwischenwert);
 
-			sollte_komma_sein = true;
+				if (geparste_linie.length == 1)
+				{
+					werte ~= geparste_linie[0];
+					roher_zwischenwert = [];
+				}
+
+				else throw new ListeSeparatorNichtGetrennt_Fehler();
+			}
+			continue;
 		}
+
+		roher_zwischenwert ~= glied;
 	}
 
 	return new ListeWert_Glied(werte);
