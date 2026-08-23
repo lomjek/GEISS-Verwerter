@@ -178,7 +178,7 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
 	if (variable_existiert(bereich_num, var_name))
 		throw new Variable_Schon_Existent_Fehler(var_name);
 
-	if (init_wert.wert == null)
+	if (init_wert == null)
 	{
 		switch (init_wert.typ)
 		{
@@ -217,8 +217,12 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
 				"Dieser Typ sollte nicht existieren: " ~ init_wert.typ.to!string);
 		}
 	}
+  else if (init_wert.typ == WertTyp.FUNKTION && var_typ == VariablenTyp.FUNKTION)
+  {
+    bereiche[bereich_num].variablen ~= Variable(var_name, VariablenTyp.FUNKTION, init_wert.wert);
+  }
 
-	bereiche[bereich_num].variablen ~= Variable(var_name, var_typ, init_wert);
+  bereiche[bereich_num].variablen ~= Variable(var_name, var_typ, init_wert);
 }
 
 void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)

@@ -1,4 +1,4 @@
-module ut_baum_generator;
+module tests.baum_generator;
 
 import baum_generator;
 

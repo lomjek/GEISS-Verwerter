@@ -17,8 +17,6 @@ enum SchlüsselWort
 
 	SOLANGE,
 	NICHT,
-
-	FUNKTION
 }
 
 immutable dstring[SchlüsselWort] schlüsselWort_dict = [
@@ -30,8 +28,6 @@ immutable dstring[SchlüsselWort] schlüsselWort_dict = [
 
 	SchlüsselWort.SOLANGE: "solange"d,
 	SchlüsselWort.NICHT: "nicht"d,
-
-	SchlüsselWort.FUNKTION: "funktion"d
 ];
 
 Glied baue_richtiges_sw_glied(SchlüsselWort sw)

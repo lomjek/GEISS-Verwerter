@@ -1,6 +1,7 @@
 module baum_generator.baum_generator;
 
 import baum_generator.baue_glied;
+import baum_generator.finde_mpo;
 
 import operatoren;
 import schlüsselwörter;
@@ -21,56 +22,6 @@ import std.stdio : writeln, write;
 import std.conv : to;
 
 // @ {} [] # \ || != ~
-
-enum Aktion_Gewicht
-{
-	INVALID,
-
-	FUNKTION_ABRUFEN,
-
-	SOLANGE,
-
-	FALLS_SONST,
-
-	SETZE_VARIABLE,
-
-	GLEICH,
-
-	GRÖSSER_ALS,
-	GRÖSSER_GLEICH,
-
-	KLEINER_ALS,
-	KLEINER_GLEICH,
-
-	PLUS_MINUS,
-	MAL_DURCH,
-	HOCH,
-
-}
-
-Aktion_Gewicht[OperatorenTyp] operatoren_Gewicht = [
-	OperatorenTyp.PLUS: Aktion_Gewicht.PLUS_MINUS,
-	OperatorenTyp.MINUS: Aktion_Gewicht.PLUS_MINUS,
-
-	OperatorenTyp.MAL: Aktion_Gewicht.MAL_DURCH,
-	OperatorenTyp.GETEILT: Aktion_Gewicht.MAL_DURCH,
-
-	OperatorenTyp.HOCH: Aktion_Gewicht.HOCH,
-
-	OperatorenTyp.GLEICH: Aktion_Gewicht.GLEICH,
-
-	OperatorenTyp.GRÖSSER_ALS: Aktion_Gewicht.GRÖSSER_ALS,
-	//TODO: GRÖSSER GLEICH
-
-	OperatorenTyp.KLEINER_ALS: Aktion_Gewicht.KLEINER_ALS,
-	//TODO: KLEINER_GLEICH
-];
-
-nothrow @safe @nogc
-private uint get_op_prio_length()
-{
-	return Aktion_Gewicht.max - Aktion_Gewicht.min + 1;
-}
 
 private bool ist_fertig(Glied[] glieder_liste)
 {
@@ -101,16 +52,6 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 				glieder_liste[i] = new Setze_Variable_Glied();
 			}
 
-		}
-		// WT_GLIED wird zu VAR_bauen node umgewandelt.
-		else if (glied.instanceof!WT_Glied && i + 1 < length &&
-			glieder_liste[i + 1].instanceof!Lese_Variable_Glied)
-		{
-			dstring var_name = (cast(Lese_Variable_Glied) glieder_liste[i + 1]).var_name;
-			WertTyp wert_typ = (cast(WT_Glied) glied).vt;
-			glieder_liste[i] = new Erstelle_Variable_Glied(var_name, wert_typ);
-			glieder_liste = glieder_liste.remove(i + 1);
-			length--;
 		}
 	}
 
@@ -281,12 +222,14 @@ ListeWert_Glied generiere_liste(Glied[] glieder_liste)
 
 	foreach (Glied glied; glieder_liste)
 	{
-		if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied).operationenTyp == OperatorenTyp.KOMMA)
+		if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied)
+			.operationenTyp == OperatorenTyp.KOMMA)
 		{
 			if (roher_zwischenwert.length == 0)
 				werte ~= new Wert_Glied(Wert(WertTyp.INVALID, null));
-			
-			else{
+
+			else
+			{
 				Glied[] geparste_linie = generiere_linie(roher_zwischenwert);
 
 				if (geparste_linie.length == 1)
@@ -295,7 +238,8 @@ ListeWert_Glied generiere_liste(Glied[] glieder_liste)
 					roher_zwischenwert = [];
 				}
 
-				else throw new ListeSeparatorNichtGetrennt_Fehler();
+				else
+					throw new ListeSeparatorNichtGetrennt_Fehler();
 			}
 			continue;
 		}
@@ -303,70 +247,15 @@ ListeWert_Glied generiere_liste(Glied[] glieder_liste)
 		roher_zwischenwert ~= glied;
 	}
 
+	if (roher_zwischenwert.length > 0)
+	{
+		Glied[] geparste_linie = generiere_linie(roher_zwischenwert);
+
+		if (geparste_linie.length == 1)
+			werte ~= geparste_linie[0];
+		else
+			throw new ListeSeparatorNichtGetrennt_Fehler();
+	}
+
 	return new ListeWert_Glied(werte);
-}
-
-//MARK: finde_mpo
-
-/// Max Priority Operation
-/// Hält den Wert und den index zum Glied, welches am dringendsten gebaut werden muss.
-struct MPO
-{
-	ulong value = 0;
-	ulong index = 0;
-
-	string toString() const @safe pure nothrow
-	{
-		return "MPO(" ~ value.to!string ~ " at index " ~ index.to!string ~ ")";
-	}
-}
-
-void passe_mpo_an(MPO* mpo, Aktion_Gewicht op, ulong index)
-{
-	if (mpo.value < op)
-	{
-		mpo.value = op;
-		mpo.index = index;
-	}
-}
-
-MPO finde_MPO(Glied[] glieder_liste)
-{
-	MPO current_mpo = MPO();
-
-	if (glieder_liste.length == 0)
-		return current_mpo;
-
-	for (ulong i = glieder_liste.length; i > 0; i--)
-	{
-		Glied glied = glieder_liste[i - 1];
-
-		if (glied.ist_vollständig)
-			continue;
-
-		if (glied.instanceof!OperationGlied)
-		{
-			OperationGlied op_glied = cast(OperationGlied) glied;
-			if (op_glied.operationenTyp in operatoren_Gewicht)
-				(&current_mpo).passe_mpo_an(operatoren_Gewicht[op_glied.operationenTyp], i);
-			else
-				throw new Parse_Fehler("Dieser Operator hat keine Option. Das nicht gut."); // TODO: Sollte nie hier sein.
-		}
-		else if (glied.instanceof!Setze_Variable_Glied)
-			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SETZE_VARIABLE, i);
-		else if (glied.instanceof!Falls_BlockGlied)
-			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
-		else if (glied.instanceof!Sonst_BlockGlied)
-			(&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
-		else if (glied.instanceof!Solange_BlockGlied)
-			(&current_mpo).passe_mpo_an(Aktion_Gewicht.SOLANGE, i);
-
-	}
-
-	if (current_mpo.index == 0)
-		throw new Parse_Fehler("Kein MPO gefunden");
-
-	current_mpo.index -= 1;
-
-	return current_mpo;
 }

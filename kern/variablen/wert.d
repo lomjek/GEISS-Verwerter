@@ -73,7 +73,9 @@ enum WertTyp
 
 	TEXT,
 
-	LISTE
+	LISTE,
+
+	FUNKTION
 }
 
 const WertTyp[] ZAHLEN_TYPEN = [
@@ -95,7 +97,9 @@ immutable dstring[WertTyp] wertTypString = [
 
 	WertTyp.TEXT: "text"d,
 
-	WertTyp.LISTE: "liste"d
+	WertTyp.LISTE: "liste"d,
+
+	WertTyp.FUNKTION: "funktion"d
 ];
 
 immutable dstring[dstring] typ_präfixe = [

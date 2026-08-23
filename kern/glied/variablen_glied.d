@@ -5,7 +5,7 @@ import variablen.speicher;
 import variablen.variable;
 
 import zahl;
-
+import fehler;
 import glied.glied;
 
 import std.stdio : write;
@@ -15,7 +15,7 @@ import std.conv : to;
 
 class Erstelle_Variable_Glied : Glied
 {
-	private WertTyp wert_typ;
+	WertTyp wert_typ;
 	private VariablenTyp var_typ;
 	public dstring var_name;
 
@@ -33,7 +33,8 @@ class Erstelle_Variable_Glied : Glied
 
 	override public bool ist_vollständig()
 	{
-		return (var_name.length != 0) && (var_typ != VariablenTyp.INVALID);
+		return (var_name.length != 0) && (var_typ != VariablenTyp.INVALID) && (
+			wert_typ != WertTyp.FUNKTION);
 	}
 
 	this(dstring var_name, WertTyp constructor)
@@ -93,7 +94,15 @@ class Lese_Variable_Glied : Glied
 
 	override public Wert verwerte(uint bereich)
 	{
-		Variable var = lies_variable(bereich, var_name);
+		Variable var;
+		try
+		{
+			var = lies_variable(bereich, var_name);
+		}
+		catch (Variable_Nicht_Existent_Fehler)
+		{
+			var = lies_variable(0, var_name);
+		}
 
 		Wert wert = *cast(Wert*) var.wert;
 		return wert;

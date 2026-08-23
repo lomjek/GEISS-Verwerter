@@ -592,6 +592,12 @@ class OperationGlied : Glied
 		operationenTyp = op_typ;
 	}
 
+  this(OperatorenTyp op_typ, Glied wert1, Glied wert2){
+    operationenTyp = op_typ;
+    werte[0] = wert1;
+    werte[1] = wert2;
+  }
+
 	override string toString() const
 	{
 		return "G(OPERATOR | " ~ this.operationenTyp.to!string ~ ")";
