@@ -23,18 +23,18 @@ struct Zahl
   }
 
   nothrow
-    this(const GanzeZahl gz)
-    {
-      this.negativ = gz.negativ;
-      this.werte = gz.werte.dup;
-    }
+  this(const GanzeZahl gz)
+  {
+    this.negativ = gz.negativ;
+    this.werte = gz.werte.dup;
+  }
 
   nothrow
-    this(const NatürlicheZahl nz)
-    {
-      this.negativ = false;
-      this.werte = nz.werte.dup;
-    }
+  this(const NatürlicheZahl nz)
+  {
+    this.negativ = false;
+    this.werte = nz.werte.dup;
+  }
 
   this(const bool negativ, const Bruch nach_komma, const ubyte[] werte)
   {
@@ -70,7 +70,7 @@ struct Zahl
     }
     else
       throw new Exception(
-          "TYPENFEHLER: man kann typ " ~ R.toString ~ " nicht mit einer Natürlichen Zahl vergleichen");
+        "TYPENFEHLER: man kann typ " ~ R.toString ~ " nicht mit einer Natürlichen Zahl vergleichen");
   }
 
   bool opEquals(R)(const R other) const
@@ -83,87 +83,6 @@ struct Zahl
 
     else static if (is(R == Zahl))
       return this.opCmp(other) == 0;
-
-    else
-      return false;
-  }
-}
-
-struct GanzeZahl
-{
-  bool negativ;
-  ubyte[] werte;
-
-  nothrow
-    this(const NatürlicheZahl nz)
-    {
-      this.negativ = false;
-      this.werte = nz.werte.dup;
-    }
-
-  nothrow
-    this(const GanzeZahl gz)
-    {
-      this.negativ = gz.negativ;
-      this.werte = gz.werte.dup;
-    }
-
-  nothrow
-    this(const bool negativ, const ubyte[] werte)
-    {
-      this.negativ = negativ;
-      this.werte = werte.dup;
-    }
-
-  int opCmp(R)(const R other) const
-  {
-    static if (is(R == NatürlicheZahl))
-      return this.opCmp(GanzeZahl(other));
-
-    else static if (is(R == GanzeZahl))
-    {
-      ubyte[] num1 = right_unpad(this.werte.dup);
-      ubyte[] num2 = right_unpad(other.werte.dup);
-
-      if (num1.length == 0 && num2.length == 0)
-        return 0;
-
-      if (this.negativ != other.negativ)
-        return this.negativ ? -1 : 1;
-
-      int cmp = 0;
-      if (num1.length != num2.length)
-      {
-        cmp = num1.length < num2.length ? -1 : 1;
-      }
-      else
-      {
-        foreach_reverse (i; 0 .. num1.length)
-        {
-          if (num1[i] != num2[i])
-          {
-            cmp = num1[i] < num2[i] ? -1 : 1;
-            break;
-          }
-        }
-      }
-
-      return this.negativ ? -cmp : cmp;
-    }
-    else static if (is(R == Zahl))
-      return other.opCmp(Zahl(this));
-  }
-
-  bool opEquals(R)(const R other) const
-  {
-    static if (is(R == NatürlicheZahl))
-      return this.opCmp(GanzeZahl(other)) == 0;
-
-    else static if (is(R == GanzeZahl))
-      return this.opCmp(other) == 0;
-
-    else static if (is(R == Zahl))
-      return other.opCmp(Zahl(this)) == 0;
 
     else
       return false;
@@ -176,18 +95,18 @@ struct Bruch
   ubyte[] nenner;
 
   nothrow
-    this(ubyte[] nzähler, ubyte[] nnenner)
-    {
-      zähler = nzähler;
-      nenner = nnenner;
-    }
+  this(ubyte[] nzähler, ubyte[] nnenner)
+  {
+    zähler = nzähler;
+    nenner = nnenner;
+  }
 
   nothrow
-    this(Bruch bruch)
-    {
-      zähler = bruch.zähler;
-      nenner = bruch.nenner;
-    }
+  this(Bruch bruch)
+  {
+    zähler = bruch.zähler;
+    nenner = bruch.nenner;
+  }
 
   int opCmp(const Bruch other) const
   {
@@ -216,7 +135,7 @@ private ubyte[] left_pad(ubyte[] num, ulong desired_length)
   return padded;
 }
 
-  nothrow
+nothrow
 private ubyte[] right_pad(ubyte[] num, ulong desired_length)
 {
   if (num.length >= desired_length)
@@ -229,7 +148,7 @@ private ubyte[] right_pad(ubyte[] num, ulong desired_length)
   return padded;
 }
 
-  nothrow
+nothrow
 private ubyte[] right_pad(const ubyte[] num, ulong desired_length)
 {
   return right_pad(num.dup, desired_length);
@@ -250,7 +169,7 @@ private bool ist_grösser_gleich_1(Bruch bruch)
   return false;
 }
 
-  nothrow
+nothrow
 private bool ist_null(const ubyte[] num)
 {
   foreach (ubyte b; num)
@@ -262,7 +181,7 @@ private bool ist_null(const ubyte[] num)
 }
 
 //MARK: ADDIERE
-  nothrow
+nothrow
 private Bruch addiere(Bruch num1, Bruch num2)
 {
   if (num2.zähler.ist_null)
@@ -282,7 +201,7 @@ private Bruch addiere(Bruch num1, Bruch num2)
 Zahl addiere(Zahl num1, Zahl num2)
 {
   if ((num1.negativ && num2.negativ) ||
-      (!num1.negativ && !num2.negativ))
+    (!num1.negativ && !num2.negativ))
   {
     Bruch neuer_bruch = addiere(num1.nach_komma, num2.nach_komma);
 
@@ -432,22 +351,17 @@ GanzeZahl subtrahiere(GanzeZahl minuend, GanzeZahl subtrahend) // x - y
 }
 
 //MARK: MULTIPLIKATION
-  nothrow
-private ubyte[] multipliziere(const ubyte[] num1, const ubyte[] num2) //Funktioniert nur mit ganzzahlen, aber auch nicht mit allen...
-{
-
-
 private Bruch multipliziere(Bruch num1, Bruch num2)
 {
   return Bruch(multipliziere(num1.zähler, num2.zähler),
-      multipliziere(num1.nenner, num2.zähler));
+    multipliziere(num1.nenner, num2.zähler));
 }
 
 Zahl multipliziere(Zahl num1, Zahl num2)
 {
   bool negativ = true;
   if ((num1.negativ && num2.negativ) ||
-      (num1.negativ == false && num2.negativ == false))
+    (num1.negativ == false && num2.negativ == false))
     negativ = false;
 
   Bruch neuer_bruch = multipliziere(num1.nach_komma, num2.nach_komma);
@@ -460,17 +374,11 @@ Zahl multipliziere(Zahl num1, Zahl num2)
 GanzeZahl multipliziere(GanzeZahl num1, GanzeZahl num2)
 {
   if ((num1.negativ && num2.negativ) ||
-      (num1.negativ == false && num2.negativ == false))
+    (num1.negativ == false && num2.negativ == false))
     return GanzeZahl(false, multipliziere(num1.werte, num2.werte));
 
   return GanzeZahl(true, multipliziere(num1.werte, num2.werte));
 }
-
-NatürlicheZahl multipliziere(NatürlicheZahl num1, NatürlicheZahl num2)
-{
-  return NatürlicheZahl(multipliziere(num1.werte, num2.werte));
-}
-
 //MARK: DIVISON
 
 /// dividiere => Bruch / Bruch = Bruch
@@ -478,36 +386,13 @@ NatürlicheZahl multipliziere(NatürlicheZahl num1, NatürlicheZahl num2)
 nothrow Bruch dividiere(Bruch num1, Bruch num2)
 {
   return Bruch(multipliziere(num1.zähler, num2.nenner), multipliziere(num1.nenner, num2
-        .zähler));
+      .zähler));
 }
 
 struct DivisionResultat
 {
   ubyte[] quotient;
   ubyte[] rest;
-}
-
-/// Essentiel ein grosser ByteShift nach Unten.
-
-ubyte[] int_div_by2(const ubyte[] num)
-{
-  ubyte[] nummer = num.dup.reverse;
-
-  bool übertragung = false;
-
-  for (ulong i = 0; nummer.length > i; i++)
-  {
-    ubyte temp = nummer[i];
-
-    nummer[i] = temp >> 1;
-
-    if (übertragung)
-      nummer[i] += 0b_1000_0000;
-
-    übertragung = (temp % 2) != 0;
-  }
-
-  return reverse(nummer).right_unpad;
 }
 
 /// dividiere => ubyte[] / ubyte[] = DivisionResultat;
@@ -570,10 +455,10 @@ Zahl dividiere(Zahl num1, Zahl num2)
   Bruch resultat = dividiere(bruch1, bruch2);
 
   return Zahl(
-      negativ,
-      resultat,
-      []
-      );
+    negativ,
+    resultat,
+    []
+  );
 }
 
 Zahl dividiere(GanzeZahl num1, GanzeZahl num2)
@@ -582,43 +467,20 @@ Zahl dividiere(GanzeZahl num1, GanzeZahl num2)
   bool negativ = (num1.negativ != num2.negativ);
 
   return Zahl(
-      negativ,
-      Bruch(dr.rest, num2.werte),
-      dr.quotient
-      );
+    negativ,
+    Bruch(dr.rest, num2.werte),
+    dr.quotient
+  );
 }
 
 Zahl dividiere(NatürlicheZahl num1, NatürlicheZahl num2)
 {
   DivisionResultat dr = dividiere(num1.werte, num2.werte);
   return Zahl(
-      false,
-      Bruch(dr.rest, num2.werte),
-      dr.quotient
-      );
-}
-
-//MARK: POTENTIERUNG
-
-/// potenz => ubyte[] ^ ubyte[] = ubyte[];
-/// die zweite Zahl wird kopiert...
-ubyte[] potenz(const ubyte[] num1, const ubyte[] num2)
-{
-  ubyte[] z1 = num1.dup;
-  ubyte[] z2 = num2.dup;
-
-  while (NatürlicheZahl(z2) > NatürlicheZahl([1]))
-  {
-    z1 = num1.multipliziere(z1);
-    z2 = subtrahiere(z2, [1]);
-  }
-
-  return z1;
-}
-
-NatürlicheZahl potenz(const NatürlicheZahl num1, const NatürlicheZahl num2)
-{
-  return NatürlicheZahl(potenz(num1.werte, num2.werte));
+    false,
+    Bruch(dr.rest, num2.werte),
+    dr.quotient
+  );
 }
 
 //MARK: ist_zahl
