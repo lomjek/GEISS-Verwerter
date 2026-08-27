@@ -1,0 +1,6 @@
+funktion test (zahl a, zahl b) { 
+  text wort <- als_text(a + b)
+  schreibe(wort)
+}
+
+test(2, 3)

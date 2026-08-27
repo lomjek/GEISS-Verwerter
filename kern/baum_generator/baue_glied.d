@@ -2,6 +2,7 @@ module baum_generator.baue_glied;
 
 import ext.klasse;
 import glied;
+import variablen.wert;
 import fehler;
 
 import std.algorithm : remove;
@@ -148,6 +149,7 @@ Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, ulon
 
   if (glieder_liste[glied_index + 2].is_class!BlockGlied)
     glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 2]).aktionen;
+
   else
     glied.aktionen ~= glieder_liste[glied_index + 2];
 
@@ -164,11 +166,23 @@ Glied[] baue_glied_Erstelle_Variable_Glied(WT_Glied glied, Glied[] glieder_liste
   if ((glied_index + 1) >= glieder_liste.length)
     throw new Parse_Fehler("Das WT_Glied ist zu nahe am Ende...");
 
-  dstring var_name = (cast(Lese_Variable_Glied) glieder_liste[glied_index + 1]).var_name;
-  glieder_liste[glied_index] = new Erstelle_Variable_Glied(var_name, glied.vt);
-  glieder_liste = glieder_liste.remove(glied_index + 1);
+  if (glieder_liste[glied_index + 1].is_class!Lese_Variable_Glied)
+  {
+    dstring var_name = (cast(Lese_Variable_Glied) glieder_liste[glied_index + 1]).var_name;
+    glieder_liste[glied_index] = new Erstelle_Variable_Glied(var_name, glied.vt);
+    glieder_liste = glieder_liste.remove(glied_index + 1);
 
-  return glieder_liste;
+    return glieder_liste;
+  }
+  else if (glieder_liste[glied_index + 1].is_class!Funktion_Abrufen_Glied)
+  {
+    Funktion_Abrufen_Glied vg = cast(Funktion_Abrufen_Glied) glieder_liste[glied_index + 1]; 
+    Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied(vg.identifier, WertTyp.FUNKTION);
+    glieder_liste[glied_index] = evg;
+    glieder_liste[glied_index + 1] = new ListeWert_Glied(vg.argumente); 
+    return baue_glied_FunktionErstellen_Glied(evg, glieder_liste, glied_index);
+  }
+  else throw new Parse_Fehler(glieder_liste[glied_index + 1].toString); 
 }
 
 Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[] glieder_liste, ulong glied_index)
@@ -182,7 +196,30 @@ Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[
     glieder_liste = glieder_liste.remove(glied_index + 1);
     return glieder_liste;
   }
-  else
-    throw new Fehler("Leider noch kein support für Argumente / Returns");
+ 
+  if ((glied_index + 2) >= glieder_liste.length)
+    throw new Parse_Fehler("Die deklaration der Funktion ist zu nahe am Ende... (2)");
+
+  if (glieder_liste[glied_index + 1].is_class!ListeWert_Glied &&
+      glieder_liste[glied_index + 2].is_class!BlockGlied)
+  {
+    Glied[] parameter_liste = (cast(ListeWert_Glied) glieder_liste[glied_index + 1]).werte;
+    Erstelle_Variable_Glied[] parameter;
+
+    foreach (Glied parameter_glied; parameter_liste)
+    {
+      if (!glied.is_class!Erstelle_Variable_Glied)
+        throw new Parse_Fehler("Die Parameter sind nicht gültig");
+
+      parameter ~= cast(Erstelle_Variable_Glied) parameter_glied;
+    }
+
+    glieder_liste[glied_index] = new FunktionErstellen_Glied(cast(BlockGlied) glieder_liste[glied_index + 2], glied.var_name, parameter);
+    glieder_liste = glieder_liste.remove(glied_index + 2);
+    glieder_liste = glieder_liste.remove(glied_index + 1);
+    return glieder_liste;
+  }
+
+  throw new Fehler("Leider noch kein support für Argumente / Returns");
 }
 

@@ -85,11 +85,12 @@ class Funktion_Abrufen_Glied : Glied
     return true;
   }
 
-  override string toString() const @safe pure
+  override public
+  string toString() const
   {
-    return "G(" ~ identifier.to!string ~ " | " ~ argumente.length.to!string ~ ")";
+    return "G(FUNKTION_ABRUFEN | " ~ identifier.to!string ~ ")";
   }
-
+ 
   this(dstring funk_name, Glied[] argumente)
   {
     identifier = funk_name;
@@ -225,6 +226,7 @@ class FunktionErstellen_Glied : Glied // TODO:Muss noch Parameter und returns ma
 {
   Funktion_Glied körper;
   dstring var_name;
+  Glied[] parameter;
 
   override public Wert verwerte(uint bereich)
   {
@@ -243,9 +245,21 @@ class FunktionErstellen_Glied : Glied // TODO:Muss noch Parameter und returns ma
     return (körper !is null) && (var_name.length != 0);
   }
 
+  override public
+  string toString() const
+  {
+    return "G(ERSTELLE_FUNKTION | " ~ var_name.to!string ~ ")";
+  }
+  
   this(BlockGlied körper, dstring variable)
   {
     this.körper = new Funktion_Glied([], [], körper);
+    this.var_name = variable;
+  }
+
+  this(BlockGlied körper, dstring variable, Erstelle_Variable_Glied[] parameter)
+  {
+    this.körper = new Funktion_Glied(parameter, [], körper);
     this.var_name = variable;
   }
 }
