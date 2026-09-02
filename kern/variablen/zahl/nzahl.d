@@ -4,34 +4,36 @@ import zahl.helfer;
 
 import core.memory : GC;
 
+// @ {} [] # \ || != ~
+
 /**
  * Nzahl oder eine natürliche Zahl ist praktisch ein slice mit
  * ubytes, welches eine Zahl darstellt.
  */
 struct Nzahl
 {
-  ubyte* werte;
-  ulong länge;
+  ubyte* werte = null;
+  ulong länge = 0;
 
   //MARK: THIS()
   pure nothrow
   this(const Nzahl nz)
   {
-    this.werte = nz.werte.dup(nz.länge).ptr;
+    this.werte = nz.werte.dup(nz.länge);
     this.länge = nz.länge;
   }
 
   pure nothrow
   this(const ubyte[] werte)
   {
-    this.werte = werte.ptr.dup(werte.length).ptr;
+    this.werte = werte.ptr.dup(werte.length);
     this.länge = werte.length;
   }
 
   pure nothrow
   this(const ubyte* werte, const ubyte länge)
   {
-    this.werte = dup(werte, länge).ptr;
+    this.werte = dup(werte, länge);
     this.länge = länge;
   }
 
@@ -70,6 +72,9 @@ struct Nzahl
     case "-":
       return subtrahiere(other);
 
+    case "*":
+      return multipliziere(other);
+
     default:
       debug
       {
@@ -84,7 +89,7 @@ struct Nzahl
 
   //MARK: ADDIERE
   private pure nothrow
-  Nzahl addiere(const Nzahl other)
+  Nzahl addiere(const Nzahl other) const
   {
     ulong max_len = this.länge > other.länge ? this.länge : other.länge;
 

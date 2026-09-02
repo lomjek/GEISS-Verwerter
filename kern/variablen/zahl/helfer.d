@@ -3,8 +3,10 @@ module zahl.helfer;
 import core.memory : GC;
 import core.stdc.string : memcpy;
 
+import zahl.nzahl;
+
 pure nothrow @safe
-ubyte[] dup(const ubyte* ptr, const ulong länge)
+ubyte* dup(const ubyte* ptr, const ulong länge)
 {
   if (ptr == null || length == 0)
     return null;
@@ -13,7 +15,7 @@ ubyte[] dup(const ubyte* ptr, const ulong länge)
 
   memcpy(mem, ptr, länge);
 
-  return (cast(ubyte*) mem)[0 .. length];
+  return (cast(ubyte*) mem);
 }
 
 /// In place reversion of ubyte array
@@ -83,4 +85,17 @@ ubyte[] int_div_by2(const ubyte[] num)
   }
 
   return reverse(nummer).right_unpad;
+}
+
+nothrow
+private bool ist_null(const Nzahl num)
+{
+  for (ulong i = 0; i < num.länge; i++)
+  {
+    ubyte b = num.grösse[i];
+
+    if (b != 0)
+      return false;
+  }
+  return true;
 }
