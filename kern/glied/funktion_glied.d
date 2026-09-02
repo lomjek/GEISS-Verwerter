@@ -54,27 +54,51 @@ class Funktion_Abrufen_Glied : Glied
 
     Funktion_Glied fg = cast(Funktion_Glied) var.wert;
 
-    dstring[] namen;
+    //ARGUMENTE
+    dstring[] arg_namen;
 
     foreach (Erstelle_Variable_Glied evg; fg.parameter)
     {
       evg.verwerte(neuer_bereich);
-      namen ~= evg.var_name;
+      arg_namen ~= evg.var_name;
     }
 
-    if (argumente.length != namen.length)
+    if (argumente.length != arg_namen.length)
     {
-      throw new Fehler("Die Anzahl Argumenten ist nicht richtg: Wollte " ~ namen.length.to!string ~ ", habe aber " ~ argumente
+      throw new Fehler("Die Anzahl Argumenten ist nicht richtg: Wollte " ~ arg_namen.length.to!string ~ ", habe aber " ~ argumente
           .length.to!string ~ ".");
     }
 
     for (ulong i = 0; i < argumente.length; i++)
     {
       Wert* argument = new Wert(argumente[i].verwerte(bereich));
-      setze_variable(neuer_bereich, namen[i], argument);
+      setze_variable(neuer_bereich, arg_namen[i], argument);
     }
 
-    Wert resultat = fg.verwerte(neuer_bereich);
+    //RETURNS (für jetzt nur eins)
+    dstring[] ret_namen;
+
+    foreach(Erstelle_Variable_Glied evg; fg.return_values)
+    {
+      evg.verwerte(neuer_bereich);
+      ret_namen ~= evg.var_name;
+    }
+
+    fg.verwerte(neuer_bereich);
+
+    Wert resultat;
+    if (ret_namen.length == 1)
+    {
+      resultat = *(cast(Wert*) lies_variable(neuer_bereich, ret_namen[0]).wert); // Muss geändert werden.
+    }
+    else if (ret_namen.length == 0) 
+    {
+      resultat  = Wert(WertTyp.INVALID, null);
+    }
+    else{
+      debug writeln("Mehrere argumente noch nicht implementiert");
+    }
+
     lösche_bereich(neuer_bereich);
 
     return resultat;
@@ -86,11 +110,11 @@ class Funktion_Abrufen_Glied : Glied
   }
 
   override public
-  string toString() const
-  {
-    return "G(FUNKTION_ABRUFEN | " ~ identifier.to!string ~ ")";
-  }
- 
+    string toString() const
+    {
+      return "G(FUNKTION_ABRUFEN | " ~ identifier.to!string ~ ")";
+    }
+
   this(dstring funk_name, Glied[] argumente)
   {
     identifier = funk_name;
@@ -150,32 +174,31 @@ class EingebauteFunktion_Glied : Funktion_Glied
   {
     switch (typ)
     {
-    case MethodenTyp.PRINT:
-      Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
-      schreibe_schön_wert(text);
-      writeln;
-      goto default;
+      case MethodenTyp.PRINT:
+        Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+        schreibe_schön_wert(text);
+        writeln;
+        goto default;
 
-    case MethodenTyp.ALS_TEXT:
-      Wert zahl = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
-      Zahl z;
-      if (zahl.typ == WertTyp.ZAHL)
-        z = *cast(Zahl*) zahl.wert;
-      else if (zahl.typ == WertTyp.GANZE_ZAHL)
-        z = Zahl(*cast(GanzeZahl*) zahl.wert);
-      else if (zahl.typ == WertTyp.NATÜRLICHE_ZAHL)
-        z = Zahl(*cast(NatürlicheZahl*) zahl.wert);
-      else
-        throw new Fehler("Funktion als_text benötigt eine Zahl als Eingabe");
+      case MethodenTyp.ALS_TEXT:
+        Wert zahl = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+        Zahl z;
+        if (zahl.typ == WertTyp.ZAHL)
+          z = *cast(Zahl*) zahl.wert;
+        else if (zahl.typ == WertTyp.GANZE_ZAHL)
+          z = Zahl(*cast(GanzeZahl*) zahl.wert);
+        else if (zahl.typ == WertTyp.NATÜRLICHE_ZAHL)
+          z = Zahl(*cast(NatürlicheZahl*) zahl.wert);
+        else
+          throw new Fehler("Funktion als_text benötigt eine Zahl als Eingabe");
 
-      string str = z.als_string;
+        string str = z.als_string;
 
-      return Wert(WertTyp.TEXT, new Text(str));
+        setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(str)));
+        goto default;
 
-      // Vielleicht müssen einige Methoden Sachen zurückgeben
-
-    default:
-      return Wert(WertTyp.INVALID, null);
+      default:
+        return Wert(WertTyp.INVALID, null);
     }
   }
 
@@ -246,11 +269,11 @@ class FunktionErstellen_Glied : Glied // TODO:Muss noch Parameter und returns ma
   }
 
   override public
-  string toString() const
-  {
-    return "G(ERSTELLE_FUNKTION | " ~ var_name.to!string ~ ")";
-  }
-  
+    string toString() const
+    {
+      return "G(ERSTELLE_FUNKTION | " ~ var_name.to!string ~ ")";
+    }
+
   this(BlockGlied körper, dstring variable)
   {
     this.körper = new Funktion_Glied([], [], körper);
