@@ -1,6 +1,9 @@
-funktion test (zahl a, zahl b) { 
+funktion test (zahl a, zahl b) -> zahl zl { 
   text wort <- als_text(a + b)
   schreibe(wort)
+  zl <- 2
 }
 
-test(2, 3)
+zahl x <- test(2, 3)
+
+schreibe(als_text(x))

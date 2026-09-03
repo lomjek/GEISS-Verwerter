@@ -1,5 +1,11 @@
 module operatoren;
 
+import glied.operation_glied;
+
+import fehler.parse_fehler;
+
+import std.conv : to;
+
 // @ {} [] # \ || != ~
 
 enum OperatorenTyp
@@ -88,3 +94,84 @@ immutable OperatorenTyp[OperatorenTyp] JEWEILIG_SCHLIESSENDE_KLAMMER = [
 	OperatorenTyp.ECKIGE_KLAMMER_AUF : OperatorenTyp.ECKIGE_KLAMMER_ZU,
 	OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF : OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU
 ];
+
+immutable (dstring[OperatorenTyp]) mehrteilige_operatoren = [
+  OperatorenTyp.RÜCK_PFEIL : "<-",
+  OperatorenTyp.VOR_PFEIL : "->",
+];
+
+//MARK: FUNKTIONEN
+OperatorenTyp char_zu_opt(dchar c)
+{
+    foreach (k, v; operatoren_chars)
+    {
+        if (v == c)
+            return k;
+    }
+    return OperatorenTyp.INVALID;
+}
+
+bool wort_ist_op(dstring wort)
+{
+  if (wort.length != 1) return false;
+
+  dchar gesucht = wort[0];
+
+  foreach (OperatorenTyp opt, dchar character; operatoren_chars)
+  {
+    if (character == gesucht) return true;
+  }
+
+  return false;
+}
+
+private pure
+bool beginnt_multi_char_op(dchar character)
+{
+  foreach (OperatorenTyp opt, dstring multi_char_op; mehrteilige_operatoren)
+  {
+    if (multi_char_op[0] == character)
+      return true;
+  }
+
+  return false;
+}
+
+/// Wir nehmen an, dass die dstring entries für die Operatoren aus einteiligen Teilen bestehen.
+private pure
+OperatorenTyp erstelle_multi_char_op(dstring[] wort_liste, ulong* wort_index)
+{
+  foreach (OperatorenTyp opt, dstring multi_char_op; mehrteilige_operatoren)
+  {
+    dstring ganzer_operator = "";
+    for (ulong i = 0; i < multi_char_op.length; i++)
+    {
+      if (wort_liste[*wort_index + i].length != 1) return OperatorenTyp.INVALID;
+      ganzer_operator ~= wort_liste[*wort_index + i];
+    }
+
+    if (ganzer_operator == multi_char_op){
+      *wort_index += ganzer_operator.length - 1;
+      return opt;
+    }
+  }
+
+  return OperatorenTyp.INVALID;
+}
+
+OperationGlied wort_als_op(dstring[] wort_liste, ulong* wort_index)
+{
+  if (!wort_ist_op(wort_liste[*wort_index]))
+    throw new Parse_Fehler("Folgender Operator ist nicht korrekt: " ~ wort_liste[*wort_index].to!string);
+
+  OperatorenTyp opt = erstelle_multi_char_op(wort_liste, wort_index);
+
+  if (opt == OperatorenTyp.INVALID)
+    opt = char_zu_opt((wort_liste[*wort_index])[0]);
+
+  if (opt == OperatorenTyp.INVALID)
+    throw new Parse_Fehler("Invalider Operator");
+
+  return new OperationGlied(opt);
+}
+

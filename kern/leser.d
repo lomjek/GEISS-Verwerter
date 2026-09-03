@@ -15,13 +15,11 @@ import text;
 
 import variablen.wert;
 
-import std.array;
 import std.algorithm : startsWith, endsWith, remove, canFind, filter;
 import std.string : strip;
 import std.conv : to, ConvException;
 import std.stdio : write, writeln;
-import std.math : pow;
-import std.array : split;
+import std.array : split, array;
 import std.traits : EnumMembers;
 
 // @ {} [] # \ || != ~
@@ -175,24 +173,6 @@ private Wert als_wert(dstring wort)
 }
 
 // MARK: operatoren
-private bool ist_operator(dstring wort)
-{
-	if (wort.length > 1)
-	{
-		return false;
-	}
-	dchar op_char = wort[0];
-
-	foreach (dchar chr; operatoren_chars.byValue)
-	{
-		if (chr == op_char)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 private OperatorenTyp als_operator(dstring wort)
 {
 	if (wort.length > 1)
@@ -245,18 +225,6 @@ Glied[] lese_linie(dstring linie)
 			continue;
 		}
 
-		if (wort_liste.length > i + 1) // Pfeile schon sofort zu Pfeilen machen
-		{
-			if (wort == "<" && (wort_liste[i + 1]).strip == "-")
-			{
-				token_liste ~= new OperationGlied(OperatorenTyp.RÜCK_PFEIL);
-				wort_liste = wort_liste.remove(i + 1);
-				wort_liste_length--;
-				wort_liste[i] = " ";
-				continue;
-			}
-		}
-
 		if (wort_liste.length > i + 2)
 		{
 			if (wort.ist_zahl && wort_liste[i + 1] == ".")
@@ -299,7 +267,7 @@ Glied[] lese_linie(dstring linie)
 				dstring neues_wort = wort_liste[i + 1];
 				if (neues_wort != "zahl"d)
 				{
-					//TODO: Zweistellige Typen anschauen.
+					//TODO:Zweistellige Typen anschauen.
 					throw new Error(
 						"Muss sowieso noch die alten zweistelligen Typen anschauen...");
 				}
@@ -330,9 +298,9 @@ Glied[] lese_linie(dstring linie)
 			continue;
 		}
 
-		if (wort.ist_operator)
+		if (wort.wort_ist_op)
 		{
-			token_liste ~= new OperationGlied(wort.als_operator);
+			token_liste ~= wort_als_op(wort_liste, &i);
 			continue;
 		}
 

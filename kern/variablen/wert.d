@@ -69,8 +69,6 @@ enum WertTyp
 
 	WAHRHEIT,
 
-	FARBE,
-
 	TEXT,
 
 	LISTE,
@@ -92,8 +90,6 @@ immutable dstring[WertTyp] wertTypString = [
 	WertTyp.NATÜRLICHE_ZAHL: "nzahl"d,
 
 	WertTyp.WAHRHEIT: "wahrheit"d,
-
-	WertTyp.FARBE: "farbe"d,
 
 	WertTyp.TEXT: "text"d,
 
