@@ -69,32 +69,3 @@ class SW_Glied : Glied
 	}
 }
 
-class WT_Glied : Glied
-{
-	public WertTyp vt;
-
-	override public Wert verwerte(uint bereich)
-	{
-		return Wert(WertTyp.INVALID, null);
-	}
-
-	override public void schreibe_baum()
-	{
-		write(vt.to!string);
-	}
-
-	override public bool ist_vollständig()
-	{
-		return false;
-	}
-
-	this(WertTyp vta)
-	{
-		this.vt = vta;
-	}
-
-	override string toString() const
-	{
-		return "G(VAR_TYP | " ~ this.vt.to!string ~ ")";
-	}
-}

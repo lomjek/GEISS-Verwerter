@@ -125,18 +125,6 @@ bool wort_ist_op(dstring wort)
   return false;
 }
 
-private pure
-bool beginnt_multi_char_op(dchar character)
-{
-  foreach (OperatorenTyp opt, dstring multi_char_op; mehrteilige_operatoren)
-  {
-    if (multi_char_op[0] == character)
-      return true;
-  }
-
-  return false;
-}
-
 /// Wir nehmen an, dass die dstring entries für die Operatoren aus einteiligen Teilen bestehen.
 private pure
 OperatorenTyp erstelle_multi_char_op(dstring[] wort_liste, ulong* wort_index)

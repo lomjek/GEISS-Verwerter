@@ -58,42 +58,6 @@ private SchlüsselWort als_sw(dstring wort)
 	return SchlüsselWort.INVALID;
 }
 
-// MARK: WertTyp
-private Verifizierung ist_vt(dstring wort)
-{
-	foreach (WertTyp typ, dstring wert; wertTypString)
-	{
-		if (wort.strip == wert.strip)
-		{
-			return Verifizierung.ja;
-		}
-	}
-
-	foreach (dstring präfix; typ_präfixe)
-	{
-		if (präfix.strip == wort.strip)
-		{
-			return Verifizierung.nicht_ganz;
-		}
-
-	}
-
-	return Verifizierung.nein;
-}
-
-private WertTyp als_vt(dstring wort)
-{
-	foreach (WertTyp typ, dstring wert; wertTypString)
-	{
-		if (wort.strip == wert.strip)
-		{
-			return typ;
-		}
-	}
-
-	return WertTyp.INVALID;
-}
-
 // MARK: Wert - ist?
 dstring[] string_delims = [
 	"\\\'"d, "\\\""d, "\'"d, "\""d
@@ -254,24 +218,9 @@ Glied[] lese_linie(dstring linie)
 		}
 
 		// WertTypen
-		if (wort.ist_vt == Verifizierung.ja)
+		if (wort.wort_ist_wert_typ)
 		{
-			token_liste ~= new WT_Glied(wort.als_vt);
-			continue;
-		}
-		else if (wort.ist_vt == Verifizierung.nicht_ganz)
-		{
-			wort_präfix = wort ~ "_";
-			if (i < wort_liste_length - 1)
-			{
-				dstring neues_wort = wort_liste[i + 1];
-				if (neues_wort != "zahl"d)
-				{
-					//TODO:Zweistellige Typen anschauen.
-					throw new Error(
-						"Muss sowieso noch die alten zweistelligen Typen anschauen...");
-				}
-			}
+			token_liste ~= wort_als_wert_typ(wort_liste, &i);
 			continue;
 		}
 
