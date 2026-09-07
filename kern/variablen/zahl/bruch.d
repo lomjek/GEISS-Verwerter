@@ -32,6 +32,7 @@ struct Bruch
 	}
 
 	//MARK: opCmp
+	pure nothrow
 	int opCmp(const Bruch other) const
 	{
 		Nzahl zähler1 = this.zähler * other.nenner;
@@ -40,35 +41,44 @@ struct Bruch
 		return Nzahl(zähler1).opCmp(Nzahl(zähler2));
 	}
 
+	pure nothrow
 	bool opEquals(Bruch other) const
 	{
 		return this.opCmp(other) == 0;
 	}
 
 	//MARK: opBinary
-	Bruch opBinary(string op, const Bruch other) const
+	Bruch opBinary(string op, R)(const R other) const
 	{
-		switch (op)
+		static if (is(R == Bruch))
 		{
-		case "+":
-			return addiere(other);
-
-		case "-":
-			return subtrahiere(other);
-
-		case "*":
-			return multipliziere(other);
-
-		default:
-			debug
+			switch (op)
 			{
-				import std.stdio : write, writeln;
+			case "+":
+				return addiere(other);
 
-				write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
-				writeln(op);
+			case "-":
+				return subtrahiere(other);
+
+			case "*":
+				return multipliziere(other);
+
+			case "/":
+				return dividiere(other);
+
+			default:
+				debug
+				{
+					import std.stdio : write, writeln;
+
+					write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
+					writeln(op);
+				}
+				return Gzahl();
 			}
-			return Gzahl();
 		}
+		else
+			return Bruch();
 	}
 
 	//MARK: ADDIERE
@@ -76,15 +86,15 @@ struct Bruch
 	Bruch addiere(const Bruch other)
 	{
 		if (other.zähler.opCmp(Nzahl.init) == 0)
-			return num1;
+			return Bruch(this);
 
 		else if (this.zähler.opCmp(Nzahl.init) == 0)
-			return num2;
+			return Bruch(other);
 
 		Nzahl neuer_nenner = this.nenner * other.nenner;
 
-		Nzahl summand1 = num1.zähler * num2.nenner;
-		Nzahl summand2 = num2.zähler * num1.nenner;
+		Nzahl summand1 = this.zähler * other.nenner;
+		Nzahl summand2 = other.zähler * this.nenner;
 
 		return Bruch(summand1 + summand2, neuer_nenner);
 	}
@@ -116,5 +126,12 @@ struct Bruch
 	Bruch multipliziere(Bruch other)
 	{
 		return Bruch(this.zähler * other.zähler, this.nenner * other.zähler);
+	}
+
+	//MARK: DIVIDIERE
+	private pure nothrow
+	Bruch dividiere(Bruch other)
+	{
+		return Bruch(this.zähler * other.nenner, this.nenner * other.zähler);
 	}
 }

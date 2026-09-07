@@ -1,6 +1,7 @@
 module zahl.wandel;
 
 import std.bigint : BigInt;
+import std.bitmanip : littleEndianToNative;
 
 import zahl.zahl : Zahl;
 import zahl.gzahl : Gzahl;
@@ -95,7 +96,7 @@ Zahl als_zahl(dstring wort)
 
 /// Es nimmt die letzten vier ubytes und stopfft Sie in ein int.
 /// Keine garantie, wie negative Zahlen funktionieren werden.
-int als_int(ubyte[] liste, bool throw_on_overflow = true)
+int als_int(const Nzahl liste, bool throw_on_overflow = true)
 {
 	if (liste.length > 4 && throw_on_overflow)
 	{
@@ -103,9 +104,9 @@ int als_int(ubyte[] liste, bool throw_on_overflow = true)
 	}
 
 	ubyte[4] kurze_liste;
-	if (liste.length > 4)
+	if (liste.länge > 4)
 	{
-		kurze_liste = liste[$ - 4 .. $];
+		kurze_liste = liste.werte[$ - 4 .. $];
 	}
 	else
 	{

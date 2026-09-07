@@ -1,6 +1,7 @@
 module zahl.nzahl;
 
 import zahl.helfer;
+import zahl.division;
 
 import core.memory : GC;
 
@@ -13,27 +14,25 @@ import core.memory : GC;
 struct Nzahl
 {
   ubyte* werte = null;
-  ulong länge = 0;
+  size_t länge = 0;
 
   //MARK: THIS()
   pure nothrow
   this(const Nzahl nz)
   {
-    this.werte = nz.werte.dup(nz.länge);
-    this.länge = nz.länge;
+    this(nz.werte, nz.länge);
   }
 
   pure nothrow
   this(const ubyte[] werte)
   {
-    this.werte = werte.ptr.dup(werte.length);
-    this.länge = werte.length;
+    this(werte.ptr, werte.length);
   }
 
   pure nothrow
-  this(const ubyte* werte, const ubyte länge)
+  this(const ubyte* werte, const size_t länge)
   {
-    this.werte = dup(werte, länge);
+    this.werte = dup(werte, länge).right_unpad;
     this.länge = länge;
   }
 
@@ -56,35 +55,44 @@ struct Nzahl
     return 0;
   }
 
+  pure nothrow
   bool opEquals(const Nzahl other) const
   {
     return this.opCmp(other) == 0;
   }
 
   //MARK: opBinary
-  Nzahl opBinary(string op, const Nzahl other) const
+  Nzahl opBinary(string op, R)(const R other) const
   {
-    switch (op)
+    static if (is(R == Nzahl))
     {
-    case "+":
-      return addiere(other);
-
-    case "-":
-      return subtrahiere(other);
-
-    case "*":
-      return multipliziere(other);
-
-    default:
-      debug
+      switch (op)
       {
-        import std.stdio : write, writeln;
+      case "+":
+        return addiere(other);
 
-        write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
-        writeln(op);
+      case "-":
+        return subtrahiere(other);
+
+      case "*":
+        return multipliziere(other);
+
+      case "/":
+        return dividiere(other);
+
+      default:
+        debug
+        {
+          import std.stdio : write, writeln;
+
+          write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
+          writeln(op);
+        }
+        return Nzahl();
       }
-      return Nzahl();
     }
+    else
+      throw new Parse_Fehler("Typen_Fehler, (Nzahl)");
   }
 
   //MARK: ADDIERE
@@ -120,7 +128,7 @@ struct Nzahl
 
   //MARK: SUBTRAHIERE
   private pure nothrow
-  Nzahl subtrahiere(const Nzahl other)
+  Nzahl subtrahiere(const Nzahl other) const
   {
     if (this.opCmp(other) == -1)
       return Nzahl();
@@ -159,20 +167,17 @@ struct Nzahl
 
   //MARK: MULTIPLIZIERE
   private pure nothrow
-  Nzahl multipliziere(const Nzahl other)
+  Nzahl multipliziere(const Nzahl other) const
   {
     ubyte[][] matrix;
 
-    if (num1.length == 0 || num2.length == 0)
+    if (this.länge == 0 || other.länge == 0)
       return [0];
 
-    if ((num1.length == 1 && num1[0] == 0) || (num2.length == 1 && num2[0] == 0))
+    if ((this.länge == 1 && this.werte[0] == 0) || (other.länge == 1 && other.werte[0] == 0))
       return [0];
 
-    if (num1.length == 0 || num2.length == 0)
-      return [0];
-
-    for (ulong i = 0; i < num2.length; i++)
+    for (ulong i = 0; i < other.length; i++)
     {
       ubyte[] zwischenresultat = [];
       ubyte überschuss = 0;
@@ -184,9 +189,9 @@ struct Nzahl
         repeat--;
       }
 
-      for (ulong j = 0; j < num1.length; j++)
+      for (ulong j = 0; j < this.länge; j++)
       {
-        ushort ziffer = (num1[j] * num2[i]) + überschuss;
+        ushort ziffer = (this.werte[j] * other.werte[i]) + überschuss;
         überschuss = cast(ubyte)(ziffer >> 8); //oberer Byte des ushort, was übertragen wird...
         zwischenresultat ~= cast(ubyte)(ziffer & 0xFF); // tieferer Byte des ushorts, was an der Stelle eingetragen wird.
       }
@@ -206,5 +211,21 @@ struct Nzahl
     }
 
     return matrix[0];
+  }
+
+  //MARK: DIVIDIERE
+  private pure nothrow
+  Nzahl dividiere(const Nzahl other) const
+  {
+    Nzahl anders = Nzahl(other);
+
+    if (anders.länge == 0)
+    {
+      return Nzahl();
+    }
+
+    DivisionResultat dr = dividiere(this, other);
+
+    return dr.quotient;
   }
 }

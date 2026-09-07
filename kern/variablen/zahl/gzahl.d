@@ -1,44 +1,52 @@
 module zahl.gzahl;
 
 import zahl.nzahl;
+import zahl.division;
 
 // @ {} [] # \ || != ~
 
 struct Gzahl
 {
-  Nzahl grösse;
+  Nzahl grösse = Nzahl();
+  alias werte = grösse.werte;
+  alias länge = grösse.länge;
+
   bool positiv = true;
 
   //MARK: THIS()
   pure nothrow
   this(const Nzahl nz)
   {
-    this.grösse = Nzahl(nz);
-    this.positiv = true;
+    this(nz, true);
   }
 
   pure nothrow
-  this(const Nzahl nz, bool positiv)
+  this(const Nzahl nz, const bool positiv)
   {
     this.grösse = Nzahl(nz);
     this.positiv = positiv;
   }
 
   pure nothrow
-  this(const ubyte[] werte, bool positiv)
+  this(const Gzahl gz)
   {
-    this.grösse = Nzahl(werte);
-    this.positiv = positiv;
+    this(gz.grösse, gz.positiv);
   }
 
   pure nothrow
-  this(const ubyte* werte, const ubyte länge, bool positiv)
+  this(const ubyte[] werte, const bool positiv)
   {
-    this.grösse = Nzahl(werte, länge);
-    this.positiv = positiv;
+    this(Nzahl(werte), positiv);
+  }
+
+  pure nothrow
+  this(const ubyte* werte, const ubyte länge, const bool positiv)
+  {
+    this(Nzahl(werte, länge), positiv);
   }
 
   //MARK: opCmp
+  pure nothrow
   int opCmp(ref const Gzahl other) const
   {
     if (this.grösse.opCmp(Nzahl.init) == 0 && other.grösse.opCmp(Nzahl.init) == 0)
@@ -55,36 +63,46 @@ struct Gzahl
     return nzahlResult;
   }
 
+  pure nothrow
   bool opEquals(const Gzahl other) const
   {
     return this.opCmp(other) == 0;
   }
 
   //MARK: opBinary
-  private pure nothrow
-  Gzahl opBinary(string op, const Gzahl other) const
+  pure nothrow
+  Gzahl opBinary(string op, R)(const R other) const
   {
-    switch (op)
+    static if (is(R == Gzahl))
     {
-    case "+":
-      return addiere(other);
-
-    case "-":
-      return subtrahiere(other);
-
-    case "*":
-      return multipliziere(other);
-
-    default:
-      debug
+      switch (op)
       {
-        import std.stdio : write, writeln;
+      case "+":
+        return addiere(other);
 
-        write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
-        writeln(op);
+      case "-":
+        return subtrahiere(other);
+
+      case "*":
+        return multipliziere(other);
+
+      default:
+        debug
+        {
+          import std.stdio : write, writeln;
+
+          write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
+          writeln(op);
+        }
+        return Gzahl();
       }
-      return Gzahl();
     }
+    else static if (is(R == Nzahl))
+    {
+      return this.opBinary(Gzahl(other));
+    }
+    else
+      throw new Parse_Fehler("Typen_Fehler, (Gzahl)");
   }
 
   //MARK: ADDIERE
@@ -93,16 +111,16 @@ struct Gzahl
   {
     if (this.positiv == other.positiv)
     {
-      return Gzahl(this.positiv, this.grösse + other.grösse);
+      return Gzahl(this.grösse + other.grösse, this.positiv);
     }
 
     if (this.positiv && other.positiv == false)
     {
-      return subtrahiere(num1, num2);
+      return Gzahl(this) - Gzahl(other);
     }
     else if (this.positiv == false && other.positiv)
     {
-      return subtrahiere(num2, num1);
+      return Gzahl(other) - Gzahl(this);
     }
 
     //Man sollte hier nie anlangen...
@@ -110,8 +128,7 @@ struct Gzahl
     {
       import std.stdio : write, writeln;
 
-      write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
-      writeln(op);
+      write("FEHLER: Diese zwei Zahlen könnte man eigentlich nicht addieren...");
     }
     return Gzahl();
   }
@@ -132,12 +149,28 @@ struct Gzahl
 
   //MARK: MULTIPLIZIERE
   private pure nothrow
-  Gzahl multipliziere(Gzahl num1, Gzahl num2)
+  Gzahl multipliziere(const Gzahl other) const
   {
-    if ((num1.negativ && num2.negativ) ||
-      (num1.negativ == false && num2.negativ == false))
-      return Gzahl(false, this.grösse * other.grösse);
+    if ((this.positiv && other.positiv) ||
+      (this.positiv == false && other.positiv == false))
+      return Gzahl(this.grösse * other.grösse, false);
 
-    return Gzahl(true, this.grösse * other.grösse);
+    return Gzahl(this.grösse * other.grösse, true);
+  }
+
+  //MARK: DIVIDIERE
+  private pure nothrow
+  Gzahl dividiere(const Gzahl other) const
+  {
+    if (Gzahl(other).grösse.länge == 0) //TODO: alias
+      return Gzahl();
+
+    DivisionResultat dr = zahl.division.dividiere(this.grösse, other.grösse, false); //TODO: alias
+
+    if ((this.positiv && other.positiv) ||
+      (this.positiv == false && other.positiv == false))
+      return Gzahl(dr.quotient, true);
+
+    return Gzahl(dr.quotient, false);
   }
 }

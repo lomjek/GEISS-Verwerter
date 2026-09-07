@@ -5,10 +5,10 @@ import core.stdc.string : memcpy;
 
 import zahl.nzahl;
 
-pure nothrow @safe
+pure nothrow
 ubyte* dup(const ubyte* ptr, const ulong länge)
 {
-  if (ptr == null || length == 0)
+  if (ptr == null || länge == 0)
     return null;
 
   void* mem = GC.malloc(länge, GC.BlkAttr.NO_SCAN);
@@ -19,19 +19,20 @@ ubyte* dup(const ubyte* ptr, const ulong länge)
 }
 
 /// In place reversion of ubyte array
-ubyte[] reverse(ubyte[] arr)
+pure nothrow
+Nzahl reverse(Nzahl arr)
 {
-  if (arr.length <= 1)
+  if (arr.länge <= 1)
     return arr;
 
   size_t i = 0;
-  size_t j = cast(size_t) arr.length - 1;
+  size_t j = cast(size_t) arr.länge - 1;
 
   while (i < j)
   {
-    ubyte temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
+    ubyte temp = arr.werte[i];
+    arr.werte[i] = arr.werte[j];
+    arr.werte[j] = temp;
     i++;
     j--;
   }
@@ -42,7 +43,7 @@ ubyte[] reverse(ubyte[] arr)
 pure nothrow
 ubyte[] right_unpad(const ubyte[] num)
 {
-  ubyte[] arr = num.dup(num.length);
+  ubyte[] arr = num.dup(num.länge);
   arr.reverse();
   ubyte[] unpadded;
 
@@ -62,40 +63,4 @@ ubyte[] right_unpad(const ubyte[] num)
   }
 
   return unpadded.reverse;
-}
-
-/// Essentiel ein grosser ByteShift nach Unten.
-
-ubyte[] int_div_by2(const ubyte[] num)
-{
-  ubyte[] nummer = num.dup.reverse;
-
-  bool übertragung = false;
-
-  for (ulong i = 0; nummer.length > i; i++)
-  {
-    ubyte temp = nummer[i];
-
-    nummer[i] = temp >> 1;
-
-    if (übertragung)
-      nummer[i] += 0b_1000_0000;
-
-    übertragung = (temp % 2) != 0;
-  }
-
-  return reverse(nummer).right_unpad;
-}
-
-nothrow
-private bool ist_null(const Nzahl num)
-{
-  for (ulong i = 0; i < num.länge; i++)
-  {
-    ubyte b = num.grösse[i];
-
-    if (b != 0)
-      return false;
-  }
-  return true;
 }

@@ -26,12 +26,12 @@ struct Wert
 		string wert_str;
 		if (this.typ == WertTyp.NATÜRLICHE_ZAHL)
 		{
-			NatürlicheZahl nz = *cast(NatürlicheZahl*) this.wert;
+			Nzahl nz = *cast(Nzahl*) this.wert;
 			wert_str = nz.als_string;
 		}
 		else if (this.typ == WertTyp.GANZE_ZAHL)
 		{
-			GanzeZahl gz = *cast(GanzeZahl*) this.wert;
+			Gzahl gz = *cast(Gzahl*) this.wert;
 			wert_str = gz.als_string;
 		}
 		else if (this.typ == WertTyp.ZAHL)

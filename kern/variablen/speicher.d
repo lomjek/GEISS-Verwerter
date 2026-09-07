@@ -35,22 +35,22 @@ static this()
 			Variable(
 				"status_nummer"d,
 				VariablenTyp.FIX,
-				new Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl([0]))
+				new Wert(WertTyp.NATÜRLICHE_ZAHL, new Nzahl())
 			), // Exit code 
 			Variable(
 				"std_wert_nzahl"d,
 				VariablenTyp.FIX,
-				new Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl([0]))
+				new Wert(WertTyp.NATÜRLICHE_ZAHL, new Nzahl())
 			), //Standard Wert, mit welchem nzahlen initialisiert werden.
 			Variable(
 				"std_wert_gzahl"d,
 				VariablenTyp.FIX,
-				new Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(false, [0]))
+				new Wert(WertTyp.GANZE_ZAHL, new Gzahl(Nzahl(), false))
 			), //Standard Wert, mit welchem gzahlen initialisiert werden.
 			Variable(
 				"std_wert_zahl"d,
 				VariablenTyp.FIX,
-				new Wert(WertTyp.ZAHL, new Zahl(NatürlicheZahl([0])))
+				new Wert(WertTyp.ZAHL, new Zahl(Nzahl()))
 			), //Standard Wert, mit welchem zahlen initialisiert werden.
 			Variable(
 				"std_wert_wahrheit"d,
@@ -248,7 +248,7 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 				// Upcasting für Zahlen  
 			else if (nw_typ == WertTyp.GANZE_ZAHL && vw_typ == WertTyp.ZAHL)
 				{
-					GanzeZahl nw_gzahl = *cast(GanzeZahl*) neuer_wert.wert;
+					Gzahl nw_gzahl = *cast(Gzahl*) neuer_wert.wert;
 					Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(nw_gzahl));
 					var.wert = nw;
 				}
@@ -256,7 +256,7 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp
 					.ZAHL)
 				{
-					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert
+					Nzahl nw_nzahl = *cast(Nzahl*) neuer_wert
 						.wert;
 					Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(
 							nw_nzahl));
@@ -266,9 +266,9 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
 				else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp
 					.GANZE_ZAHL)
 				{
-					NatürlicheZahl nw_nzahl = *cast(NatürlicheZahl*) neuer_wert
+					Nzahl nw_nzahl = *cast(Nzahl*) neuer_wert
 						.wert;
-					Wert* nw = new Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(
+					Wert* nw = new Wert(WertTyp.GANZE_ZAHL, new Gzahl(
 							nw_nzahl));
 					var.wert = nw;
 				}
@@ -292,9 +292,9 @@ int bekomme_return_status()
 	Variable var = lies_variable(0, "status_nummer");
 	Wert wert = *cast(
 		Wert*) var.wert;
-	NatürlicheZahl zahl = *cast(NatürlicheZahl*) wert
+	Nzahl zahl = *cast(Nzahl*) wert
 		.wert;
-	return als_int(zahl.werte);
+	return als_int(zahl);
 }
 
 bool hat_variable_typ(uint bereich, dstring indetifier, VariablenTyp vt)

@@ -2,12 +2,7 @@ module zahl.zahl;
 
 import ext.prints;
 
-import std.algorithm : canFind;
-import std.range : retro, split;
-import std.bigint : BigInt;
-import std.bitmanip : littleEndianToNative;
-import std.conv : to;
-
+import zahl.division;
 import zahl.bruch;
 import zahl.gzahl;
 import zahl.nzahl;
@@ -16,25 +11,34 @@ import zahl.nzahl;
 
 struct Zahl
 {
-  Gzahl vor_komma;
+  Gzahl vor_komma = Gzahl();
+  alias positiv = vor_komma.positiv;
+  alias grösse = vor_komma.grösse;
+  alias länge = vor_komma.länge;
+  alias werte = vor_komma.werte;
+
   Bruch nach_komma;
 
   //MARK: THIS()
+  pure nothrow
   this(const Zahl z)
   {
     this(z.negativ, z.nach_komma, z.werte);
   }
 
+  pure nothrow
   this(const Gzahl gz)
   {
     this(gz, Bruch());
   }
 
+  pure nothrow
   this(const Nzahl nz)
   {
     this(Gzahl(nz), Bruch());
   }
 
+  pure nothrow
   this(const Gzahl vor_komma, const Bruch nach_komma)
   {
     DivisionResultat dr = dividiere(nach_komma.zähler, nach_komma.nenner, false);
@@ -62,33 +66,47 @@ struct Zahl
 
   //MARK: opBinary
   private pure nothrow
-  Zahl opBinary(string op, const Zahl other) const
+  Zahl opBinary(string op, R)(const R other) const
   {
-    switch (op)
+    static if (is(R == Zahl))
     {
-    case "+":
-      return addiere(other);
-
-    case "-":
-      return subtrahiere(other);
-
-    case "*":
-      return multipliziere(other);
-
-    default:
-      debug
+      switch (op)
       {
-        import std.stdio : write, writeln;
+      case "+":
+        return addiere(other);
 
-        write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
-        writeln(op);
+      case "-":
+        return subtrahiere(other);
+
+      case "*":
+        return multipliziere(other);
+
+      default:
+        debug
+        {
+          import std.stdio : write, writeln;
+
+          write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
+          writeln(op);
+        }
+        return Zahl();
       }
-      return Zahl();
     }
+    else static if (is(R == Gzahl))
+    {
+      return this.opBinary!op(Zahl(other));
+    }
+    else static if (is(R == Nzahl))
+    {
+      return this.opBinary!op(Zahl(other));
+    }
+    else
+      throw new Parse_Fehler("Typen_Fehler, (Zahl)");
+
   }
 
   private pure nothrow
-  Zahl addiere(const Zahl other)
+  Zahl addiere(const Zahl other) const
   {
     return Zahl(this.vor_komma + other.vor_komma, this.nach_komma + other.nach_komma);
   }
@@ -119,69 +137,20 @@ struct Zahl
   }
 
   private pure nothrow
-  Zahl multipliziere(Zahl other)
+  Zahl multipliziere(const Zahl other) const
   {
     return Zahl(this.vor_komma * other.vor_komma, this.nach_komma * other.nach_komma);
   }
-}
 
-//MARK: DIVISON
-
-/// dividiere => Bruch / Bruch = Bruch
-/// Funktioniert eigentlich durch multiplikation.
-nothrow Bruch dividiere(Bruch num1, Bruch num2)
-{
-  return Bruch(multipliziere(num1.zähler, num2.nenner), multipliziere(num1.nenner, num2
-      .zähler));
-}
-
-struct DivisionResultat
-{
-  ubyte[] quotient;
-  ubyte[] rest;
-}
-
-/// dividiere => ubyte[] / ubyte[] = DivisionResultat;
-/// 0en am Anfang werden nicht weggestrichen.
-/// Ich verstehe diesen Algorithmus nicht, aber er funktioniert.
-/// => Fast recursive division
-DivisionResultat dividiere(const ubyte[] nummer1, const ubyte[] nummer2, bool throw_error = true)
-{
-  if (nummer2.ist_null)
+  private pure nothrow
+  Zahl dividiere(const Zahl other) const
   {
-    if (throw_error)
-      throw new Exception("Division durch 0");
-    else
-      return DivisionResultat([], []);
+    DivisionResultat dr_vor_komma = dividiere(this.grösse, other.grösse);
+    Gzahl neu_vor_komma = dr_vor_komma.quotient;
+
+    Bruch dr_nach_komma = this.nach_komma / other.nach_komma;
+    Bruch neu_nach_komma = dr_nach_komma + Bruch(dr_vor_komma.rest, [1]);
+
+    return Zahl(neu_vor_komma, neu_nach_komma);
   }
-
-  ubyte[] num1 = nummer1.dup.right_unpad();
-  ubyte[] num2 = nummer2.dup.right_unpad();
-
-  if (num1 == [0] || num1.length == 0)
-    return DivisionResultat([0], [0]);
-
-  else if (num1 == num2)
-    return DivisionResultat([1], [0]);
-
-  else if (NatürlicheZahl(num2) > NatürlicheZahl(num1))
-    return DivisionResultat([0], num1);
-
-  bool ist_ungerade = (num1[0] % 2) != 0;
-
-  DivisionResultat dr = dividiere(int_div_by2(num1), num2);
-
-  dr.quotient = multipliziere(dr.quotient, [2]);
-  dr.rest = multipliziere(dr.rest, [2]);
-
-  if (ist_ungerade)
-    dr.rest = addiere(dr.rest, [1]);
-
-  while (NatürlicheZahl(dr.rest) >= NatürlicheZahl(num2))
-  {
-    dr.rest = subtrahiere(dr.rest, num2);
-    dr.quotient = addiere(dr.quotient, [1]);
-  }
-
-  return dr;
 }
