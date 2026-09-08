@@ -6,16 +6,14 @@ import zahl.division;
 import zahl.bruch;
 import zahl.gzahl;
 import zahl.nzahl;
+import zahl.helfer : dup;
 
 // @ {} [] # \ || != ~
 
 struct Zahl
 {
   Gzahl vor_komma = Gzahl();
-  alias positiv = vor_komma.positiv;
-  alias grösse = vor_komma.grösse;
-  alias länge = vor_komma.länge;
-  alias werte = vor_komma.werte;
+  alias vor_komma this;
 
   Bruch nach_komma;
 
@@ -23,7 +21,7 @@ struct Zahl
   pure nothrow
   this(const Zahl z)
   {
-    this(z.negativ, z.nach_komma, z.werte);
+    this(z.vor_komma, z.nach_komma);
   }
 
   pure nothrow
@@ -41,16 +39,23 @@ struct Zahl
   pure nothrow
   this(const Gzahl vor_komma, const Bruch nach_komma)
   {
-    DivisionResultat dr = dividiere(nach_komma.zähler, nach_komma.nenner, false);
+    DivisionResultat dr = zahl.division.dividiere(nach_komma.zähler, nach_komma.nenner, false);
 
-    this.werte = addiere(werte, dr.quotient);
-    this.nach_komma = Bruch(dr.rest, nach_komma.nenner.dup);
+    this.werte = (Nzahl(this) + dr.quotient).werte;
+    this.nach_komma = Bruch(dr.rest, Nzahl(nach_komma.nenner));
 
-    if (this.nach_komma.zähler.ist_null)
-      this.nach_komma.nenner = [];
+    if (this.nach_komma.zähler.länge == 0)
+      this.nach_komma.nenner = Nzahl();
+  }
+
+  pure nothrow
+  this(const ubyte* werte, const size_t länge, const bool positiv, const Bruch nach_komma)
+  {
+    this(Gzahl(werte, länge, positiv), nach_komma);
   }
 
   //MARK: opCmp
+  pure nothrow
   int opCmp(const Zahl other) const
   {
     if (this.vor_komma.opCmp(other.vor_komma) != 0)
@@ -59,6 +64,7 @@ struct Zahl
     return this.nach_komma.opCmp(other.nach_komma);
   }
 
+  pure nothrow
   bool opEquals(const Zahl other) const
   {
     return this.opCmp(other) == 0;
@@ -125,8 +131,8 @@ struct Zahl
 
     if (this.nach_komma < other.nach_komma)
     {
-      diff_vor = diff_vor - Gzahl(1);
-      diff_nach = (Bruch(1) + this.nach_komma) - other.nach_komma;
+      diff_vor = diff_vor - Gzahl([1], true);
+      diff_nach = (Bruch([1], [1]) + this.nach_komma) - other.nach_komma;
     }
     else
     {
@@ -145,11 +151,11 @@ struct Zahl
   private pure nothrow
   Zahl dividiere(const Zahl other) const
   {
-    DivisionResultat dr_vor_komma = dividiere(this.grösse, other.grösse);
+    DivisionResultat dr_vor_komma = zahl.division.dividiere(this.grösse, other.grösse);
     Gzahl neu_vor_komma = dr_vor_komma.quotient;
 
     Bruch dr_nach_komma = this.nach_komma / other.nach_komma;
-    Bruch neu_nach_komma = dr_nach_komma + Bruch(dr_vor_komma.rest, [1]);
+    Bruch neu_nach_komma = dr_nach_komma + Bruch(dr_vor_komma.rest, Nzahl([1]));
 
     return Zahl(neu_vor_komma, neu_nach_komma);
   }

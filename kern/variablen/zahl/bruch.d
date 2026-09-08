@@ -1,6 +1,7 @@
 module zahl.bruch;
 
 import zahl.nzahl;
+import zahl.gzahl;
 
 // @ {} [] # \ || != ~
 
@@ -74,7 +75,7 @@ struct Bruch
 					write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
 					writeln(op);
 				}
-				return Gzahl();
+				return Bruch();
 			}
 		}
 		else
@@ -83,7 +84,7 @@ struct Bruch
 
 	//MARK: ADDIERE
 	private pure nothrow
-	Bruch addiere(const Bruch other)
+	Bruch addiere(const Bruch other) const
 	{
 		if (other.zähler.opCmp(Nzahl.init) == 0)
 			return Bruch(this);
@@ -101,7 +102,7 @@ struct Bruch
 
 	//MARK: SUBTRAHIERE
 	private pure nothrow
-	Bruch subtrahiere(const Bruch other)
+	Bruch subtrahiere(const Bruch other) const
 	{
 		debug
 		{
@@ -123,15 +124,16 @@ struct Bruch
 
 	//MARK: MULTIPLIZIERE
 	private pure nothrow
-	Bruch multipliziere(Bruch other)
+	Bruch multipliziere(const Bruch other) const
 	{
 		return Bruch(this.zähler * other.zähler, this.nenner * other.zähler);
 	}
 
 	//MARK: DIVIDIERE
 	private pure nothrow
-	Bruch dividiere(Bruch other)
+	Bruch dividiere(const Bruch other) const
 	{
+		//TODO
 		return Bruch(this.zähler * other.nenner, this.nenner * other.zähler);
 	}
 }

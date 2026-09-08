@@ -8,8 +8,7 @@ import zahl.division;
 struct Gzahl
 {
   Nzahl grösse = Nzahl();
-  alias werte = grösse.werte;
-  alias länge = grösse.länge;
+  alias grösse this;
 
   bool positiv = true;
 
@@ -40,7 +39,7 @@ struct Gzahl
   }
 
   pure nothrow
-  this(const ubyte* werte, const ubyte länge, const bool positiv)
+  this(const ubyte* werte, const size_t länge, const bool positiv)
   {
     this(Nzahl(werte, länge), positiv);
   }

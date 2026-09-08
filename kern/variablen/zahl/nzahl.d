@@ -3,7 +3,11 @@ module zahl.nzahl;
 import zahl.helfer;
 import zahl.division;
 
+import fehler.parse_fehler;
+
 import core.memory : GC;
+
+import std.algorithm : remove;
 
 // @ {} [] # \ || != ~
 
@@ -13,8 +17,8 @@ import core.memory : GC;
  */
 struct Nzahl
 {
-  ubyte* werte = null;
   size_t länge = 0;
+  ubyte* werte = null;
 
   //MARK: THIS()
   pure nothrow
@@ -32,24 +36,24 @@ struct Nzahl
   pure nothrow
   this(const ubyte* werte, const size_t länge)
   {
-    this.werte = dup(werte, länge).right_unpad;
+    this.werte = dup(werte, länge);
     this.länge = länge;
+    this.right_unpad;
   }
 
   //MARK: opCmp
   pure nothrow
   int opCmp(const Nzahl other) const
   {
-    ubyte[] num1 = right_unpad(werte.dup);
-    ubyte[] num2 = right_unpad(other.werte.dup);
+    Nzahl oth = Nzahl(other);
 
-    if (num1.length != num2.length)
-      return num1.length < num2.length ? -1 : 1;
+    if (this.länge != oth.länge)
+      return this.länge < oth.länge ? -1 : 1;
 
-    foreach_reverse (i; 0 .. num1.length)
+    foreach_reverse (i; 0 .. this.länge)
     {
-      if (num1[i] != num2[i])
-        return num1[i] < num2[i] ? -1 : 1;
+      if (this.werte[i] != oth.werte[i])
+        return this.werte[i] < oth.werte[i] ? -1 : 1;
     }
 
     return 0;
@@ -134,19 +138,19 @@ struct Nzahl
       return Nzahl();
 
     if (this == other)
-      return [0];
+      return Nzahl();
 
     ulong max_len = this.länge > other.länge ? this.länge : other.länge;
-    Nzahl resultat = Nzahl(GC.malloc(max_len, GC.BlkAttr.NO_SCAN), max_len);
+    ubyte[] resultat = [];
 
     ushort buffer;
     ubyte carry_over;
-    for (ulong i = 0; i < sub.length; i++)
+    for (ulong i = 0; i < other.länge; i++)
     {
-      buffer = min[i];
-      ushort subtr = cast(ushort)(sub[i] + carry_over);
+      buffer = this.werte[i];
+      ushort subtr = cast(ushort)(other.werte[i] + carry_over);
 
-      if (min[i] < subtr)
+      if (this.werte[i] < subtr)
       {
         buffer += 0x100; // 0x100 ist die Erste Zahl die grösser ist, als der jetztige buffer;
         carry_over = 0x1;
@@ -160,9 +164,9 @@ struct Nzahl
     }
 
     if (carry_over != 0)
-      Nzahl();
+      return Nzahl();
 
-    return resultat;
+    return Nzahl(resultat);
   }
 
   //MARK: MULTIPLIZIERE
@@ -172,12 +176,12 @@ struct Nzahl
     ubyte[][] matrix;
 
     if (this.länge == 0 || other.länge == 0)
-      return [0];
+      return Nzahl();
 
     if ((this.länge == 1 && this.werte[0] == 0) || (other.länge == 1 && other.werte[0] == 0))
-      return [0];
+      return Nzahl();
 
-    for (ulong i = 0; i < other.length; i++)
+    for (ulong i = 0; i < other.länge; i++)
     {
       ubyte[] zwischenresultat = [];
       ubyte überschuss = 0;
@@ -206,11 +210,12 @@ struct Nzahl
 
     while (matrix.length > 1)
     {
-      matrix[0] = addiere(matrix[0], matrix[1]);
+      Nzahl summe = Nzahl(matrix[0]) + Nzahl(matrix[1]);
+      matrix[0] = summe.werte[0 .. summe.länge];
       matrix = matrix.remove(1);
     }
 
-    return matrix[0];
+    return Nzahl(matrix[0]);
   }
 
   //MARK: DIVIDIERE
@@ -224,7 +229,7 @@ struct Nzahl
       return Nzahl();
     }
 
-    DivisionResultat dr = dividiere(this, other);
+    DivisionResultat dr = zahl.division.dividiere(this, other);
 
     return dr.quotient;
   }

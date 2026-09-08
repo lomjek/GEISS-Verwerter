@@ -5,6 +5,8 @@ import core.stdc.string : memcpy;
 
 import zahl.nzahl;
 
+// @ {} [] # \ || != ~
+
 pure nothrow
 ubyte* dup(const ubyte* ptr, const ulong länge)
 {
@@ -40,27 +42,34 @@ Nzahl reverse(Nzahl arr)
   return arr;
 }
 
+/// IN place unpadding of Nzahl
 pure nothrow
-ubyte[] right_unpad(const ubyte[] num)
+Nzahl right_unpad(Nzahl num)
 {
-  ubyte[] arr = num.dup(num.länge);
-  arr.reverse();
-  ubyte[] unpadded;
+  size_t last_num = 0;
 
-  bool encountered_int = false;
-
-  foreach (ubyte key; arr)
+  for (size_t i; i < num.länge; i++)
   {
-    if (encountered_int)
-    {
-      unpadded ~= key;
-    }
-    else if (key != 0)
-    {
-      encountered_int = true;
-      unpadded ~= key;
-    }
+    if (num.werte[i] != 0)
+      last_num = i;
   }
 
-  return unpadded.reverse;
+  num.länge = num.länge - last_num;
+
+  return num;
+}
+
+pure nothrow
+Nzahl potenz(const Nzahl num1, const Nzahl num2)
+{
+  Nzahl z1 = Nzahl(num1);
+  Nzahl z2 = Nzahl(num2);
+
+  while (z2 > Nzahl([1]))
+  {
+    z1 = num1 * z1;
+    z2 = z2 - Nzahl([1]);
+  }
+
+  return z1;
 }

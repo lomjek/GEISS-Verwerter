@@ -1,5 +1,9 @@
 module zahl.wandel;
 
+import std.conv : to;
+import std.array : split;
+import std.range : retro;
+import std.algorithm : canFind;
 import std.bigint : BigInt;
 import std.bitmanip : littleEndianToNative;
 
@@ -7,6 +11,7 @@ import zahl.zahl : Zahl;
 import zahl.gzahl : Gzahl;
 import zahl.nzahl : Nzahl;
 import zahl.bruch;
+import zahl.helfer : dup, potenz;
 
 nothrow pure
 bool ist_zahl(dstring wort)
@@ -88,17 +93,17 @@ Zahl als_zahl(dstring wort)
 		ubyte[] nach_komma = als_zahl_us(nach_komma_stellen);
 		ubyte[] nach_komma_länge = als_zahl_uu(nach_komma_stellen.length);
 
-		bruch = Bruch(nach_komma, potenz([10], nach_komma_länge));
+		bruch = Bruch(Nzahl(nach_komma), Nzahl(potenz(Nzahl([10]), Nzahl(nach_komma_länge))));
 	}
 
-	return Zahl(false, bruch, vor_komma);
+	return Zahl(Gzahl(vor_komma, false), bruch);
 }
 
 /// Es nimmt die letzten vier ubytes und stopfft Sie in ein int.
 /// Keine garantie, wie negative Zahlen funktionieren werden.
 int als_int(const Nzahl liste, bool throw_on_overflow = true)
 {
-	if (liste.length > 4 && throw_on_overflow)
+	if (liste.länge > 4 && throw_on_overflow)
 	{
 		throw new Exception("Die Zahl ist zu gross für die Umwandlung in ein ubyte");
 	}
@@ -106,15 +111,11 @@ int als_int(const Nzahl liste, bool throw_on_overflow = true)
 	ubyte[4] kurze_liste;
 	if (liste.länge > 4)
 	{
-		kurze_liste = liste.werte[$ - 4 .. $];
+		kurze_liste = liste.werte[liste.länge - 4 .. liste.länge];
 	}
 	else
 	{
-		while (liste.length < 4)
-		{
-			liste = liste ~ 0;
-		}
-		kurze_liste = liste;
+		kurze_liste = liste.werte.dup(liste.länge)[0 .. liste.länge];
 	}
 
 	int resultat = littleEndianToNative!int(kurze_liste);
@@ -160,26 +161,26 @@ string als_string(ubyte[] num)
 
 string als_string(Nzahl n)
 {
-	return als_string(n.werte);
+	return als_string(n.werte[0 .. n.länge]);
 }
 
 string als_string(Gzahl g)
 {
-	if (g.negativ)
-		return "-" ~ als_string(NatürlicheZahl(g.werte));
+	if (g.positiv == false)
+		return "-" ~ als_string(Nzahl(g.werte, g.länge));
 	else
-		return als_string(NatürlicheZahl(g.werte));
+		return als_string(Nzahl(g.werte, g.länge));
 }
 
-string als_string(Zahl z)
+string als_string(const Zahl zahl)
 {
-	z = Zahl(z);
+	Zahl z = Zahl(zahl);
 	string result = "";
 
-	if (z.negativ)
+	if (z.positiv == false)
 		result ~= "-";
 
-	result ~= als_string(NatürlicheZahl(z.werte));
+	result ~= als_string(Nzahl(z.werte, z.länge));
 
 	if (z.nach_komma != Bruch())
 	{
