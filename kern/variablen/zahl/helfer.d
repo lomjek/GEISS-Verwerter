@@ -44,17 +44,22 @@ Nzahl reverse(Nzahl arr)
 
 /// IN place unpadding of Nzahl
 pure nothrow
-Nzahl right_unpad(Nzahl num)
+Nzahl right_unpad(ref Nzahl num)
 {
+  if (num.länge == 1 && num.werte[0] == 0){
+    num.länge = 0;
+    return num;
+  }
+
   size_t last_num = 0;
 
-  for (size_t i; i < num.länge; i++)
+  for (size_t i = 0; i < num.länge; i++)
   {
     if (num.werte[i] != 0)
       last_num = i;
   }
 
-  num.länge = num.länge - last_num;
+  num.länge = last_num + 1;
 
   return num;
 }
