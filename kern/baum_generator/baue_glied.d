@@ -5,6 +5,8 @@ import glied;
 import variablen.wert;
 import fehler;
 
+import operatoren;
+
 import std.algorithm : remove;
 import std.stdio : write, writeln;
 
@@ -99,7 +101,7 @@ Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ul
   {
     writeln(glied_index, glieder_liste);
     throw new Parse_Fehler(
-        "Das Wort Falls ist zu nahe am Ende...");
+      "Das Wort Falls ist zu nahe am Ende...");
   }
 
   if (glieder_liste[glied_index + 2].instanceof!BlockGlied)
@@ -130,7 +132,7 @@ Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ul
   if ((glied_index + 1) >= glieder_liste.length)
   {
     throw new Parse_Fehler(
-        "Das Wort Sonst ist zu nahe am Ende...");
+      "Das Wort Sonst ist zu nahe am Ende...");
   }
 
   if (glieder_liste[glied_index + 1].is_class!BlockGlied)
@@ -176,13 +178,14 @@ Glied[] baue_glied_Erstelle_Variable_Glied(WT_Glied glied, Glied[] glieder_liste
   }
   else if (glieder_liste[glied_index + 1].is_class!Funktion_Abrufen_Glied)
   {
-    Funktion_Abrufen_Glied vg = cast(Funktion_Abrufen_Glied) glieder_liste[glied_index + 1]; 
+    Funktion_Abrufen_Glied vg = cast(Funktion_Abrufen_Glied) glieder_liste[glied_index + 1];
     Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied(vg.identifier, WertTyp.FUNKTION);
     glieder_liste[glied_index] = evg;
-    glieder_liste[glied_index + 1] = new ListeWert_Glied(vg.argumente); 
+    glieder_liste[glied_index + 1] = new ListeWert_Glied(vg.argumente);
     return baue_glied_FunktionErstellen_Glied(evg, glieder_liste, glied_index);
   }
-  else throw new Parse_Fehler(glieder_liste[glied_index + 1].toString); 
+  else
+    throw new Parse_Fehler(glieder_liste[glied_index + 1].toString);
 }
 
 Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[] glieder_liste, ulong glied_index)
@@ -192,16 +195,17 @@ Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[
 
   if (glieder_liste[glied_index + 1].is_class!BlockGlied)
   {
-    glieder_liste[glied_index] = new FunktionErstellen_Glied(cast(BlockGlied) glieder_liste[glied_index + 1], glied.var_name);
+    glieder_liste[glied_index] = new FunktionErstellen_Glied(
+      cast(BlockGlied) glieder_liste[glied_index + 1], glied.var_name);
     glieder_liste = glieder_liste.remove(glied_index + 1);
     return glieder_liste;
   }
- 
+
   if ((glied_index + 2) >= glieder_liste.length)
     throw new Parse_Fehler("Die deklaration der Funktion ist zu nahe am Ende... (2)");
 
   if (glieder_liste[glied_index + 1].is_class!ListeWert_Glied &&
-      glieder_liste[glied_index + 2].is_class!BlockGlied)
+    glieder_liste[glied_index + 2].is_class!BlockGlied)
   {
     Glied[] parameter_liste = (cast(ListeWert_Glied) glieder_liste[glied_index + 1]).werte;
     Erstelle_Variable_Glied[] parameter;
@@ -214,12 +218,44 @@ Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[
       parameter ~= cast(Erstelle_Variable_Glied) parameter_glied;
     }
 
-    glieder_liste[glied_index] = new FunktionErstellen_Glied(cast(BlockGlied) glieder_liste[glied_index + 2], glied.var_name, parameter);
+    glieder_liste[glied_index] = new FunktionErstellen_Glied(
+      cast(BlockGlied) glieder_liste[glied_index + 2], glied.var_name, parameter);
     glieder_liste = glieder_liste.remove(glied_index + 2);
     glieder_liste = glieder_liste.remove(glied_index + 1);
     return glieder_liste;
   }
 
-  throw new Fehler("Leider noch kein support für Argumente / Returns");
-}
+  if ((glied_index + 3) >= glieder_liste.length)
+    throw new Parse_Fehler("Die deklaration der Funktion ist zu nahe am Ende... (3)");
 
+  if (glieder_liste[glied_index + 1].is_class!ListeWert_Glied &&
+      glieder_liste[glied_index + 2].is_class!OperationGlied && 
+      (cast(OperationGlied)glieder_liste[glied_index + 2]).operationenTyp == OperatorenTyp.VOR_PFEIL &&
+      glieder_liste[glied_index + 3].is_class!Erstelle_Variable_Glied &&
+      glieder_liste[glied_index + 4].is_class!BlockGlied)
+  {
+    Glied[] parameter_liste = (cast(ListeWert_Glied) glieder_liste[glied_index + 1]).werte;
+    Erstelle_Variable_Glied[] parameter;
+
+    foreach (Glied parameter_glied; parameter_liste)
+    {
+      if (!glied.is_class!Erstelle_Variable_Glied)
+        throw new Parse_Fehler("Die Parameter sind nicht gültig");
+
+      parameter ~= cast(Erstelle_Variable_Glied) parameter_glied;
+    }
+
+    Erstelle_Variable_Glied das_return = cast(Erstelle_Variable_Glied) glieder_liste[glied_index + 3];
+
+    glieder_liste[glied_index] = new FunktionErstellen_Glied(
+      cast(BlockGlied) glieder_liste[glied_index + 4], glied.var_name, parameter, [das_return]);
+    
+    glieder_liste = glieder_liste.remove(glied_index + 4);
+    glieder_liste = glieder_liste.remove(glied_index + 3);
+    glieder_liste = glieder_liste.remove(glied_index + 2);
+    glieder_liste = glieder_liste.remove(glied_index + 1);
+    return glieder_liste;
+  }
+
+  throw new Fehler("Leider noch kein support für Returns");
+}

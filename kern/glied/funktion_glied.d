@@ -245,11 +245,10 @@ class EingebauteFunktion_Glied : Funktion_Glied
 }
 //endregion
 //regeion FunktionErstellen_Glied
-class FunktionErstellen_Glied : Glied // TODO:Muss noch Parameter und returns machen 
+class FunktionErstellen_Glied : Glied
 {
   Funktion_Glied körper;
   dstring var_name;
-  Glied[] parameter;
 
   override public Wert verwerte(uint bereich)
   {
@@ -280,9 +279,11 @@ class FunktionErstellen_Glied : Glied // TODO:Muss noch Parameter und returns ma
     this.var_name = variable;
   }
 
-  this(BlockGlied körper, dstring variable, Erstelle_Variable_Glied[] parameter)
+  this(BlockGlied körper, dstring variable, 
+      Erstelle_Variable_Glied[] parameter = [], 
+      Erstelle_Variable_Glied[] returns = [])
   {
-    this.körper = new Funktion_Glied(parameter, [], körper);
+    this.körper = new Funktion_Glied(parameter, returns, körper);
     this.var_name = variable;
   }
 }

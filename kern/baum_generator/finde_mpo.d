@@ -101,8 +101,6 @@ MPO finde_MPO(Glied[] glieder_liste)
       OperationGlied op_glied = cast(OperationGlied) glied;
       if (op_glied.operationenTyp in operatoren_Gewicht)
         (&current_mpo).passe_mpo_an(operatoren_Gewicht[op_glied.operationenTyp], i);
-      else
-        throw new Parse_Fehler("Dieser Operator hat keine Option. Das nicht gut."); // TODO: Sollte nie hier sein.
     }
     else if (glied.instanceof!Setze_Variable_Glied)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.SETZE_VARIABLE, i);
