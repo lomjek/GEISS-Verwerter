@@ -30,7 +30,7 @@ Nzahl int_div_by2(const Nzahl num)
 		übertragung = (temp % 2) != 0;
 	}
 
-	return reverse(nummer);
+	return Nzahl(reverse(nummer));
 }
 
 /// dividiere => ubyte[] / ubyte[] = DivisionResultat;
@@ -38,7 +38,7 @@ Nzahl int_div_by2(const Nzahl num)
 /// Ich verstehe diesen Algorithmus nicht, aber er funktioniert.
 /// => Fast recursive division
 pure nothrow
-DivisionResultat dividiere(const Nzahl nummer1, const Nzahl nummer2, bool throw_error = true)
+DivisionResultat dividiere(const Nzahl nummer1, const Nzahl nummer2, bool throw_error = false)
 {
 	Nzahl num1 = Nzahl(nummer1);
 	Nzahl num2 = Nzahl(nummer2);

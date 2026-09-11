@@ -14,8 +14,8 @@ unittest
   writeln("    Testiere zahl.gzahl");
   writeln("    ====================================");
 
-  { // Nzahl grösse
-    write("    Gzahl, grösse: ");
+  { // Gzahl grösse
+    write("    Gzahl, Grösse: ");
     writeln(Gzahl.sizeof);
   }
   { // this
