@@ -13,42 +13,52 @@ import zahl.helfer : dup;
 struct Zahl
 {
   Gzahl vor_komma = Gzahl();
-  alias vor_komma this;
+
+  bool positiv() const {
+    return vor_komma.positiv;
+  }
+
+  size_t länge() const {
+    return vor_komma.grösse.länge;
+  }
+
+  const (ubyte)* werte() const {
+    return vor_komma.grösse.werte;
+  }
+
+  const(Nzahl) grösse() const {
+    return vor_komma.grösse;
+  }
 
   Bruch nach_komma;
 
   //MARK: THIS()
-  pure nothrow
   this(const Zahl z)
   {
     this(z.vor_komma, z.nach_komma);
   }
 
-  pure nothrow
   this(const Gzahl gz)
   {
     this(gz, Bruch());
   }
 
-  pure nothrow
   this(const Nzahl nz)
   {
     this(Gzahl(nz), Bruch());
   }
 
-  pure nothrow
   this(const Gzahl vor_komma, const Bruch nach_komma)
   {
     DivisionResultat dr = zahl.division.dividiere(nach_komma.zähler, nach_komma.nenner, false);
 
-    this.werte = (Nzahl(this) + dr.quotient).werte;
+    this.vor_komma = vor_komma + Gzahl(dr.quotient);
     this.nach_komma = Bruch(dr.rest, Nzahl(nach_komma.nenner));
 
     if (this.nach_komma.zähler.länge == 0)
       this.nach_komma.nenner = Nzahl();
   }
 
-  pure nothrow
   this(const ubyte* werte, const size_t länge, const bool positiv, const Bruch nach_komma)
   {
     this(Gzahl(werte, länge, positiv), nach_komma);
@@ -71,7 +81,6 @@ struct Zahl
   }
 
   //MARK: opBinary
-  private pure nothrow
   Zahl opBinary(string op, R)(const R other) const
   {
     static if (is(R == Zahl))
@@ -86,6 +95,9 @@ struct Zahl
 
       case "*":
         return multipliziere(other);
+
+      case "/":
+        return dividiere(other);
 
       default:
         debug
@@ -111,13 +123,13 @@ struct Zahl
 
   }
 
-  private pure nothrow
+  private
   Zahl addiere(const Zahl other) const
   {
     return Zahl(this.vor_komma + other.vor_komma, this.nach_komma + other.nach_komma);
   }
 
-  private pure nothrow
+  private
   Zahl subtrahiere(const Zahl other) const
   {
     if (this.opCmp(other) == -1)
@@ -142,13 +154,13 @@ struct Zahl
     return Zahl(diff_vor, diff_nach);
   }
 
-  private pure nothrow
+  private
   Zahl multipliziere(const Zahl other) const
   {
     return Zahl(this.vor_komma * other.vor_komma, this.nach_komma * other.nach_komma);
   }
 
-  private pure nothrow
+  private
   Zahl dividiere(const Zahl other) const
   {
     DivisionResultat dr_vor_komma = zahl.division.dividiere(this.grösse, other.grösse);

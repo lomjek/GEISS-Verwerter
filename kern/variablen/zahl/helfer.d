@@ -46,7 +46,8 @@ Nzahl reverse(Nzahl arr)
 pure nothrow
 Nzahl right_unpad(ref Nzahl num)
 {
-  if (num.länge == 1 && num.werte[0] == 0){
+  if (num.länge == 1 && num.werte[0] == 0)
+  {
     num.länge = 0;
     return num;
   }
@@ -60,6 +61,27 @@ Nzahl right_unpad(ref Nzahl num)
   }
 
   num.länge = last_num + 1;
+
+  return num;
+}
+
+/// IN place padding of Nzahl
+pure nothrow
+Nzahl right_pad(ref Nzahl num, size_t target_length)
+{
+  if (target_length <= num.länge)
+    return num;
+
+  ubyte* new_werte = cast(ubyte*) GC.calloc(target_length * ubyte.sizeof);
+
+  if (num.länge > 0 && num.werte !is null)
+  {
+    new_werte[0 .. num.länge] = num.werte[0 .. num.länge];
+    GC.free(num.werte);
+  }
+
+  num.werte = new_werte;
+  num.länge = target_length;
 
   return num;
 }

@@ -34,18 +34,37 @@ struct Bruch
   pure nothrow
     int opCmp(const Bruch other) const
     {
+      bool thisValid = this.nenner.länge != 0;
+      bool otherValid = other.nenner.länge != 0;
+
+      if (!thisValid && !otherValid)
+        return 0;
+      if (!thisValid)
+        return -1;
+      if (!otherValid)
+        return 1;
+
+      bool thisZero = this.zähler.länge == 0;
+      bool otherZero = other.zähler.länge == 0;
+
+      if (thisZero && otherZero)
+        return 0;
+      if (thisZero)
+        return -1;
+      if (otherZero)
+        return 1;
+
       Nzahl zahler1 = this.zähler * other.nenner;
       Nzahl zahler2 = other.zähler * this.nenner;
 
-      return Nzahl(zahler1).opCmp(Nzahl(zahler2));
+      return zahler1.opCmp(zahler2);
     }
 
   pure nothrow
-    bool opEquals(Bruch other) const
+    bool opEquals(const Bruch other) const
     {
       return this.opCmp(other) == 0;
     }
-
   //MARK: opBinary
   Bruch opBinary(string op, R)(const R other) const
   {
@@ -131,7 +150,6 @@ struct Bruch
   private pure nothrow
     Bruch dividiere(const Bruch other) const
     {
-      //TODO
       return Bruch(this.zähler * other.nenner, this.nenner * other.zähler);
     }
 }

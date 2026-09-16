@@ -10,7 +10,14 @@ struct Gzahl
   bool positiv = true;
 
   Nzahl grösse = Nzahl();
-  alias grösse this;
+
+  size_t länge() const {
+    return grösse.länge;
+  }
+
+  const (ubyte)* werte() const {
+    return grösse.werte;
+  }
 
   //MARK: THIS()
   pure nothrow
@@ -23,7 +30,7 @@ struct Gzahl
     this(const Nzahl nz, const bool positiv)
     {
       this.grösse = Nzahl(nz);
-      if (this.länge != 0)
+      if (this.grösse.länge != 0)
         this.positiv = positiv;
     }
 
@@ -70,7 +77,7 @@ struct Gzahl
     }
 
   //MARK: opBinary
-  pure nothrow
+  nothrow
     Gzahl opBinary(string op, R)(const R other) const
     {
       static if (is(R == Gzahl))
@@ -166,7 +173,7 @@ struct Gzahl
   private pure nothrow
     Gzahl dividiere(const Gzahl other) const
     {
-      if (Gzahl(other).länge == 0)
+      if (Gzahl(other).grösse.länge == 0)
         return Gzahl();
 
       DivisionResultat dr = zahl.division.dividiere(this.grösse, other.grösse, false);
