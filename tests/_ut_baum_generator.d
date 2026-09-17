@@ -21,9 +21,9 @@ unittest
 
 	write("Testiere parse_glied_OperationGlied...");
 	Glied[] glied_liste_plus = [
-		new Wert_Glied(Wert(WertTyp.ZAHL, new Zahl(false, Bruch(), [0x20, 0x03]))),
+		new Wert_Glied(Wert(WertTyp.ZAHL, new Zahl(Gzahl(Nzahl([0x20, 0x03])), Bruch()))),
 		new OperationGlied(OperatorenTyp.PLUS),
-		new Wert_Glied(Wert(WertTyp.ZAHL, new Zahl(false, Bruch(), [0x21, 0x03]))),
+		new Wert_Glied(Wert(WertTyp.ZAHL, new Zahl(Gzahl(Nzahl([0x21, 0x03])), Bruch()))),
 	];
 	assert(baue_glied(glied_liste_plus, 1)[0].ist_vollständig);
 	writeln("läuft");

@@ -48,31 +48,31 @@ class OperationGlied : Glied
 			switch (wert1.typ)
 			{
 			case WertTyp.NATÜRLICHE_ZAHL:
-				NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) wert2.wert;
+				Nzahl zwischenresultat = *cast(Nzahl*) wert2.wert;
 
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					NatürlicheZahl alte_zahl = *cast(NatürlicheZahl*) wert2
+					Nzahl alte_zahl = *cast(Nzahl*) wert2
 						.wert;
 
-					NatürlicheZahl neue_zahl = addiere(zwischenresultat, alte_zahl);
+					Nzahl neue_zahl = zwischenresultat + alte_zahl;
 
-					resultat = Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl(neue_zahl));
+					resultat = Wert(WertTyp.NATÜRLICHE_ZAHL, new Nzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = addiere(GanzeZahl(zwischenresultat), alte_zahl);
+					Gzahl neue_zahl = Gzahl(zwischenresultat) + alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = addiere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = Zahl(zwischenresultat) + alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -83,30 +83,30 @@ class OperationGlied : Glied
 				}
 
 			case WertTyp.GANZE_ZAHL:
-				GanzeZahl zwischenresultat = *cast(GanzeZahl*) wert1.wert;
+				Gzahl zwischenresultat = *cast(Gzahl*) wert1.wert;
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					GanzeZahl alte_zahl = GanzeZahl(
-						*cast(NatürlicheZahl*) wert2.wert);
+					Gzahl alte_zahl = Gzahl(
+						*cast(Nzahl*) wert2.wert);
 
-					GanzeZahl neue_zahl = addiere(zwischenresultat, alte_zahl);
+					Gzahl neue_zahl = zwischenresultat + alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = addiere(zwischenresultat, alte_zahl);
+					Gzahl neue_zahl = zwischenresultat + alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = addiere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = Zahl(zwischenresultat) + alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -123,17 +123,17 @@ class OperationGlied : Glied
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					Zahl alte_zahl = Zahl(*cast(NatürlicheZahl*) wert2.wert);
+					Zahl alte_zahl = Zahl(*cast(Nzahl*) wert2.wert);
 
-					Zahl neue_zahl = addiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat + alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					Zahl alte_zahl = Zahl(*cast(GanzeZahl*) wert2.wert);
+					Zahl alte_zahl = Zahl(*cast(Gzahl*) wert2.wert);
 
-					Zahl neue_zahl = addiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat + alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -141,7 +141,7 @@ class OperationGlied : Glied
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = addiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat + alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -160,29 +160,29 @@ class OperationGlied : Glied
 			switch (resultat.typ)
 			{
 			case WertTyp.NATÜRLICHE_ZAHL:
-				NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) wert1.wert;
+				Nzahl zwischenresultat = *cast(Nzahl*) wert1.wert;
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					NatürlicheZahl alte_zahl = *cast(NatürlicheZahl*) wert2.wert;
+					Nzahl alte_zahl = *cast(Nzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = subtrahiere(zwischenresultat, alte_zahl);
+					Gzahl neue_zahl = zwischenresultat - alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = subtrahiere(GanzeZahl(zwischenresultat), alte_zahl);
+					Gzahl neue_zahl = Gzahl(zwischenresultat) - alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = subtrahiere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = Zahl(zwischenresultat) - alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -193,29 +193,29 @@ class OperationGlied : Glied
 				}
 
 			case WertTyp.GANZE_ZAHL:
-				GanzeZahl zwischenresultat = *cast(GanzeZahl*) wert1.wert;
+				Gzahl zwischenresultat = *cast(Gzahl*) wert1.wert;
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					NatürlicheZahl alte_zahl = *cast(NatürlicheZahl*) wert2.wert;
+					Nzahl alte_zahl = *cast(Nzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = subtrahiere(zwischenresultat, GanzeZahl(alte_zahl));
+					Gzahl neue_zahl = zwischenresultat - Gzahl(alte_zahl);
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = subtrahiere(GanzeZahl(zwischenresultat), alte_zahl);
+					Gzahl neue_zahl = Gzahl(zwischenresultat) - alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = subtrahiere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = Zahl(zwischenresultat) - alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -229,17 +229,17 @@ class OperationGlied : Glied
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					NatürlicheZahl alte_zahl = *cast(NatürlicheZahl*) wert2.wert;
+					Nzahl alte_zahl = *cast(Nzahl*) wert2.wert;
 
-					Zahl neue_zahl = subtrahiere(zwischenresultat, Zahl(alte_zahl));
+					Zahl neue_zahl = zwischenresultat - alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					Zahl neue_zahl = subtrahiere(zwischenresultat, Zahl(alte_zahl));
+					Zahl neue_zahl = zwischenresultat - alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -247,7 +247,7 @@ class OperationGlied : Glied
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = subtrahiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat - alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -265,31 +265,31 @@ class OperationGlied : Glied
 			switch (wert1.typ)
 			{
 			case WertTyp.NATÜRLICHE_ZAHL:
-				NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) wert1.wert;
+				Nzahl zwischenresultat = *cast(Nzahl*) wert1.wert;
 
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					NatürlicheZahl alte_zahl = *cast(NatürlicheZahl*) wert2
+					Nzahl alte_zahl = *cast(Nzahl*) wert2
 						.wert;
 
-					NatürlicheZahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
+					Nzahl neue_zahl = zwischenresultat * alte_zahl;
 
-					resultat = Wert(WertTyp.NATÜRLICHE_ZAHL, new NatürlicheZahl(neue_zahl));
+					resultat = Wert(WertTyp.NATÜRLICHE_ZAHL, new Nzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = multipliziere(GanzeZahl(zwischenresultat), alte_zahl);
+					Gzahl neue_zahl = Gzahl(zwischenresultat) * alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = multipliziere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = Zahl(zwischenresultat) * alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -300,30 +300,30 @@ class OperationGlied : Glied
 				}
 
 			case WertTyp.GANZE_ZAHL:
-				GanzeZahl zwischenresultat = *cast(GanzeZahl*) wert1.wert;
+				Gzahl zwischenresultat = *cast(Gzahl*) wert1.wert;
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					GanzeZahl alte_zahl = GanzeZahl(
-						*cast(NatürlicheZahl*) wert2.wert);
+					Gzahl alte_zahl = Gzahl(
+						*cast(Nzahl*) wert2.wert);
 
-					GanzeZahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
+					Gzahl neue_zahl = zwischenresultat * alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					GanzeZahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
+					Gzahl neue_zahl = zwischenresultat * alte_zahl;
 
-					resultat = Wert(WertTyp.GANZE_ZAHL, new GanzeZahl(neue_zahl));
+					resultat = Wert(WertTyp.GANZE_ZAHL, new Gzahl(neue_zahl));
 					break ots;
 
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = multipliziere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = Zahl(zwischenresultat) * alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -340,17 +340,17 @@ class OperationGlied : Glied
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					Zahl alte_zahl = Zahl(*cast(NatürlicheZahl*) wert2.wert);
+					Zahl alte_zahl = Zahl(*cast(Nzahl*) wert2.wert);
 
-					Zahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat * alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					Zahl alte_zahl = Zahl(*cast(GanzeZahl*) wert2.wert);
+					Zahl alte_zahl = Zahl(*cast(Gzahl*) wert2.wert);
 
-					Zahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat * alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -358,7 +358,7 @@ class OperationGlied : Glied
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = multipliziere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat * alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -379,23 +379,23 @@ class OperationGlied : Glied
 			switch (wert1.typ)
 			{
 			case WertTyp.NATÜRLICHE_ZAHL:
-				NatürlicheZahl zwischenresultat = *cast(NatürlicheZahl*) wert1.wert;
+				Nzahl zwischenresultat = *cast(Nzahl*) wert1.wert;
 
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					NatürlicheZahl alte_zahl = *cast(NatürlicheZahl*) wert2
+					Nzahl alte_zahl = *cast(Nzahl*) wert2
 						.wert;
 
-					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat / alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					Zahl neue_zahl = dividiere(GanzeZahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = (Gzahl(zwischenresultat) / alte_zahl);
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -403,7 +403,7 @@ class OperationGlied : Glied
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = dividiere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = (Zahl(zwischenresultat) / alte_zahl);
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -414,22 +414,22 @@ class OperationGlied : Glied
 				}
 
 			case WertTyp.GANZE_ZAHL:
-				GanzeZahl zwischenresultat = *cast(GanzeZahl*) wert1.wert;
+				Gzahl zwischenresultat = *cast(Gzahl*) wert1.wert;
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					GanzeZahl alte_zahl = GanzeZahl(
-						*cast(NatürlicheZahl*) wert2.wert);
+					Gzahl alte_zahl = Gzahl(
+						*cast(Nzahl*) wert2.wert);
 
-					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat / alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					GanzeZahl alte_zahl = *cast(GanzeZahl*) wert2.wert;
+					Gzahl alte_zahl = *cast(Gzahl*) wert2.wert;
 
-					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat / alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 
@@ -438,7 +438,7 @@ class OperationGlied : Glied
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = dividiere(Zahl(zwischenresultat), alte_zahl);
+					Zahl neue_zahl = (Zahl(zwischenresultat) / alte_zahl);
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -455,17 +455,17 @@ class OperationGlied : Glied
 				switch (wert2.typ)
 				{
 				case WertTyp.NATÜRLICHE_ZAHL:
-					Zahl alte_zahl = Zahl(*cast(NatürlicheZahl*) wert2.wert);
+					Zahl alte_zahl = Zahl(*cast(Nzahl*) wert2.wert);
 
-					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat / alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
 
 				case WertTyp.GANZE_ZAHL:
-					Zahl alte_zahl = Zahl(*cast(GanzeZahl*) wert2.wert);
+					Zahl alte_zahl = Zahl(*cast(Gzahl*) wert2.wert);
 
-					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat / alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -473,7 +473,7 @@ class OperationGlied : Glied
 				case WertTyp.ZAHL:
 					Zahl alte_zahl = *cast(Zahl*) wert2.wert;
 
-					Zahl neue_zahl = dividiere(zwischenresultat, alte_zahl);
+					Zahl neue_zahl = zwischenresultat / alte_zahl;
 
 					resultat = Wert(WertTyp.ZAHL, new Zahl(neue_zahl));
 					break ots;
@@ -493,15 +493,15 @@ class OperationGlied : Glied
 			{
 				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
-					NatürlicheZahl num1 = *cast(NatürlicheZahl*) wert1.wert;
-					NatürlicheZahl num2 = *cast(NatürlicheZahl*) wert2.wert;
+					Nzahl num1 = *cast(Nzahl*) wert1.wert;
+					Nzahl num2 = *cast(Nzahl*) wert2.wert;
 					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
 					break ots;
 				}
 				else if (wert1.typ == WertTyp.GANZE_ZAHL)
 				{
-					GanzeZahl num1 = *cast(GanzeZahl*) wert1.wert;
-					GanzeZahl num2 = *cast(GanzeZahl*) wert2.wert;
+					Gzahl num1 = *cast(Gzahl*) wert1.wert;
+					Gzahl num2 = *cast(Gzahl*) wert2.wert;
 
 					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
 					break ots;
@@ -526,15 +526,15 @@ class OperationGlied : Glied
 			{
 				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
-					NatürlicheZahl num1 = *cast(NatürlicheZahl*) wert1.wert;
-					NatürlicheZahl num2 = *cast(NatürlicheZahl*) wert2.wert;
+					Nzahl num1 = *cast(Nzahl*) wert1.wert;
+					Nzahl num2 = *cast(Nzahl*) wert2.wert;
 					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
 					break ots;
 				}
 				else if (wert1.typ == WertTyp.GANZE_ZAHL)
 				{
-					GanzeZahl num1 = *cast(GanzeZahl*) wert1.wert;
-					GanzeZahl num2 = *cast(GanzeZahl*) wert2.wert;
+					Gzahl num1 = *cast(Gzahl*) wert1.wert;
+					Gzahl num2 = *cast(Gzahl*) wert2.wert;
 					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
 					break ots;
 				}
@@ -553,15 +553,15 @@ class OperationGlied : Glied
 			{
 				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
 				{
-					NatürlicheZahl num1 = *cast(NatürlicheZahl*) wert1.wert;
-					NatürlicheZahl num2 = *cast(NatürlicheZahl*) wert2.wert;
+					Nzahl num1 = *cast(Nzahl*) wert1.wert;
+					Nzahl num2 = *cast(Nzahl*) wert2.wert;
 					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
 					break ots;
 				}
 				else if (wert1.typ == WertTyp.GANZE_ZAHL)
 				{
-					GanzeZahl num1 = *cast(GanzeZahl*) wert1.wert;
-					GanzeZahl num2 = *cast(GanzeZahl*) wert2.wert;
+					Gzahl num1 = *cast(Gzahl*) wert1.wert;
+					Gzahl num2 = *cast(Gzahl*) wert2.wert;
 					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
 					break ots;
 				}

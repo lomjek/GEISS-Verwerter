@@ -134,6 +134,7 @@ OperatorenTyp erstelle_multi_char_op(dstring[] wort_liste, ulong* wort_index)
     dstring ganzer_operator = "";
     for (ulong i = 0; i < multi_char_op.length; i++)
     {
+      if (*wort_index + i >= wort_liste.length) return OperatorenTyp.INVALID;
       if (wort_liste[*wort_index + i].length != 1) return OperatorenTyp.INVALID;
       ganzer_operator ~= wort_liste[*wort_index + i];
     }

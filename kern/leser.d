@@ -287,7 +287,7 @@ Glied[] lese_linie(dstring linie)
 				if (var.typ == WertTyp.ZAHL)
 				{
 					Zahl* z = cast(Zahl*) var.wert;
-					z.negativ = true;
+					z.vor_komma.positiv = false; // TODO: alias?
 					(cast(Wert_Glied) token_liste[i]).wert = Wert(WertTyp.ZAHL, new Zahl(*z));
 					token_liste = token_liste.remove(i - 1);
 					i--;

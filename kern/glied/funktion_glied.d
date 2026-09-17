@@ -186,9 +186,9 @@ class EingebauteFunktion_Glied : Funktion_Glied
         if (zahl.typ == WertTyp.ZAHL)
           z = *cast(Zahl*) zahl.wert;
         else if (zahl.typ == WertTyp.GANZE_ZAHL)
-          z = Zahl(*cast(GanzeZahl*) zahl.wert);
+          z = Zahl(*cast(Gzahl*) zahl.wert);
         else if (zahl.typ == WertTyp.NATÜRLICHE_ZAHL)
-          z = Zahl(*cast(NatürlicheZahl*) zahl.wert);
+          z = Zahl(*cast(Nzahl*) zahl.wert);
         else
           throw new Fehler("Funktion als_text benötigt eine Zahl als Eingabe");
 

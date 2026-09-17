@@ -56,12 +56,12 @@ string als_schön_string(Wert wert)
 	switch (wert.typ)
 	{
 	case WertTyp.NATÜRLICHE_ZAHL:
-		NatürlicheZahl nz = *cast(NatürlicheZahl*) wert.wert;
+		Nzahl nz = *cast(Nzahl*) wert.wert;
 		str = nz.als_string;
 		break;
 
 	case WertTyp.GANZE_ZAHL:
-		GanzeZahl gz = *cast(GanzeZahl*) wert.wert;
+		Gzahl gz = *cast(Gzahl*) wert.wert;
 		str = gz.als_string;
 		break;
 
