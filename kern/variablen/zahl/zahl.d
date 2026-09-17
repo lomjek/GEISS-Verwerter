@@ -48,6 +48,10 @@ struct Zahl
     this(Gzahl(nz), Bruch());
   }
 
+  this(const Nzahl nz, const Bruch b){
+    this(Gzahl(nz), b);
+  }
+
   this(const Gzahl vor_komma, const Bruch nach_komma)
   {
     DivisionResultat dr = zahl.division.dividiere(nach_komma.zähler, nach_komma.nenner, false);

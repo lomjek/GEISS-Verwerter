@@ -109,7 +109,7 @@ struct Gzahl
       }
       else static if (is(R == Nzahl))
       {
-        return this.opBinary(Gzahl(other));
+        return this.opBinary!op(Gzahl(other));
       }
       else
         throw new Parse_Fehler("Typen_Fehler, (Gzahl)");
