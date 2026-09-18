@@ -184,8 +184,6 @@ string als_string(Gzahl g)
 
 string als_string(const Zahl zahl)
 {
-  import std.stdio;
-
   Zahl z = Zahl(zahl);
   string result = "";
 
@@ -196,7 +194,6 @@ string als_string(const Zahl zahl)
 
   if (z.nach_komma.zähler.länge != 0 && z.nach_komma.nenner.länge != 0)
   {
-    writeln("-");
     result ~= ".";
     result ~= als_string(z.nach_komma).split(".")[1];
   }

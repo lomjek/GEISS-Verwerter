@@ -16,29 +16,6 @@ abstract class Glied
 	abstract public bool ist_vollständig();
 }
 
-class InvalidGlied : Glied
-{
-	override public Wert verwerte(uint bereich)
-	{
-		return Wert(WertTyp.INVALID, null);
-	}
-
-	override public void schreibe_baum()
-	{
-		write("INVALID");
-	}
-
-	override public bool ist_vollständig()
-	{
-		return true;
-	}
-
-	override string toString() const
-	{
-		return "G(INVALID)";
-	}
-}
-
 class SW_Glied : Glied
 {
 	public SchlüsselWort sw;

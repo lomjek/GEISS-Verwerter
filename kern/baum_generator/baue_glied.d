@@ -5,6 +5,7 @@ import glied;
 import variablen.wert;
 import fehler;
 
+import schlüsselwörter : SchlüsselWort;
 import operatoren;
 
 import std.algorithm : remove;
@@ -31,6 +32,9 @@ Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
 
   else if (glied.is_class!WT_Glied)
     return baue_glied_Erstelle_Variable_Glied(cast(WT_Glied) glied, glieder_liste, glied_index);
+
+  else if (glied.is_class!Wiederhole_BlockGlied)
+    return baue_glied_Wiederhole_BlockGlied(cast(Wiederhole_BlockGlied) glied, glieder_liste, glied_index);
 
   else if (glied.is_class!Erstelle_Variable_Glied)
     return baue_glied_FunktionErstellen_Glied(cast(Erstelle_Variable_Glied) glied, glieder_liste, glied_index);
@@ -186,6 +190,34 @@ Glied[] baue_glied_Erstelle_Variable_Glied(WT_Glied glied, Glied[] glieder_liste
   }
   else
     throw new Parse_Fehler(glieder_liste[glied_index + 1].toString);
+}
+
+Glied[] baue_glied_Wiederhole_BlockGlied(Wiederhole_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+{
+  if (glied_index + 3 >= glieder_liste.length)
+  {
+    throw new Parse_Fehler("Wiederhole Block zu nahe am Ende");
+  }
+
+  if (!glieder_liste[glied_index + 2].is_class!SW_Glied ||
+      (cast(SW_Glied) glieder_liste[glied_index + 2]).sw != SchlüsselWort.MAL)
+  {
+    throw new Parse_Fehler("wiederhole <ANZAHL> mal { ... } <= Wort mal nicht gefunden");
+  }
+
+  glied.wiederholungen = glieder_liste[glied_index + 1];
+
+  if (glieder_liste[glied_index + 3].is_class!BlockGlied){
+   glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 3]).aktionen;
+  }
+  else
+    glied.aktionen ~= glieder_liste[glied_index + 3];
+
+  glieder_liste = glieder_liste.remove(glied_index + 3);
+  glieder_liste = glieder_liste.remove(glied_index + 2);
+  glieder_liste = glieder_liste.remove(glied_index + 1);
+
+  return glieder_liste;
 }
 
 Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[] glieder_liste, ulong glied_index)

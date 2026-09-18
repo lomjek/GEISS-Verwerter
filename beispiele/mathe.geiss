@@ -1,6 +1,15 @@
 zahl x <- 123465123745123741562347512764512745127341257541256125612456125122
 zahl y <- 393241661696127888888888888888888888888888888888888888888888888888
 
+funktion wurzel(zahl x, nzahl wiederholungen) -> zahl resultat
+{
+  zahl n <- x
+  
+  wiederhole wiederholungen mal {
+    schreibe("Hallo")
+  }
+}
+
 zahl b <- x - 2 * y
 
 schreibe(als_text(b))

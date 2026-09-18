@@ -83,8 +83,6 @@ unittest
     assert(als_string(zPos) == "123");
 
     Zahl zNeg = als_zahl("-123.5"d);
-    writeln(zNeg);
-    writeln(als_string(zNeg));
     assert(als_string(zNeg) == "-123.5");
   }
   {

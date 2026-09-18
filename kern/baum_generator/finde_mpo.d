@@ -4,9 +4,11 @@ import glied;
 import fehler.parse_fehler;
 import operatoren;
 import variablen.wert;
-import ext.klasse : instanceof;
+import ext.klasse : instanceof, is_class;
 
 import std.conv : to;
+
+// @ {} [] # \ || != ~
 
 enum Aktion_Gewicht
 {
@@ -16,6 +18,7 @@ enum Aktion_Gewicht
   FUNTKION_ERSTELLEN,
 
   SOLANGE,
+  WIEDERHOLE,
 
   FALLS_SONST,
 
@@ -110,6 +113,8 @@ MPO finde_MPO(Glied[] glieder_liste)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
     else if (glied.instanceof!Solange_BlockGlied)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.SOLANGE, i);
+    else if (glied.is_class!Wiederhole_BlockGlied)
+      (&current_mpo).passe_mpo_an(Aktion_Gewicht.WIEDERHOLE, i);
     else if (glied.instanceof!WT_Glied)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.VARIABLE_ERSTELLEN, i);
     else if ((glied.instanceof!Erstelle_Variable_Glied) &&

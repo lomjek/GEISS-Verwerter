@@ -9,3 +9,4 @@ public import glied.glied;
 public import glied.operation_glied;
 public import glied.variablen_glied;
 public import glied.wert_glied;
+public import glied.schleife_glied;

@@ -7,22 +7,41 @@
 	"license": "LGPL-3.0-or-later",
 	"name": "interpreter",
 	"targetName": "geiss.dc",
-	"mainSourceFile": "kern/geiss.d",
 	"targetType": "executable",
-	"sourcePaths": [
-		"."
-	],
-	"importPaths": [
-		"."
-	],
 	"configurations": [
 		{
-			"name": "default"
+			"name": "default",
+			"mainSourceFile": "kern/geiss.d",
+			"sourcePaths": [
+				"kern"
+			],
+			"importPaths": [
+				"kern"
+			]
 		},
 		{
 			"name": "static",
+			"mainSourceFile": "kern/geiss.d",
+			"sourcePaths": [
+				"kern"
+			],
+			"importPaths": [
+				"kern"
+			],
 			"dflags": [
 				"-static"
+			]
+		},
+		{
+			"name": "unittest",
+			"mainSourceFile": "kern/geiss.d",
+			"sourcePaths": [
+				"kern",
+				"tests"
+			],
+			"importPaths": [
+				"kern",
+				"tests"
 			]
 		}
 	],

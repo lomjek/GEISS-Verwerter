@@ -22,7 +22,7 @@ int main(string[] args)
 		repl_mode = true;
 
 		set_pen_trait(TextTrait.fgGreen);
-		writeln("Willkommen bei MÖWE! Version: <-1>");
+		writeln("Willkommen bei GEISS! Version: <-1>");
 		set_pen_trait(TextTrait.reset);
 
 		enter_repl_loop();
@@ -40,6 +40,6 @@ int main(string[] args)
 		return bekomme_return_status;
 	}
 
-	writeln("Entweder ohne Argumente für REPL, oder aber mit einer Datei, als argument....");
+	writeln("Entweder ohne Argumente für REPL, oder aber mit einer Datei, als Argument....");
 	return 1;
 }
