@@ -86,6 +86,9 @@ struct Nzahl
         case "/":
           return dividiere(other);
 
+        case "%":
+          return modulo(other);
+
         default:
           debug
           {
@@ -235,5 +238,13 @@ struct Nzahl
       DivisionResultat dr = zahl.division.dividiere(this, other);
 
       return dr.quotient;
+    }
+
+  //MARK: MODULO
+  private pure nothrow
+    Nzahl modulo(const Nzahl other) const
+    {
+      DivisionResultat dr = zahl.division.dividiere(Nzahl(this), Nzahl(other));
+      return dr.rest;
     }
 }

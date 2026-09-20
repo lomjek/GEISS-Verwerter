@@ -20,8 +20,23 @@ struct Bruch
   pure nothrow
     this(const Nzahl nzähler, const Nzahl nnenner)
     {
-      this.zähler = Nzahl(nzähler);
-      this.nenner = Nzahl(nnenner);
+      Nzahl z = Nzahl(nzähler);
+      Nzahl n = Nzahl(nnenner);
+
+      if (z != Nzahl() || n != Nzahl())
+      {
+        for (ubyte i = 13; i > 1; i --)
+        {
+          while (z % Nzahl([i]) == Nzahl() && n % Nzahl([i]) == Nzahl())
+          {
+            z = z / Nzahl([i]);
+            n = n / Nzahl([i]);
+          }
+        }
+      }
+
+      this.zähler = z;
+      this.nenner = n;
     }
 
   pure nothrow

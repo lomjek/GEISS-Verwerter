@@ -1,19 +1,17 @@
-zahl x <- 123465123745123741562347512764512745127341257541256125612456125122
-zahl y <- 393241661696127888888888888888888888888888888888888888888888888888
+zahl x <- 12563
 
 funktion wurzel(zahl x, nzahl wiederholungen) -> zahl resultat
 {
-  zahl n <- x
-  
+  zahl jetzt <- x
+
   wiederhole wiederholungen mal {
-    schreibe("Hallo")
+    jetzt <- 0.5 * (jetzt + x / jetzt)
   }
+
+  resultat <- jetzt
 }
 
-zahl b <- x - 2 * y
-
-schreibe(als_text(b))
-
-zahl z <- 1
-z <- z + 1
-schreibe(als_text(z))
+schreibe(als_text(x))
+zahl y <- wurzel(x, 10)
+y
+schreibe(als_text(y))

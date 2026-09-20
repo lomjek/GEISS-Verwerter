@@ -41,7 +41,7 @@ unittest
     Zahl z_norm = Zahl(gz, unecht);
     assert(z_norm.vor_komma == gz + Nzahl([2]));
     assert(z_norm.nach_komma == Bruch([1], [2]));
-  } 
+  }
   {
     writeln("    opCmp");
 
@@ -74,7 +74,12 @@ unittest
     Zahl z4 = Zahl(Gzahl([3], true), Bruch([1], [3]));
 
     writeln("        MAL");
-    assert(z3 * z4 == Zahl(Gzahl([6], true), Bruch([1], [6])));
+    assert(z3 * z4 == Zahl(Gzahl([8], true), Bruch([1], [3])));
+
+    assert(
+        Zahl(Gzahl([123], true), Bruch()) * Zahl(Gzahl(), Bruch([5], [10])) ==
+        Zahl(Gzahl([61], true), Bruch([5], [10]))
+        );
 
     writeln("        DURCH");
     Zahl z_div = Zahl(Gzahl([10], true)) / Zahl(Gzahl([2], true));
