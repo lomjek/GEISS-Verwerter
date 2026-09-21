@@ -35,6 +35,7 @@
 		{
 			"name": "unittest",
 			"mainSourceFile": "kern/geiss.d",
+      "targetName": "interpreter-test-default",
 			"sourcePaths": [
 				"kern",
 				"tests"

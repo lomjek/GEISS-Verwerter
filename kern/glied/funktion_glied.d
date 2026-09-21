@@ -259,7 +259,9 @@ class FunktionErstellen_Glied : Glied
 
   override public void schreibe_baum()
   {
-    write("[ERSTELLE_FUNKTION]{" ~ var_name ~ "}");
+    write("[ERSTELLE_FUNKTION]{" ~ var_name ~ ", ");
+    körper.schreibe_baum;
+    write("}");
   }
 
   override public bool ist_vollständig()

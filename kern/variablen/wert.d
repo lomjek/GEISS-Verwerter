@@ -111,9 +111,9 @@ WT_Glied wort_als_wert_typ(dstring[] wort_liste, ulong* wort_index)
 	if (wt == WertTyp.INVALID)
 		wt = dstring_als_wt(wort_liste[*wort_index]);
 
-	if (wt == WertTyp.INVALID)
+	if (wt == WertTyp.INVALID && wort_liste[*wort_index] != "variable"d)
 		throw new Parse_Fehler(
-			"Das Wort ist kein valides WertTyp " ~ wort_liste[*wort_index].to!string);
+			"Das Wort ist kein valides WertTyp: " ~ wort_liste[*wort_index].to!string);
 
 	return new WT_Glied(wt);
 }

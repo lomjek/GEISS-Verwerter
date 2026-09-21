@@ -15,9 +15,9 @@ import text;
 
 import variablen.wert;
 
-import std.algorithm : startsWith, endsWith, remove, canFind, filter;
+import std.algorithm : startsWith, endsWith, remove, filter;
 import std.string : strip;
-import std.conv : to, ConvException;
+import std.conv : to;
 import std.stdio : write, writeln;
 import std.array : split, array;
 import std.traits : EnumMembers;
@@ -29,33 +29,6 @@ private enum Verifizierung
 	ja,
 	nein,
 	nicht_ganz
-}
-
-// MARK: Schüsselwort 
-private Verifizierung ist_sw(dstring wort)
-{
-	foreach (SchlüsselWort swort, dstring wert; schlüsselWort_dict)
-	{
-		if (wort.strip == wert.strip)
-		{
-			return Verifizierung.ja;
-		}
-	}
-
-	return Verifizierung.nein;
-}
-
-private SchlüsselWort als_sw(dstring wort)
-{
-	foreach (SchlüsselWort swort, dstring wert; schlüsselWort_dict)
-	{
-		if (wort.strip == wert.strip)
-		{
-			return swort;
-		}
-	}
-
-	return SchlüsselWort.INVALID;
 }
 
 // MARK: Wert - ist?
@@ -224,9 +197,10 @@ Glied[] lese_linie(dstring linie)
 			continue;
 		}
 
-		if (wort.ist_sw == Verifizierung.ja)
+    //schlüsselwörter
+		if (wort.wort_ist_sw)
 		{
-			token_liste ~= baue_richtiges_sw_glied(wort.als_sw);
+			token_liste ~= wort_als_sw(wort_liste, &i);
 			continue;
 		}
 
