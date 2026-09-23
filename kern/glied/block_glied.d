@@ -1,8 +1,11 @@
 module glied.block_glied;
 
 import glied.glied;
+import glied.signal_glied : Beende_Programm_Signal;
 
 import variablen.wert;
+
+import interpreter : repl_mode;
 
 import ext.prints;
 
@@ -13,204 +16,217 @@ import std.conv : to;
 
 enum BlockTypes
 {
-	FALLS_SONST,
+  FALLS_SONST,
 
-	SCHLEIFE_PRO_DER,
-	SCHLEIFE_SOLANGE,
+  SCHLEIFE_PRO_DER,
+  SCHLEIFE_SOLANGE,
 
-	FUNKTION
+  FUNKTION
 }
 
 class BlockGlied : Glied
 {
-	public Glied[] aktionen;
+  public Glied[] aktionen;
 
-	override public void schreibe_baum()
-	{
-		write("[BLOCK]{");
-		schreibe_glied_liste(this.aktionen);
-		write("}");
-	}
+  override public void schreibe_baum()
+  {
+    write("[BLOCK]{");
+    schreibe_glied_liste(this.aktionen);
+    write("}");
+  }
 
-	protected void schreibe_glied_liste(Glied[] glied_liste)
-	{
-		bool first = true;
-		foreach (Glied aktion; glied_liste)
-		{
-			if (!first)
-				write(", ");
-			aktion.schreibe_baum;
-			first = false;
-		}
+  protected void schreibe_glied_liste(Glied[] glied_liste)
+  {
+    bool first = true;
+    foreach (Glied aktion; glied_liste)
+    {
+      if (!first)
+        write(", ");
+      aktion.schreibe_baum;
+      first = false;
+    }
 
-	}
+  }
 
-	override public Wert verwerte(uint bereich)
-	{
-		verwerte_glieder_liste(bereich, this.aktionen);
-		return Wert(WertTyp.INVALID, null);
-	}
+  override public Wert verwerte(uint bereich)
+  {
+    verwerte_glieder_liste(bereich, this.aktionen);
+    return Wert(WertTyp.INVALID, null);
+  }
 
-	public void verwerte_glieder_liste(uint bereich, Glied[] aktionen)
-	{
-		foreach (Glied aktion; aktionen)
-		{
-			Wert resultat = aktion.verwerte(bereich);
-			debug
-			{
-				write("Rückgabewert: ");
-				schreibe_schön_wert(resultat);
-				writeln("");
-			}
-		}
-	}
+  public void verwerte_glieder_liste(uint bereich, Glied[] aktionen)
+  {
+    foreach (Glied aktion; aktionen)
+    {
+      Wert resultat = aktion.verwerte(bereich);
+      debug
+      {
+        write("Rückgabewert: ");
+        schreibe_schön_wert(resultat);
+        writeln("");
+      }
+    }
+  }
 
-	override public bool ist_vollständig()
-	{
-		return false;
-	}
+  override public bool ist_vollständig()
+  {
+    return false;
+  }
 
-	override string toString() const
-	{
-		return "G(BLOCK | " ~ aktionen.length.to!string ~ ")";
-	}
+  override string toString() const
+  {
+    return "G(BLOCK | " ~ aktionen.length.to!string ~ ")";
+  }
 
-	this()
-	{
-	}
+  this()
+  {
+  }
 
-	this(Glied[] glieder_liste)
-	{
-		this.aktionen = glieder_liste;
-	}
+  this(Glied[] glieder_liste)
+  {
+    this.aktionen = glieder_liste;
+  }
 }
 
 class Programm_BlockGlied : BlockGlied
 {
-	override public Wert verwerte(uint bereich = 0)
-	{
-		return super.verwerte(0);
-	}
+  override public Wert verwerte(uint bereich = 0)
+  {
+    Wert resultat;
+    try{
+      resultat = super.verwerte(0);
+    } 
+    catch (Beende_Programm_Signal)
+    {
+      resultat = Wert(WertTyp.INVALID, null);
 
-	override public bool ist_vollständig()
-	{
-		return true;
-	}
+      if (repl_mode){
+        throw new Beende_Programm_Signal();
+      }
+    }
 
-	override string toString() const
-	{
-		return "G(PROGRAMM | " ~ aktionen.length.to!string ~ ")";
-	}
+    return resultat;
+  }
+
+  override public bool ist_vollständig()
+  {
+    return true;
+  }
+
+  override string toString() const
+  {
+    return "G(PROGRAMM | " ~ aktionen.length.to!string ~ ")";
+  }
 }
 
 //MARK: FALLS
 class Falls_BlockGlied : BlockGlied
 {
-	public Glied bedingung;
+  public Glied bedingung;
 
-	override public void schreibe_baum()
-	{
-		write("[FALLS ");
-		if (bedingung !is null)
-			bedingung.schreibe_baum();
-		write("]{");
-		schreibe_glied_liste(aktionen);
-		write("}");
-	}
+  override public void schreibe_baum()
+  {
+    write("[FALLS ");
+    if (bedingung !is null)
+      bedingung.schreibe_baum();
+    write("]{");
+    schreibe_glied_liste(aktionen);
+    write("}");
+  }
 
-	override public Wert verwerte(uint bereich)
-	{
-		Wert wert_bedingung = this.bedingung.verwerte(bereich);
-		if (wert_bedingung.ist_wahr)
-		{
-			verwerte_glieder_liste(bereich, this.aktionen);
-		}
+  override public Wert verwerte(uint bereich)
+  {
+    Wert wert_bedingung = this.bedingung.verwerte(bereich);
+    if (wert_bedingung.ist_wahr)
+    {
+      verwerte_glieder_liste(bereich, this.aktionen);
+    }
 
-		return Wert(WertTyp.INVALID, null);
-	}
+    return Wert(WertTyp.INVALID, null);
+  }
 
-	override public bool ist_vollständig()
-	{
-		return (bedingung !is null) && (aktionen.length !is 0);
-	}
+  override public bool ist_vollständig()
+  {
+    return (bedingung !is null) && (aktionen.length !is 0);
+  }
 
-	override string toString() const
-	{
-		return "G(FALLS | " ~ aktionen.length.to!string ~ ")";
-	}
+  override string toString() const
+  {
+    return "G(FALLS | " ~ aktionen.length.to!string ~ ")";
+  }
 }
 
 class Sonst_BlockGlied : BlockGlied
 {
-	override public void schreibe_baum()
-	{
-		write("(Sonst_Block) INVALID");
-	}
+  override public void schreibe_baum()
+  {
+    write("(Sonst_Block) INVALID");
+  }
 
-	override public Wert verwerte(uint bereich)
-	{
-		return Wert(WertTyp.INVALID, null);
-	}
+  override public Wert verwerte(uint bereich)
+  {
+    return Wert(WertTyp.INVALID, null);
+  }
 
-	override public bool ist_vollständig()
-	{
-		return aktionen.length > 0;
-	}
+  override public bool ist_vollständig()
+  {
+    return aktionen.length > 0;
+  }
 
-	override string toString() const
-	{
-		return "G(SONST | " ~ (aktionen.length)
-			.to!string ~ ")";
-	}
+  override string toString() const
+  {
+    return "G(SONST | " ~ (aktionen.length)
+      .to!string ~ ")";
+  }
 }
 
 class Falls_Sonst_BlockGlied : Falls_BlockGlied
 {
-	public Glied[] sonst_aktionen;
+  public Glied[] sonst_aktionen;
 
-	override public void schreibe_baum()
-	{
-		write("[FALLS ");
-		bedingung.schreibe_baum();
-		write("]{{");
-		schreibe_glied_liste(this.aktionen);
-		write("} / {");
-		schreibe_glied_liste(this.sonst_aktionen);
-		write("}}");
-	}
+  override public void schreibe_baum()
+  {
+    write("[FALLS ");
+    bedingung.schreibe_baum();
+    write("]{{");
+    schreibe_glied_liste(this.aktionen);
+    write("} / {");
+    schreibe_glied_liste(this.sonst_aktionen);
+    write("}}");
+  }
 
-	override public Wert verwerte(uint bereich)
-	{
-		Wert wert_bedingung = bedingung.verwerte(bereich);
+  override public Wert verwerte(uint bereich)
+  {
+    Wert wert_bedingung = bedingung.verwerte(bereich);
 
-		if (wert_bedingung.ist_wahr)
-		{
-			verwerte_glieder_liste(bereich, aktionen);
-		}
-		else
-		{
-			verwerte_glieder_liste(bereich, sonst_aktionen);
-		}
+    if (wert_bedingung.ist_wahr)
+    {
+      verwerte_glieder_liste(bereich, aktionen);
+    }
+    else
+    {
+      verwerte_glieder_liste(bereich, sonst_aktionen);
+    }
 
-		return Wert(WertTyp.INVALID, null);
-	}
+    return Wert(WertTyp.INVALID, null);
+  }
 
-	override public bool ist_vollständig()
-	{
-		return (bedingung !is null) && (aktionen.length !is 0) && (sonst_aktionen.length != 0);
-	}
+  override public bool ist_vollständig()
+  {
+    return (bedingung !is null) && (aktionen.length !is 0) && (sonst_aktionen.length != 0);
+  }
 
-	this(Falls_BlockGlied f_bgl, Sonst_BlockGlied s_bgl)
-	{
-		this.aktionen = f_bgl.aktionen;
-		this.bedingung = f_bgl.bedingung;
-		this.sonst_aktionen = s_bgl.aktionen;
-	}
+  this(Falls_BlockGlied f_bgl, Sonst_BlockGlied s_bgl)
+  {
+    this.aktionen = f_bgl.aktionen;
+    this.bedingung = f_bgl.bedingung;
+    this.sonst_aktionen = s_bgl.aktionen;
+  }
 
-	override string toString() const
-	{
-		return "G(FALLS / SONST | " ~ (aktionen.length)
-			.to!string ~ "/" ~ (sonst_aktionen.length).to!string ~ ")";
-	}
+  override string toString() const
+  {
+    return "G(FALLS / SONST | " ~ (aktionen.length)
+      .to!string ~ "/" ~ (sonst_aktionen.length).to!string ~ ")";
+  }
 }
 

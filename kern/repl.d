@@ -7,6 +7,8 @@ import std.conv : to;
 import ext.string : dchar_from_string;
 import ext.prints;
 
+import glied.signal_glied : Beende_Programm_Signal;
+
 debug
 {
 	import variablen.speicher : dump_speicher;
@@ -31,11 +33,7 @@ void enter_repl_loop()
 
 			repl_linie = repl_linie.strip;
 
-			if (repl_linie == "exit".dchar_from_string)
-			{
-				return;
-			}
-			else if (repl_linie == "clear".dchar_from_string)
+			if (repl_linie == "clear".dchar_from_string)
 			{
 				write("\x1b[2J\x1b[H");
 				continue;
@@ -68,5 +66,8 @@ void enter_repl_loop()
 			writeln(fehler.msg);
 			set_pen_trait(TextTrait.reset);
 		}
+    catch (Beende_Programm_Signal){
+      break;
+    }
 	}
 }

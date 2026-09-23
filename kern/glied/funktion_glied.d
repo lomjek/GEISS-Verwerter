@@ -3,6 +3,7 @@ module glied.funktion_glied;
 import glied.glied;
 import glied.variablen_glied : Erstelle_Variable_Glied;
 import glied.block_glied;
+import glied.signal_glied : Beende_Funktion_Signal;
 
 import variablen.wert;
 import variablen.speicher;
@@ -84,7 +85,11 @@ class Funktion_Abrufen_Glied : Glied
       ret_namen ~= evg.var_name;
     }
 
-    fg.verwerte(neuer_bereich);
+    try {
+      fg.verwerte(neuer_bereich);
+    }
+    catch (Beende_Funktion_Signal)
+    { ;}
 
     Wert resultat;
     if (ret_namen.length == 1)

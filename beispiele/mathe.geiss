@@ -9,9 +9,11 @@ funktion wurzel(zahl x, nzahl wiederholungen) -> zahl resultat
   }
 
   resultat <- jetzt
+  beende funktion
 }
 
 schreibe(als_text(x))
 zahl y <- wurzel(x, 10)
-y
 schreibe(als_text(y))
+
+beende programm
