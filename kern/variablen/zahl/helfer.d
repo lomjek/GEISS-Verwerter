@@ -4,6 +4,7 @@ import core.memory : GC;
 import core.stdc.string : memcpy;
 
 import zahl.nzahl;
+import zahl.division : DivisionResultat, dividiere;
 
 // @ {} [] # \ || != ~
 
@@ -99,4 +100,25 @@ Nzahl potenz(const Nzahl num1, const Nzahl num2)
   }
 
   return z1;
+}
+
+//GGT via Euklid
+pure nothrow 
+Nzahl ggt(const Nzahl z1, const Nzahl z2){
+  if (z1 == Nzahl() || z2 == Nzahl())
+    return Nzahl();
+    
+  Nzahl a = Nzahl(z1);
+  Nzahl b = Nzahl(z2);
+
+  DivisionResultat dr = dividiere(a, b);
+
+  while (dr.rest != Nzahl()){
+    a = b;
+    b = dr.rest;
+
+    dr = dividiere(a, b);
+  }
+
+  return b;
 }

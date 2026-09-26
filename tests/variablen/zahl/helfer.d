@@ -69,4 +69,11 @@ unittest
         0x01
       ]));
   }
+  {
+    writeln("    ggt(const Nzahl z1, const Nzahl z2)");
+
+    Nzahl a = Nzahl([25]);
+    Nzahl b = Nzahl([5]);
+    assert(ggt(a, b) == b);
+  }
 }

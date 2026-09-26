@@ -24,6 +24,13 @@ unittest
     ubyte[] arr = [0x2C, 0x01];
     ubyte[] arrb = [0x5D, 0x03];
     writeln("        Bruch(arr,  arrb) == Bruch(Nzahl(arr), Nzahl(arrb)) == Bruch(Bruch(arr, arrb))");
+
+    // kürzen
+    import zahl.wandel;
+
+    writeln(Bruch(arr, arrb));
+    writeln(als_string(Bruch(arr, arrb)));
+
     assert(Bruch(arr, arrb) == Bruch(Nzahl(arr), Nzahl(arrb)) &&
         Bruch(arr, arrb) == Bruch(Bruch(arr, arrb)));
   }

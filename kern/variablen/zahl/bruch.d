@@ -2,6 +2,7 @@ module zahl.bruch;
 
 import zahl.nzahl;
 import zahl.gzahl;
+import zahl.helfer : ggt;
 
 // @ {} [] # \ || != ~
 
@@ -18,21 +19,17 @@ struct Bruch
     }
 
   pure nothrow
-    this(const Nzahl nzähler, const Nzahl nnenner)
+    this(const Nzahl nzähler, const Nzahl nnenner, bool optimize = true)
     {
       Nzahl z = Nzahl(nzähler);
       Nzahl n = Nzahl(nnenner);
 
-      if (z != Nzahl() || n != Nzahl())
+      if (z != Nzahl() && n != Nzahl() && optimize)
       {
-        for (ubyte i = 13; i > 1; i --)
-        {
-          while (z % Nzahl([i]) == Nzahl() && n % Nzahl([i]) == Nzahl())
-          {
-            z = z / Nzahl([i]);
-            n = n / Nzahl([i]);
-          }
-        }
+        const Nzahl ggT = ggt(z, n);
+
+        z = nzähler / ggT;
+        n = nnenner / ggT;
       }
 
       this.zähler = z;
