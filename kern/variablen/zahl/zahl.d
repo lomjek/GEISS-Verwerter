@@ -108,7 +108,7 @@ struct Zahl
           {
             import std.stdio : write, writeln;
 
-            write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
+            write("FEHLER: Der Operator kann nicht an Zahl ausgeführt werden: ");
             writeln(op);
           }
           return Zahl();
@@ -127,35 +127,54 @@ struct Zahl
 
   }
 
+  private 
+    Bruch als_bruch() const
+    {
+      Nzahl nenner = this.nach_komma.nenner.länge == 0 ? Nzahl([1]) : Nzahl(this.nach_komma.nenner);
+      Nzahl abs_vor = Nzahl(this.vor_komma.grösse);
+      Nzahl zähler_abs = (abs_vor * nenner) + this.nach_komma.zähler;
+
+      return Bruch(zähler_abs, nenner);
+    }
+
   private
     Zahl addiere(const Zahl other) const
     {
-      return Zahl(this.vor_komma + other.vor_komma, this.nach_komma + other.nach_komma);
+      Bruch resultat;
+      bool presultat;
+
+      if (this.positiv == other.positiv)
+      {
+        resultat = this.als_bruch + other.als_bruch;
+        presultat = this.positiv;
+      }
+      else if (this.als_bruch == other.als_bruch)
+      {
+        presultat = true;
+        resultat = Bruch();
+      }
+      else if (this.als_bruch > other.als_bruch)
+      {
+        resultat = this.als_bruch - other.als_bruch;
+        presultat = this.positiv;
+      }
+      else
+      {
+        resultat = other.als_bruch - this.als_bruch;
+        presultat = other.positiv;
+      }
+
+      return Zahl(Gzahl([], presultat), resultat);
     }
 
   private
     Zahl subtrahiere(const Zahl other) const
     {
-      if (this.opCmp(other) == -1)
-        return Zahl();
-
       if (this == other)
         return Zahl();
 
-      Gzahl diff_vor = this.vor_komma - other.vor_komma;
-      Bruch diff_nach;
-
-      if (this.nach_komma < other.nach_komma)
-      {
-        diff_vor = diff_vor - Gzahl([1], true);
-        diff_nach = (Bruch([1], [1]) + this.nach_komma) - other.nach_komma;
-      }
-      else
-      {
-        diff_nach = this.nach_komma - other.nach_komma;
-      }
-
-      return Zahl(diff_vor, diff_nach);
+      Zahl negiertesOther = Zahl(Gzahl(other.grösse, !other.positiv), other.nach_komma);
+      return addiere(negiertesOther);
     }
 
   private

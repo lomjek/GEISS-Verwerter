@@ -63,6 +63,9 @@ unittest
     Zahl z2 = Zahl(Nzahl([1]), Bruch([3], [4]));
 
     writeln("        2 1/4 + 1 3/4 = 4");
+    import zahl.wandel;
+    writeln(z1 + z2);
+    writeln(als_string(z1 + z2));
     assert(z1 + z2 == Zahl(Nzahl([4])));
 
     //MINUS

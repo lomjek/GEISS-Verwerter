@@ -40,10 +40,7 @@ Nzahl int_div_by2(const Nzahl num)
 pure nothrow
 DivisionResultat dividiere(const Nzahl nummer1, const Nzahl nummer2, bool throw_error = false)
 {
-	Nzahl num1 = Nzahl(nummer1);
-	Nzahl num2 = Nzahl(nummer2);
-
-	if (num2.länge == 0)
+	if (nummer2.länge == 0)
 	{
 		if (throw_error) //division durch 0
 			assert(false);
@@ -51,18 +48,18 @@ DivisionResultat dividiere(const Nzahl nummer1, const Nzahl nummer2, bool throw_
 			return DivisionResultat(Nzahl(), Nzahl());
 	}
 
-	if (num1.länge == 0)
+	if (nummer1.länge == 0)
 		return DivisionResultat(Nzahl(), Nzahl());
 
-	else if (num1 == num2)
+	else if (nummer1 == nummer2)
 		return DivisionResultat(Nzahl([1]), Nzahl());
 
-	else if (num2 > num1)
-		return DivisionResultat(Nzahl(), num1);
+	else if (nummer2 > nummer1)
+		return DivisionResultat(Nzahl(), Nzahl(nummer1));
 
-	bool ist_ungerade = (num1.werte[0] % 2) != 0;
+	bool ist_ungerade = (nummer1.werte[0] % 2) != 0;
 
-	DivisionResultat dr = dividiere(int_div_by2(num1), num2);
+	DivisionResultat dr = dividiere(int_div_by2(nummer1), nummer2);
 
 	dr.quotient = dr.quotient * Nzahl([2]);
 	dr.rest = dr.rest * Nzahl([2]);
@@ -70,9 +67,9 @@ DivisionResultat dividiere(const Nzahl nummer1, const Nzahl nummer2, bool throw_
 	if (ist_ungerade)
 		dr.rest = dr.rest + Nzahl([1]);
 
-	while (dr.rest >= num2)
+	while (dr.rest >= nummer2)
 	{
-		dr.rest = dr.rest - num2;
+		dr.rest = dr.rest - nummer2;
 		dr.quotient = dr.quotient + Nzahl([1]);
 	}
 
