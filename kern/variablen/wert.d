@@ -157,7 +157,7 @@ struct Wert
 		else if (this.typ == WertTyp.TEXT)
 		{
 			wert_str = "\"";
-			wert_str ~= (*cast(Text*) this.wert).payload;
+			wert_str ~= (*cast(Text*) this.wert).str;
 			wert_str ~= "\"";
 		}
 		else if (this.typ == WertTyp.WAHRHEIT)

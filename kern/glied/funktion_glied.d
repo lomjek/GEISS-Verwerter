@@ -15,7 +15,7 @@ import fehler;
 import zahl;
 import text;
 
-import std.stdio : writeln, write;
+import std.stdio : writeln, write, readln;
 import std.conv : to;
 
 // @ {} [] # \ || != ~
@@ -164,11 +164,12 @@ class Funktion_Glied : Glied
   }
 }
 
-enum MethodenTyp
+enum MethodenTyp : ubyte
 {
   PRINT,
   ALS_TEXT,
   ALS_ZAHL,
+  EINGABE,
 }
 
 class EingebauteFunktion_Glied : Funktion_Glied
@@ -183,7 +184,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
         Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
         schreibe_schön_wert(text);
         writeln;
-        goto default;
+        return Wert();
 
       case MethodenTyp.ALS_TEXT:
         Wert zahl = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
@@ -200,10 +201,28 @@ class EingebauteFunktion_Glied : Funktion_Glied
         string str = z.als_string;
 
         setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(str)));
-        goto default;
+        return Wert();
+
+      case MethodenTyp.ALS_ZAHL:
+        Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+        if (text.typ != WertTyp.TEXT)
+          throw new Fehler("Ich kann nicht anderes als Text in eine Zahl umwandeln.");
+
+        string str = (*cast(Text*) text.wert).str;
+        Zahl z = als_zahl(str.to!dstring);
+
+        setze_variable(bereich, "ausgabe", new Wert(WertTyp.ZAHL, new Zahl(z)));
+        return Wert();
+
+      case MethodenTyp.EINGABE:
+        string eingabe = readln();
+        eingabe = eingabe[0 .. eingabe.length - 1];
+        setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(eingabe)));
+        return Wert();
 
       default:
-        return Wert(WertTyp.INVALID, null);
+        writeln("Noch nicht implementiert");
+        return Wert();
     }
   }
 
@@ -229,19 +248,29 @@ class EingebauteFunktion_Glied : Funktion_Glied
     Erstelle_Variable_Glied[] parameter;
     Erstelle_Variable_Glied[] return_values;
 
-    if (typ == MethodenTyp.PRINT)
-    {
+    if (typ == MethodenTyp.PRINT){
       Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.TEXT);
       parameter ~= evg;
     }
-    else if (typ == MethodenTyp.ALS_TEXT)
-    {
+    else if (typ == MethodenTyp.ALS_TEXT){
       // Parameter
       Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.ZAHL);
       parameter ~= evg;
 
       // Return Value
       Erstelle_Variable_Glied rvg = new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
+      return_values ~= rvg;
+    }
+    else if (typ == MethodenTyp.EINGABE){
+      Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
+      return_values ~= evg;
+    }
+    else if (typ == MethodenTyp.ALS_ZAHL){
+      Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.TEXT);
+      parameter ~= evg;
+
+      // Return Value
+      Erstelle_Variable_Glied rvg = new Erstelle_Variable_Glied("ausgabe", WertTyp.ZAHL);
       return_values ~= rvg;
     }
 

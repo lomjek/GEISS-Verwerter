@@ -10,3 +10,5 @@ interpreter-test-default
 
 **/*.swp
 **/*.swo
+
+**/.typstify

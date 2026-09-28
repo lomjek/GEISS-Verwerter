@@ -66,10 +66,20 @@ static this()
           "als_text"d,
           VariablenTyp.FUNKTION,
           cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ALS_TEXT))
-          ) // Zahl => Text 
+          ), // Zahl => Text
+      Variable(
+          "als_zahl"d,
+          VariablenTyp.FUNKTION,
+          cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ALS_ZAHL))
+          ),
+      Variable(
+          "eingabe"d,
+          VariablenTyp.FUNKTION,
+          cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.EINGABE))
+          ),
 
-        //Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
-        ]);
+      //Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
+      ]);
 }
 
 //MARK: BEREICH

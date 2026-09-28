@@ -12,7 +12,7 @@ import std.conv : to;
 // This is a simple wrapper, to avoid complex stuff, and just put everything on the heap.
 struct Text
 {
-	string payload;
+	string str;
 }
 
 Wert als_wert_text(dstring wort)

@@ -73,7 +73,7 @@ string als_schön_string(Wert wert)
 	case WertTyp.TEXT:
 		str = "\"";
 		Text text = *cast(Text*) wert.wert;
-		str ~= text.payload;
+		str ~= text.str;
 		str ~= "\"";
 		break;
 
