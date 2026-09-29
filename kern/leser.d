@@ -16,7 +16,6 @@ import text;
 import variablen.wert;
 
 import std.algorithm : startsWith, endsWith, remove, filter;
-import std.string : strip;
 import std.conv : to;
 import std.stdio : write, writeln;
 import std.array : split, array;

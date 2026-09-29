@@ -4,6 +4,7 @@ import glied.glied;
 import glied.wert_glied;
 
 import ext.prints;
+import ext.algorithm : contains;
 
 import operatoren;
 import fehler;
@@ -12,7 +13,6 @@ import variablen.wert;
 
 import std.stdio : write, writeln;
 import std.array : join, array;
-import std.algorithm.searching : canFind;
 import std.algorithm : map;
 import std.conv : to;
 

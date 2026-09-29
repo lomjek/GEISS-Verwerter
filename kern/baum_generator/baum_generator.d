@@ -8,6 +8,7 @@ import schlüsselwörter;
 
 import ext.prints;
 import ext.klasse;
+import ext.algorithm : contains;
 
 import liste;
 
@@ -17,7 +18,7 @@ import glied;
 
 import variablen.wert;
 
-import std.algorithm : remove, canFind;
+import std.algorithm : remove;
 import std.stdio : writeln, write;
 import std.conv : to;
 
@@ -85,7 +86,7 @@ Glied[] generiere_baum(Glied[] glieder_liste)
     {
       OperatorenTyp op_typ = (cast(OperationGlied) glied).operationenTyp;
 
-      if (KLAMMERN_AUF.canFind(op_typ))
+      if (KLAMMERN_AUF.contains(op_typ))
       {
         depth++;
 
@@ -94,7 +95,7 @@ Glied[] generiere_baum(Glied[] glieder_liste)
           matrix.length = depth + 1;
         }
       }
-      else if (KLAMMERN_ZU.canFind(op_typ))
+      else if (KLAMMERN_ZU.contains(op_typ))
       {
         if (depth == 0)
           throw new Parse_Fehler("Zu viele Klammern wurden geschlossen");

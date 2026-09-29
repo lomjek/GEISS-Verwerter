@@ -1,10 +1,9 @@
 module repl;
 
 import std.stdio : readln, writeln, write;
-import std.string : strip;
 import std.conv : to;
 
-import ext.string : dchar_from_string;
+import ext.string : dchar_from_string, strip;
 import ext.prints;
 
 import glied.signal_glied : Beende_Programm_Signal;

@@ -14,16 +14,6 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
-enum BlockTypes
-{
-  FALLS_SONST,
-
-  SCHLEIFE_PRO_DER,
-  SCHLEIFE_SOLANGE,
-
-  FUNKTION
-}
-
 class BlockGlied : Glied
 {
   public Glied[] aktionen;

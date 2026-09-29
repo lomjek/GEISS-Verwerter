@@ -1,9 +1,11 @@
 module variablen.variable;
 
 import variablen.wert;
+
 import ext.prints;
+import ext.algorithm : contains;
+
 import std.conv : to;
-import std.algorithm : canFind;
 
 enum VariablenTyp
 {
@@ -28,7 +30,7 @@ public string als_string(Variable var)
 	str ~= var.var_typ.to!string;
 	str ~= " | ";
 
-	if ([VariablenTyp.VARIABEL, VariablenTyp.FIX].canFind(var.var_typ))
+	if ([VariablenTyp.VARIABEL, VariablenTyp.FIX].contains(var.var_typ))
 	{
 		str ~= als_schön_string(*cast(Wert*) var.wert);
 	}

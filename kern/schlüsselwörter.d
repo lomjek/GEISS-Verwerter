@@ -1,5 +1,7 @@
 module schlüsselwörter;
 
+import ext.string : strip;
+
 import glied.glied : SW_Glied, Glied;
 import glied.block_glied : Falls_BlockGlied, Sonst_BlockGlied;
 import glied.schleife_glied : Solange_BlockGlied, Wiederhole_BlockGlied;
@@ -114,7 +116,7 @@ SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* w
     dstring[] ganzer_sw = [];
     for (ulong i = 0; i < multi_wort_sw.length; i++)
     {
-      ganzer_sw ~= wort_liste[*wort_index + i];
+      ganzer_sw ~= wort_liste[*wort_index + i].strip;
     }
 
     if (ganzer_sw == strs)
@@ -132,9 +134,9 @@ Glied wort_als_sw(dstring[] wort_liste, ulong* wort_index)
   SchlüsselWort sw = erstelle_multi_wort_schlüsselwort(wort_liste, wort_index);
 
   if (sw == SchlüsselWort.INVALID)
-    sw = dstring_als_sw(wort_liste[*wort_index]);
+    sw = dstring_als_sw(wort_liste[*wort_index].strip);
 
-  if (sw == SchlüsselWort.INVALID && wort_liste[*wort_index] != "variable"d)
+  if (sw == SchlüsselWort.INVALID)
     throw new Parse_Fehler(
         "Das Wort ist kein valides SchlüsselWort: " ~ wort_liste[*wort_index].to!string);
 
