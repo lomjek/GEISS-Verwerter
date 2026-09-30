@@ -12,8 +12,7 @@ import schlüsselwörter;
 import operatoren;
 import zahl;
 import text;
-
-import variablen.wert;
+import wert;
 
 import std.algorithm : startsWith, endsWith, remove, filter;
 import std.string : strip;

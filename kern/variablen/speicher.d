@@ -5,7 +5,7 @@ import liste;
 import zahl;
 
 import variablen.variable;
-import variablen.wert;
+import wert;
 
 import glied.funktion_glied;
 

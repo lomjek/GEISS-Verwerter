@@ -3,7 +3,7 @@ module glied.block_glied;
 import glied.glied;
 import glied.signal_glied : Beende_Programm_Signal;
 
-import variablen.wert;
+import wert;
 
 import interpreter : repl_mode;
 

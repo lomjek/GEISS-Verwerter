@@ -3,7 +3,7 @@ module interpreter;
 import leser;
 import baum_generator;
 
-import variablen.wert;
+import wert;
 
 import glied.glied;
 import glied.block_glied;

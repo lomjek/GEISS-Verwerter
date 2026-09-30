@@ -2,7 +2,7 @@ module liste;
 
 import fehler;
 import ext.prints;
-import variablen.wert;
+import wert;
 
 // @ {} [] # \ || != ~
 

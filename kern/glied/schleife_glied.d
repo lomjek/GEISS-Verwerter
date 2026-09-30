@@ -2,7 +2,7 @@ module glied.schleife_glied;
 
 import glied.block_glied;
 import glied.glied : Glied;
-import variablen.wert;
+import wert;
 import zahl;
 
 import std.stdio : write, writeln;

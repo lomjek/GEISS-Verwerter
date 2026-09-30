@@ -15,7 +15,7 @@ import fehler;
 
 import glied;
 
-import variablen.wert;
+import wert;
 
 import std.algorithm : remove, canFind;
 import std.stdio : writeln, write;

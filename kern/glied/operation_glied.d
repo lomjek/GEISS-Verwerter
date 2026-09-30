@@ -8,7 +8,7 @@ import ext.prints;
 import operatoren;
 import fehler;
 import zahl;
-import variablen.wert;
+import wert;
 
 import std.stdio : write, writeln;
 import std.array : join, array;

@@ -3,7 +3,7 @@ module glied.glied;
 import std.stdio : write;
 import std.conv : to;
 
-import variablen.wert;
+import wert;
 import variablen.variable;
 import schlüsselwörter;
 

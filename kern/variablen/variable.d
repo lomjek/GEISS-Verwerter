@@ -1,6 +1,6 @@
 module variablen.variable;
 
-import variablen.wert;
+import wert;
 import ext.prints;
 import std.conv : to;
 import std.algorithm : canFind;

@@ -2,7 +2,7 @@ module baum_generator.baue_glied;
 
 import ext.klasse;
 import glied;
-import variablen.wert;
+import wert;
 import fehler;
 
 import schlüsselwörter : SchlüsselWort;

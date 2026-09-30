@@ -3,7 +3,7 @@ module glied.wert_glied;
 import std.stdio : write;
 import std.conv : to;
 
-import variablen.wert;
+import wert;
 import zahl;
 import liste;
 import glied.glied;

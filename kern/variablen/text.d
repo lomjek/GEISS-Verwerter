@@ -1,6 +1,6 @@
 module text;
 
-import variablen.wert;
+import wert;
 
 import leser : Verifizierung;
 

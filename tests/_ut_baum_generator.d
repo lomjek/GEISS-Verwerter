@@ -5,7 +5,7 @@ import baum_generator;
 import glied;
 import zahl;
 import operatoren;
-import variablen.wert;
+import wert;
 
 import std.stdio : write, writeln;
 

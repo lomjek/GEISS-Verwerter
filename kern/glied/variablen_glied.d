@@ -1,6 +1,6 @@
 module glied.variablen_glied;
 
-import variablen.wert;
+import wert;
 import variablen.speicher;
 import variablen.variable;
 

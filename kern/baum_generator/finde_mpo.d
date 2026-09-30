@@ -3,7 +3,7 @@ module baum_generator.finde_mpo;
 import glied;
 import fehler.parse_fehler;
 import operatoren;
-import variablen.wert;
+import wert;
 import ext.klasse : instanceof, is_class;
 
 import std.conv : to;

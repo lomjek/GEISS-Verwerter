@@ -2,7 +2,7 @@ module fehler.fehler;
 
 import interpreter : repl_mode, file_name;
 import operatoren;
-import variablen.wert;
+import wert;
 import glied;
 
 import std.conv : to;
