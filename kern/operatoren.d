@@ -16,7 +16,7 @@ enum OperatorenTyp
 	MINUS,
 	MAL,
 	GETEILT,
-	HOCH,
+	HOCH, // TODO: Das existiert noch nicht...
 
 	GLEICH,
 
