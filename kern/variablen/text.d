@@ -13,6 +13,11 @@ import std.conv : to;
 struct Text
 {
 	string str;
+
+  int opCmp(const Text other) const
+  {
+    return -1; // TODO: IMplement
+  }
 }
 
 Wert als_wert_text(dstring wort)

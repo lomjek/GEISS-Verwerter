@@ -25,6 +25,11 @@ struct Liste
 		this.fix_wert_typ = list.fix_wert_typ;
 		this.werte = list.werte;
 	}
+
+  int opCmp(const Liste other) const
+  {
+    return -1; //TODO: IMPLEMENT branch => listen  
+  }
 }
 
 void anfügen(Liste* liste, Wert* wert)
