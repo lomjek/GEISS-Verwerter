@@ -20,6 +20,19 @@
 			]
 		},
 		{
+			"name": "full-dynamic",
+			"mainSourceFile": "kern/geiss.d",
+			"sourcePaths": [
+				"kern"
+			],
+			"importPaths": [
+				"kern"
+			],
+			"dflags": [
+				"-link-defaultlib-shared"
+			]
+		},
+		{
 			"name": "static",
 			"mainSourceFile": "kern/geiss.d",
 			"sourcePaths": [
