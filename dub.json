@@ -64,6 +64,9 @@
 			"dflags": [
 				"-Os",
 				"-flto=full"
+			],
+			"lflags": [
+				"--gc-sections"
 			]
 		},
 		"debug": {

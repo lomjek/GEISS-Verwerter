@@ -15,7 +15,7 @@ bool contains(T)(const T[] liste, const T needle)
 }
 
 ///IN PLACE
-pure nothrow @nogc @safe
+public pure nothrow @nogc @safe
 T[] reverse(T)(T[] array)
 {
   if (array.ptr == null || array.length <= 1)

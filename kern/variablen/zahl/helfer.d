@@ -6,6 +6,8 @@ import core.stdc.string : memcpy;
 import zahl.nzahl;
 import zahl.division : DivisionResultat, dividiere;
 
+import ext.algorithm : reverse;
+
 // @ {} [] # \ || != ~
 
 pure nothrow
@@ -22,23 +24,13 @@ ubyte* dup(const ubyte* ptr, const ulong länge)
 }
 
 /// In place reversion of ubyte array
-pure nothrow
+public pure nothrow @nogc
 Nzahl reverse(Nzahl arr)
 {
   if (arr.länge <= 1)
     return arr;
 
-  size_t i = 0;
-  size_t j = cast(size_t) arr.länge - 1;
-
-  while (i < j)
-  {
-    ubyte temp = arr.werte[i];
-    arr.werte[i] = arr.werte[j];
-    arr.werte[j] = temp;
-    i++;
-    j--;
-  }
+  reverse(arr.werte[0 .. arr.länge]);
 
   return arr;
 }
