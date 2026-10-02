@@ -128,7 +128,15 @@ Glied[] generiere_baum(Glied[] glieder_liste)
         else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
         {
           ListeWert_Glied geparste_teil = generiere_liste(rohe_glied_linie);
-          matrix[depth - 1] ~= geparste_teil;
+
+          if (geparste_teil.länge == 1 &&
+              matrix[depth - 1].length > 0 &&  // Wenn ein sucher für Listen
+              matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
+          {
+            matrix[depth - 1][$ - 1] = new LiesListeElement_Glied(geparste_teil.werte[0], cast(Lese_Variable_Glied) matrix[depth - 1][$ - 1]);
+          }
+          else
+            matrix[depth - 1] ~= geparste_teil;
         }
         else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
         {

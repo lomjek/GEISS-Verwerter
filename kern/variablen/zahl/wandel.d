@@ -133,6 +133,33 @@ int als_int(const Nzahl liste, bool throw_on_overflow = true)
   return resultat;
 }
 
+size_t als_size_t(const Nzahl liste, bool throw_on_overflow = true)
+{
+  if (liste.länge > size_t.sizeof && throw_on_overflow)
+  {
+    throw new Exception("Die Zahl ist zu gross für die Umwandlung in ein size_t");
+  }
+
+  ubyte[size_t.sizeof] kurze_liste = 0;
+
+  if (liste.länge > size_t.sizeof)
+  {
+    kurze_liste[] = liste.werte[liste.länge - size_t.sizeof .. liste.länge];
+  }
+  else if (liste.länge > 0 && liste.werte !is null)
+  {
+    kurze_liste[0 .. liste.länge] = liste.werte[0 .. liste.länge];
+  }
+
+  size_t resultat = 0;
+  static foreach (i; 0 .. size_t.sizeof)
+  {
+    resultat |= cast(size_t) kurze_liste[i] << (i * 8);
+  }
+
+  return resultat;
+}
+
 //MARK: als_string
 string als_string(ubyte[] num)
 {
