@@ -1,14 +1,21 @@
+# Compiled stuff
 **/*.o
 **/*.dc
-**/*.dblite
+**/*.a
 
+# IDEs
 .vscode
 .idea
 
+# Test binaries and files
 **/test*.*
 interpreter-test-default
 
+# VIM RESIDUALS
 **/*.swp
 **/*.swo
 
+# TYPST DOKUMENTATION STUFF
 **/.typstify
+dokumentation/output/
+**/*.pdf

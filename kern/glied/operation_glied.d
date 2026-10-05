@@ -12,8 +12,6 @@ import zahl;
 import variablen.wert;
 
 import std.stdio : write, writeln;
-import std.array : join, array;
-import std.algorithm : map;
 import std.conv : to;
 
 // @ {} [] # \ || != ~
@@ -602,4 +600,26 @@ class OperationGlied : Glied
 	{
 		return "G(OPERATOR | " ~ this.operationenTyp.to!string ~ ")";
 	}
+}
+
+// TODO: Muss entfernt werden.
+// War nur temporär, damit neue_linien etc funktionieren.
+class SeparatorGlied : Glied
+{
+  override public void schreibe_baum(){
+    write("[SEPARATOR]");
+  }
+
+  override public Wert verwerte(uint bereich){
+    return Wert(WertTyp.INVALID, null);
+  }
+
+  override public bool ist_vollständig(){
+    return true;
+  }
+
+  override string toString() const
+  {
+    return "G(SEPARATOR)";
+  }
 }

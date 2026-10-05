@@ -5,7 +5,7 @@ module ext.algorithm;
 pure nothrow @nogc @safe
 bool contains(T)(const T[] liste, const T needle)
 {
-  for (size_t i = 0; i > liste.length; i ++)
+  for (size_t i = 0; i < liste.length; i ++)
   {
     if (needle == liste[i])
       return true;

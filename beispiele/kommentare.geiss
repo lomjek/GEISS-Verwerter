@@ -1,0 +1,6 @@
+//Das sollte jetzt ein Kommentar sein.
+zahl x <- 2 // Es sollte immer bis zum Ende der Linie gehen.
+/*
+ * Man kann auch Multi line Comments machen
+ */ 
+schreibe(als_text(x))

@@ -41,6 +41,11 @@ enum OperatorenTyp
 
 	NEUE_LINIE,
 	ANFANG_LINIE,
+  TAB,
+
+  ANFANG_KOMMENTAR,
+  ENDE_KOMMENTAR,
+  ANFANG_LINIE_KOMMENTAR,
 }
 
 immutable dchar[OperatorenTyp] operatoren_chars = [
@@ -74,7 +79,21 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
 	OperatorenTyp.SEMIKOLON: ';',
 
 	OperatorenTyp.NEUE_LINIE: '\n',
-	OperatorenTyp.ANFANG_LINIE: '\r'
+	OperatorenTyp.ANFANG_LINIE: '\r',
+  OperatorenTyp.TAB: '\t',
+
+  OperatorenTyp.ANFANG_KOMMENTAR: '«',
+  OperatorenTyp.ENDE_KOMMENTAR: '»',
+  OperatorenTyp.ANFANG_LINIE_KOMMENTAR: '¶',
+];
+
+/// Das sind Operatoren, welche keine andere Funktion haben, als dass sie separieren
+immutable OperatorenTyp[] separatoren = [
+  OperatorenTyp.NEUE_LINIE,
+  OperatorenTyp.ANFANG_LINIE,
+  OperatorenTyp.TAB,
+  OperatorenTyp.INVALID,
+  OperatorenTyp.SEMIKOLON,
 ];
 
 immutable OperatorenTyp[] KLAMMERN_AUF = [
@@ -86,7 +105,7 @@ immutable OperatorenTyp[] KLAMMERN_AUF = [
 immutable OperatorenTyp[] KLAMMERN_ZU = [
 	OperatorenTyp.KLAMMER_ZU,
 	OperatorenTyp.ECKIGE_KLAMMER_ZU,
-	OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU // Ev brauche ich auch < kleiner als.
+	OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU // Ev brauche ich auch > grösser als.
 ];
 
 immutable OperatorenTyp[OperatorenTyp] JEWEILIG_SCHLIESSENDE_KLAMMER = [
@@ -98,6 +117,9 @@ immutable OperatorenTyp[OperatorenTyp] JEWEILIG_SCHLIESSENDE_KLAMMER = [
 immutable (dstring[OperatorenTyp]) mehrteilige_operatoren = [
   OperatorenTyp.RÜCK_PFEIL : "<-",
   OperatorenTyp.VOR_PFEIL : "->",
+  OperatorenTyp.ANFANG_KOMMENTAR: "/*",
+  OperatorenTyp.ENDE_KOMMENTAR: "*/",
+  OperatorenTyp.ANFANG_LINIE_KOMMENTAR: "//",
 ];
 
 //MARK: FUNKTIONEN
