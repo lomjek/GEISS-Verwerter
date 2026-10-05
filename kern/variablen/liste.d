@@ -46,7 +46,22 @@ struct Liste
       throw new Fehler("Out of Bounds");
     }
 
-    return werte[index];
+    return Wert(werte[index]);
+  }
+
+  void setzte_element_bei_index(size_t index, Wert neuer_wert)
+  {
+    if (index >= werte.length)
+    {
+      throw new Fehler("Out of Bounds");
+    }
+
+    if (!variabel && neuer_wert.typ != fix_wert_typ)
+    {
+      throw new Liste_TypenFehler(this.fix_wert_typ, neuer_wert.typ);
+    }
+
+    werte[index] = neuer_wert;
   }
 
   string toString() const

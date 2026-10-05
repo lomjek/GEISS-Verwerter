@@ -90,6 +90,14 @@ Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste
     glieder_liste = glieder_liste.remove(glied_index + 1);
     glieder_liste = glieder_liste.remove(glied_index - 1);
   }
+  else if (vorher_glied.instanceof!LiesListeElement_Glied)
+  {
+    LiesListeElement_Glied lleg = cast(LiesListeElement_Glied) vorher_glied;
+    glieder_liste[glied_index] = new SetzeListeElement_Glied(lleg.index, lleg.liste, naher_glied);
+
+    glieder_liste = glieder_liste.remove(glied_index + 1);
+    glieder_liste = glieder_liste.remove(glied_index - 1);
+  }
   else
   {
     writeln(vorher_glied);
