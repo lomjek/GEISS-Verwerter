@@ -94,6 +94,12 @@ string als_schön_string(Wert wert)
 	return str;
 }
 
+enum Str_conv_typ {
+  AUSGABE,
+  INTERNAL,
+  AST,
+}
+
 //region REPL
 void print_prompt()
 {

@@ -33,7 +33,7 @@ class Wert_Glied : Glied
 
   override public string toString() const
   {
-    return "G(WERT | " ~ wert.toString ~ ")";
+    return "G(WERT | " ~ wert.als_string(Str_conv_typ.INTERNAL) ~ ")";
   }
 
   this(Wert neuer_wert)

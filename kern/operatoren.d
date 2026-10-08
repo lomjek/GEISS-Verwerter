@@ -8,7 +8,7 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
-enum OperatorenTyp
+enum OperatorenTyp : ubyte
 {
 	INVALID,
 
@@ -30,6 +30,8 @@ enum OperatorenTyp
 
 	KLEINER_ALS,
 	GRÖSSER_ALS,
+  GRÖSSER_GLEICH,
+  KLEINER_GLEICH,
 
 	GESCHWUNGENE_KLAMMER_AUF,
 	GESCHWUNGENE_KLAMMER_ZU,
@@ -64,6 +66,8 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
 
 	OperatorenTyp.KLEINER_ALS: '<',
 	OperatorenTyp.GRÖSSER_ALS: '>',
+  OperatorenTyp.GRÖSSER_GLEICH: '≥',
+  OperatorenTyp.KLEINER_GLEICH: '≤',
 
 	OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF: '{',
 	OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU: '}',
@@ -98,6 +102,9 @@ immutable OperatorenTyp[OperatorenTyp] JEWEILIG_SCHLIESSENDE_KLAMMER = [
 immutable (dstring[OperatorenTyp]) mehrteilige_operatoren = [
   OperatorenTyp.RÜCK_PFEIL : "<-",
   OperatorenTyp.VOR_PFEIL : "->",
+  
+  OperatorenTyp.GRÖSSER_GLEICH : ">=",
+  OperatorenTyp.KLEINER_GLEICH : "<=",
 ];
 
 //MARK: FUNKTIONEN

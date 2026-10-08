@@ -25,10 +25,8 @@ enum Aktion_Gewicht
   SETZE_VARIABLE,
   VARIABLE_ERSTELLEN,
 
-  GLEICH,
-
-  GRÖSSER_ALS,
-  GRÖSSER_GLEICH,
+  GLEICH, // GLEICH SOLL TROTZDEM GETRENNT SEIN
+  KOMPARATOR,
 
   KLEINER_ALS,
   KLEINER_GLEICH,
@@ -49,11 +47,10 @@ Aktion_Gewicht[OperatorenTyp] operatoren_Gewicht = [
 
   OperatorenTyp.GLEICH: Aktion_Gewicht.GLEICH,
 
-  OperatorenTyp.GRÖSSER_ALS: Aktion_Gewicht.GRÖSSER_ALS,
-  //TODO: GRÖSSER GLEICH
-
-  OperatorenTyp.KLEINER_ALS: Aktion_Gewicht.KLEINER_ALS,
-  //TODO: KLEINER_GLEICH
+  OperatorenTyp.GRÖSSER_ALS: Aktion_Gewicht.KOMPARATOR,
+  OperatorenTyp.GRÖSSER_GLEICH: Aktion_Gewicht.KOMPARATOR,
+  OperatorenTyp.KLEINER_ALS: Aktion_Gewicht.KOMPARATOR,
+  OperatorenTyp.KLEINER_GLEICH: Aktion_Gewicht.KOMPARATOR,
 ];
 
 nothrow @safe @nogc

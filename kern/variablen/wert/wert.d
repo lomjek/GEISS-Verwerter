@@ -2,8 +2,6 @@ module wert.wert;
 
 import wert.wert_typ;
 
-import std.conv : to;
-
 import liste;
 import fehler;
 import zahl;
@@ -15,54 +13,73 @@ import text;
 struct Wert
 {
   WertTyp typ;
-  void* wert;
 
-  this(WertTyp typ, void* wert)
-  {
-    this.typ = typ;
-    this.wert = wert;
+  union {
+    void* wert;
+
+    Nzahl* nzahl;
+    Gzahl* gzahl;
+    Zahl* zahl;
+
+    bool* wahrheit;
+
+    Text* text;
+
+    Liste* liste;
+
+    //FUNKTION?
   }
 
-  this(Wert nwert)
-  {
-    this.typ = nwert.typ;
-    this.wert = nwert.wert;
-  }
+  //MANUAL, system initalizer
+  public pure nothrow @system @nogc
+    this(WertTyp typ, void* wert)
+    {
+      this.typ = typ;
+      this.wert = wert;
+    }
 
-  string toString() const
-  {
-    string wert_str;
-    if (this.typ == WertTyp.NATÜRLICHE_ZAHL)
-    {
-      Nzahl nz = *cast(Nzahl*) this.wert;
-      wert_str = nz.als_string;
+  public pure nothrow @safe @nogc
+    this(Nzahl* _nzahl){
+      typ = WertTyp.NATÜRLICHE_ZAHL;
+      nzahl = _nzahl;
     }
-    else if (this.typ == WertTyp.GANZE_ZAHL)
-    {
-      Gzahl gz = *cast(Gzahl*) this.wert;
-      wert_str = gz.als_string;
-    }
-    else if (this.typ == WertTyp.ZAHL)
-    {
-      Zahl z = *cast(Zahl*) this.wert;
-      wert_str = z.als_string;
-    }
-    else if (this.typ == WertTyp.TEXT)
-    {
-      wert_str = "\"";
-      wert_str ~= (*cast(Text*) this.wert).str;
-      wert_str ~= "\"";
-    }
-    else if (this.typ == WertTyp.WAHRHEIT)
-    {
-      bool wahrheit = *cast(bool*) this.wert;
-      wert_str = wahrheit ? "wahr" : "falsch";
-    }
-    else
-      return "W(" ~ this.typ.to!string ~ ")";
 
-    return "W(" ~ this.typ.to!string ~ " | " ~ wert_str ~ ")";
-  }
+  public pure nothrow @safe @nogc
+    this(Gzahl*  _gzahl){
+      typ = WertTyp.GANZE_ZAHL;
+      gzahl = _gzahl;
+    }
+
+  public pure nothrow @safe @nogc
+    this(Zahl* _zahl){
+      typ = WertTyp.ZAHL;
+      this.zahl = _zahl;
+    }
+
+  public pure nothrow @safe @nogc
+    this(bool* _wahrheit){
+      this.typ = WertTyp.WAHRHEIT;
+      this.wahrheit = _wahrheit;
+    }
+
+  public pure nothrow @safe @nogc
+    this(Text* _text){
+      this.typ = WertTyp.TEXT;
+      this.text = _text;
+    }
+
+  public pure nothrow @safe @nogc
+    this(Liste* liste){
+      this.typ = WertTyp.LISTE;
+      this.liste = liste;
+    }
+
+  public pure nothrow @trusted @nogc
+    this(Wert nwert)
+    {
+      this.typ = nwert.typ;
+      this.wert = nwert.wert;
+    }
 
   //MARK: opCmp
   int opCmp(const Wert other) const
@@ -76,7 +93,7 @@ struct Wert
     else if (this.typ == WertTyp.GANZE_ZAHL && other.typ == WertTyp.NATÜRLICHE_ZAHL){
       return (*cast(Gzahl *) this.wert).opCmp(Gzahl(*cast(Nzahl *) other.wert));
     }
-    
+
     if (this.typ == other.typ)
     {
       final switch (this.typ){
@@ -89,7 +106,7 @@ struct Wert
         case WertTyp.TEXT:
           return (*cast(Text *) this.wert).opCmp(*cast(Text *) other.wert);
         case WertTyp.LISTE:
-          return (*cast(Liste *) this.wert).opCmp(*cast(Liste *) other.wert);
+          return (*this.liste).opCmp(*other.liste);
         case WertTyp.FUNKTION:
           return -3; // TODO: Sich ein System überlegen, wie man Funktionen vergleichen kann, wenn man Sie überhaupt vergleichen kann.
         case WertTyp.WAHRHEIT:
@@ -107,6 +124,9 @@ struct Wert
     return -2;
   }
 
+  bool opEquals(const Wert other){
+    return this.opCmp(other) == 0;
+  }
 }
 
 public bool ist_wahr(Wert wert)

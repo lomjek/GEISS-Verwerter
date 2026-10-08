@@ -371,8 +371,8 @@ class OperationGlied : Glied
 			default:
 				throw new Fehler(
 					"MAL geht für volgendes Typ nicht: " ~
-						wert1.toString.to!string ~ " " ~ operationenTyp.to!string ~ " "
-						~ wert2.toString.to!string);
+						wert1.als_string(Str_conv_typ.INTERNAL) ~ " " ~ operationenTyp.to!string ~ " "
+						~ wert2.als_string(Str_conv_typ.INTERNAL));
 			}
 
 		case OperatorenTyp.GETEILT:
@@ -489,91 +489,24 @@ class OperationGlied : Glied
 			}
 
 		case OperatorenTyp.GLEICH:
-			if (wert1.typ == wert2.typ)
-			{
-				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
-				{
-					Nzahl num1 = *cast(Nzahl*) wert1.wert;
-					Nzahl num2 = *cast(Nzahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
-					break ots;
-				}
-				else if (wert1.typ == WertTyp.GANZE_ZAHL)
-				{
-					Gzahl num1 = *cast(Gzahl*) wert1.wert;
-					Gzahl num2 = *cast(Gzahl*) wert2.wert;
-
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
-					break ots;
-				}
-				else if (wert1.typ == WertTyp.ZAHL)
-				{
-					Zahl num1 = *cast(Zahl*) wert1.wert;
-					Zahl num2 = *cast(Zahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 == num2));
-					break ots;
-				}
-
-			}
-			else
-			{
-				goto default; //TODO: Implementieren, falls 3 gzahl mit 3 nzahl verglichen wird...
-			}
-			break ots; // TODO: Warum braucht es das hier?
+		  resultat = Wert(new bool(wert1 == wert2));
+      break ots; // TODO: Warum braucht es das hier?
 
 		case OperatorenTyp.GRÖSSER_ALS:
-			if (wert1.typ == wert2.typ)
-			{
-				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
-				{
-					Nzahl num1 = *cast(Nzahl*) wert1.wert;
-					Nzahl num2 = *cast(Nzahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
-					break ots;
-				}
-				else if (wert1.typ == WertTyp.GANZE_ZAHL)
-				{
-					Gzahl num1 = *cast(Gzahl*) wert1.wert;
-					Gzahl num2 = *cast(Gzahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
-					break ots;
-				}
-				else if (wert1.typ == WertTyp.ZAHL)
-				{
-					Zahl num1 = *cast(Zahl*) wert1.wert;
-					Zahl num2 = *cast(Zahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 > num2));
-					break ots;
-				}
-			}
-			break ots;
+			resultat = Wert(new bool(wert1 > wert2));
+      break ots;
 
 		case OperatorenTyp.KLEINER_ALS:
-			if (wert1.typ == wert2.typ)
-			{
-				if (wert1.typ == WertTyp.NATÜRLICHE_ZAHL)
-				{
-					Nzahl num1 = *cast(Nzahl*) wert1.wert;
-					Nzahl num2 = *cast(Nzahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
-					break ots;
-				}
-				else if (wert1.typ == WertTyp.GANZE_ZAHL)
-				{
-					Gzahl num1 = *cast(Gzahl*) wert1.wert;
-					Gzahl num2 = *cast(Gzahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
-					break ots;
-				}
-				else if (wert1.typ == WertTyp.ZAHL)
-				{
-					Zahl num1 = *cast(Zahl*) wert1.wert;
-					Zahl num2 = *cast(Zahl*) wert2.wert;
-					resultat = Wert(WertTyp.WAHRHEIT, new bool(num1 < num2));
-					break ots;
-				}
-			}
+      resultat = Wert(new bool(wert1 < wert2));
 			break ots;
+
+    case OperatorenTyp.GRÖSSER_GLEICH:
+      resultat = Wert(new bool(wert1 >= wert2));
+      break ots;
+
+    case OperatorenTyp.KLEINER_GLEICH:
+      resultat = Wert(new bool(wert1 <= wert2));
+      break ots;
 
 		default:
 			throw new Fehler(

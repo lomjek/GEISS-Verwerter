@@ -7,13 +7,15 @@ import std.bigint : BigInt;
 import std.math : trunc;
 import std.bitmanip : nativeToLittleEndian, littleEndianToNative;
 
+import ext.prints : Str_conv_typ;
+
 import zahl.zahl : Zahl;
 import zahl.gzahl : Gzahl;
 import zahl.nzahl : Nzahl;
 import zahl.bruch;
 import zahl.helfer;
 
-  nothrow pure
+public pure nothrow @safe @nogc
 bool ist_zahl(dstring wort)
 {
   bool allDigits = wort.length > 0;
@@ -134,7 +136,7 @@ int als_int(const Nzahl liste, bool throw_on_overflow = true)
 }
 
 //MARK: als_string
-string als_string(ubyte[] num)
+string als_string(const (ubyte[]) num)
 {
   if (num.length == 0)
   {
@@ -169,12 +171,25 @@ string als_string(ubyte[] num)
   return cast(string) result;
 }
 
-string als_string(Nzahl n)
+//Nzahl
+string als_string_schön(const Nzahl n)
 {
   return als_string(n.werte[0 .. n.länge]);
 }
 
-string als_string(Gzahl g)
+string als_string_internal(const Nzahl n){
+  return "Nz(" ~ n.länge.to!string ~ " | "  ~ n.werte.to!string ~ ")";
+}
+
+string als_string(const Nzahl n, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+  if (typ == Str_conv_typ.INTERNAL)
+    return als_string_internal(n);
+
+  return als_string_schön(n);
+}
+
+//Gzahl
+string als_string_schön(const Gzahl g)
 {
   if (g.positiv == false)
     return "-" ~ als_string(Nzahl(g.grösse.werte, g.grösse.länge));
@@ -182,7 +197,19 @@ string als_string(Gzahl g)
     return als_string(Nzahl(g.grösse.werte, g.grösse.länge));
 }
 
-string als_string(const Zahl zahl)
+string als_string_internal(const Gzahl g){
+  return "Gz(" ~ g.länge.to!string ~ " | " ~ g.positiv.to!string ~  " | "  ~ g.werte.to!string ~ ")";
+}
+
+string als_string(const Gzahl g, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+  if (typ == Str_conv_typ.INTERNAL)
+    return als_string_internal(g);
+
+  return als_string_schön(g);
+}
+
+//Zahl
+string als_string_schön(const Zahl zahl)
 {
   Zahl z = Zahl(zahl);
   string result = "";
@@ -201,7 +228,19 @@ string als_string(const Zahl zahl)
   return result;
 }
 
-  private pure nothrow @safe
+string als_string_internal(const Zahl z){
+  return "Z(" ~ z.länge.to!string ~ " | " ~ z.positiv.to!string ~  " | "  ~ z.werte.to!string ~ " | " ~ z.nach_komma.als_string_internal ~ ")";
+}
+
+string als_string(const Zahl z, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+  if (typ == Str_conv_typ.INTERNAL)
+    return als_string_internal(z);
+
+  return als_string_schön(z);
+}
+
+// Bruch
+private pure nothrow @safe
 ubyte[] floatToLittleEndianBytes(float value)
 {
   ulong integerPart = (value >= cast(float) ulong.max) ? ulong.max : cast(ulong) trunc(value);
@@ -240,7 +279,7 @@ float littleEndianBytesToFloat(const(ubyte)[] bytes)
   return cast(float) integerPart;
 }
 
-string als_string(const Bruch b, size_t precision = 4)
+string als_string_schön(const Bruch b, size_t precision = 4)
 {
   const Nzahl float_max = Nzahl(floatToLittleEndianBytes(float.max));
 
@@ -271,3 +310,15 @@ string als_string(const Bruch b, size_t precision = 4)
 
   return resultat.to!string;
 }
+
+string als_string_internal(const Bruch b){
+  return "B(" ~ b.zähler.als_string_internal ~ " | " ~ b.nenner.als_string_internal ~ ")";
+}
+
+string als_string(const Bruch b, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+  if (typ == Str_conv_typ.INTERNAL)
+    return als_string_internal(b);
+
+  return als_string_schön(b);
+}
+
