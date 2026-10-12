@@ -1,0 +1,11 @@
+funktion f(nzahl x) -> nzahl y {
+  falls x <= 1 {
+    y <- 1
+  }
+  sonst {
+    y <- f(x - 1) + f(x - 2)
+  }
+}
+
+zahl a <- f(30)
+schreibe(als_text(a))

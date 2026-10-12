@@ -109,7 +109,7 @@ Glied[] generiere_baum(Glied[] glieder_liste)
         if (op_typ == OperatorenTyp.KLAMMER_ZU)
         {
           if (matrix[depth - 1].length > 0 &&  // Wenn argumente für funktion
-              matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
+            matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
           {
             ListeWert_Glied argumente = generiere_liste(rohe_glied_linie);
 
@@ -184,13 +184,13 @@ Glied[] generiere_linie(Glied[] glieder_liste)
       _Op_wiederholungen++;
     else
       _Op_wiederholungen = 0; // Wenn man keine Operation findet, macht man diese Zahl grösser.
-                              // Bei genug Wiederhloungen beendet man die Schleife mit einem Fehler.
-                              // Es sollte eigentlich nie passieren, aber jetzt in der BETA-Phase,
-                              // hilft mir das Extrem beim Debuggen. // TODO: Braucht es das am Schluss?
+    // Bei genug Wiederhloungen beendet man die Schleife mit einem Fehler.
+    // Es sollte eigentlich nie passieren, aber jetzt in der BETA-Phase,
+    // hilft mir das Extrem beim Debuggen. // TODO: Braucht es das am Schluss?
     if (_Op_wiederholungen >= 10)
     {
       throw new Parse_Fehler(
-          "Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen.");
+        "Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen.");
     }
     wiederholtes_MPO = mpo;
 
@@ -223,7 +223,7 @@ ListeWert_Glied generiere_liste(Glied[] glieder_liste)
   foreach (Glied glied; glieder_liste)
   {
     if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied)
-        .operationenTyp == OperatorenTyp.KOMMA)
+      .operationenTyp == OperatorenTyp.KOMMA)
     {
       if (roher_zwischenwert.length == 0)
         werte ~= new Wert_Glied(Wert(WertTyp.INVALID, null));
