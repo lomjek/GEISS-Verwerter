@@ -1,6 +1,8 @@
 module baum_generator.baue_glied;
 
 import ext.klasse;
+import ext.algorithm : remove;
+
 import glied;
 import variablen.wert;
 import fehler;
@@ -8,7 +10,6 @@ import fehler;
 import schlüsselwörter : SchlüsselWort;
 import operatoren;
 
-import std.algorithm : remove;
 import std.stdio : write, writeln;
 
 Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)

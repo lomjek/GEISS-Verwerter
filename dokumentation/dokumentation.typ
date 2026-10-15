@@ -20,14 +20,26 @@
   size: 11pt,
 )
 
-//Code blocks bg
-#show raw.where(block: false): it => box(
-  fill: rgb("f1f3f5"),
-  inset: (x: 4pt, y: 0pt),
-  outset: (y: 3pt),
-  radius: 3pt,
-  text(fill: rgb("2b2b2b"), font: "DejaVu Sans Mono", size: 0.9em, it)
-)
+// Code blocks bg
+#show raw: it => {
+  if it.block {
+    block(
+      fill: rgb("f1f3f5"),
+      inset: 8pt,
+      radius: 4pt,
+      width: 100%,
+      text(fill: rgb("2b2b2b"), font: "DejaVu Sans Mono", size: 0.9em, it)
+    )
+  } else {
+    box(
+      fill: rgb("f1f3f5"),
+      inset: (x: 4pt, y: 0pt),
+      outset: (y: 3pt),
+      radius: 3pt,
+      text(fill: rgb("2b2b2b"), font: "DejaVu Sans Mono", size: 0.9em, it)
+    )
+  }
+}
 
 // Titel
 #align(center)[
@@ -37,19 +49,19 @@
 ]
 
 // Einleitung
-GEISS ist eine Programmiersprache, welche ich für meine Maturaarbeit implementiert
-habe. Es ist eine interpretierte Sprache. Die Variablen werden wie in Lisp#sub[1] 
-gespeichert.
+GEISS ist eine Programmiersprache, welche ich für meine Maturaarbeit implementiert habe. Es ist eine interpretierte Sprache. Die Variablen werden wie in Lisp#sub[1] 
+gespeichert. Anderes Dokument, etc...
+
+Diese Dokumentation ist die eigentliche, offizielle Dokumentation, welche ich führe. Sie sollte immer für den Release aktuell sein und mit dem Code übereinstimmen. Falls das nicht der Fall ist, dann 
 
 // Table of Contents
 #outline(indent: auto)
 
 = Wie kann ich GEISS benützten?
 
-Woher holt man sich den Interpreter, etc... etc...
+GEISS ist eine interpretierte Sprache. Um GEISS also ausführen zu können, braucht man den Interpreter. Der Interpreter ist erhältlich bei #link("https://github.com/lomjek/GEISS-Verwerter")[GitHub]. Man kann ihn aus dem Quellencode selber bauen (Anweisungen dazu sind auf GitHub).
 
-Momentan habe ich noch keinen Interpreter veröffentlich, sondern nur seinen 
-Quellencode. Wer also jetzt schon GEISS benützten will, muss den Interpreter selber bauen. 
+Wenn man den kompilierten Interpreter hat, kann man die entweder einfach laufen lassen. Das öffnet ein REPL, wo man Sachen austesten kann. Wenn man grössere Programme schreiben und auch speichern will, soll man eine Datei erstellen (präferiert wäre mit der Endung: "\*.geiss").
 
 == Hallo Welt!
 

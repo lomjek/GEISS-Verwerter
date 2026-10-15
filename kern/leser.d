@@ -2,8 +2,8 @@ module leser;
 
 import ext.string;
 import ext.prints;
-import ext.klasse : instanceof;
-import ext.algorithm : contains;
+import ext.klasse : instanceof, is_class;
+import ext.algorithm : contains, remove, startsWith, endsWith;
 
 import glied.glied;
 import glied.wert_glied;
@@ -17,7 +17,7 @@ import text;
 
 import variablen.wert;
 
-import std.algorithm : startsWith, endsWith, remove, filter;
+import std.algorithm : filter;
 import std.conv : to;
 import std.stdio : write, writeln;
 import std.array : split, array;
@@ -139,7 +139,7 @@ Glied[] lese_linie(dstring linie)
   {
     dstring to_convert = [' ', operatoren_chars[op], ' '];
     linie = replaceAll(linie, operatoren_chars[op],
-        to_convert);
+      to_convert);
   }
 
   Glied[] token_liste;
@@ -246,13 +246,14 @@ Glied[] lese_linie(dstring linie)
   for (ulong i = 1; i < length; i++) // Der erste Durchgang beachtet Minuszahlen
   {
     if (token_liste[i].classinfo == Wert_Glied.classinfo &&
-        token_liste[i - 1].classinfo == OperationGlied.classinfo)
+      token_liste[i - 1].classinfo == OperationGlied.classinfo)
     {
       Wert* var = &(cast(Wert_Glied) token_liste[i]).wert;
       OperatorenTyp op_typ = (cast(OperationGlied) token_liste[i - 1]).operationenTyp;
 
       // Falls nach dem Minus ein anderer Operator ist, lassen wir ihn liegen.
-      if ((i > 1) && token_liste[i - 2].classinfo == Wert_Glied.classinfo)
+      if ((i > 1) && (token_liste[i - 2].is_class!Wert_Glied ||
+          token_liste[i - 2].is_class!Lese_Variable_Glied))
       {
         continue;
       }
@@ -279,33 +280,35 @@ Glied[] lese_linie(dstring linie)
   bool kommentar_an = false;
   bool kommentar_linie_an = false;
 
-  for (size_t i = 0; i < token_liste.length; i ++)
+  for (size_t i = 0; i < token_liste.length; i++)
   {
-    if (token_liste[i].instanceof!OperationGlied){
+    if (token_liste[i].instanceof!OperationGlied)
+    {
       OperatorenTyp opt = (cast(OperationGlied) token_liste[i]).operationenTyp;
 
-      if (opt == OperatorenTyp.ANFANG_KOMMENTAR && 
-          !kommentar_an && !kommentar_linie_an){
+      if (opt == OperatorenTyp.ANFANG_KOMMENTAR &&
+        !kommentar_an && !kommentar_linie_an)
+      {
         kommentar_an = true;
         continue;
       }
 
       else if (opt == OperatorenTyp.ENDE_KOMMENTAR &&
-          kommentar_an && !kommentar_linie_an)
+        kommentar_an && !kommentar_linie_an)
       {
         kommentar_an = false;
         continue;
       }
 
       else if (opt == OperatorenTyp.ANFANG_LINIE_KOMMENTAR &&
-          !kommentar_an && !kommentar_linie_an)
+        !kommentar_an && !kommentar_linie_an)
       {
         kommentar_linie_an = true;
         continue;
       }
 
       else if (opt == OperatorenTyp.NEUE_LINIE &&
-          !kommentar_an && kommentar_linie_an)
+        !kommentar_an && kommentar_linie_an)
       {
         kommentar_linie_an = false;
         continue;
@@ -315,7 +318,8 @@ Glied[] lese_linie(dstring linie)
         continue;
     }
 
-    if (!kommentar_linie_an && !kommentar_an){
+    if (!kommentar_linie_an && !kommentar_an)
+    {
       glieder_liste ~= token_liste[i];
     }
   }

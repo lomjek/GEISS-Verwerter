@@ -7,7 +7,7 @@ import fehler.parse_fehler;
 
 import core.memory : GC;
 
-import std.algorithm : remove;
+import ext.algorithm : remove;
 
 // @ {} [] # \ || != ~
 
@@ -111,6 +111,7 @@ struct Nzahl
       ulong max_len = this.länge > other.länge ? this.länge : other.länge;
 
       ubyte[] resultat;
+      resultat.reserve(max_len + 1);
       ubyte überschuss = 0;
       ushort summe = 0;
 
@@ -148,6 +149,7 @@ struct Nzahl
         return Nzahl();
 
       ubyte[] resultat = [];
+      resultat.reserve(other.länge > this.länge ? other.länge : this.länge);
 
       ushort buffer;
       ubyte carry_over = 0;
