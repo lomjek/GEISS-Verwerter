@@ -4,38 +4,71 @@ import fehler;
 import ext.prints;
 import variablen.wert;
 
+import std.conv : to;
+
 // @ {} [] # \ || != ~
 
 struct Liste
 {
-  bool variabel; // Kann die Liste unterschiedliche Typen enthalten?
-  WertTyp fix_wert_typ; // Falls ja, welcher ist dieser fixe Typ?
+  WertTyp[] fix_wert_typ;
   Wert[] werte;
 
-  this(bool variabel, WertTyp fixer_wert_typ, Wert[] werte)
+  this(WertTyp[] fixer_wert_typ, Wert[] werte)
   {
-    this.variabel = variabel;
     this.fix_wert_typ = fixer_wert_typ;
     this.werte = werte;
   }
 
   this(Liste list)
   {
-    this.variabel = list.variabel;
     this.fix_wert_typ = list.fix_wert_typ;
     this.werte = list.werte;
   }
 
-  void anfügen(Wert wert, bool copy_wert = true)
+  void anfügen(Wert wert)
   {
-    if (this.variabel)
+    if (!ist_valide_mitglied_typ(wert))
     {
-      this.werte ~= wert;
+      throw new Liste_TypenFehler(this.fix_wert_typ[0], wert.typ);
     }
 
-    if (wert.typ != this.fix_wert_typ)
+    if (this.fix_wert_typ.length == 0)
     {
-      throw new Liste_TypenFehler(this.fix_wert_typ, wert.typ);
+      this.werte ~= wert;
+      return;
+    }
+  }
+
+  private
+  bool ist_valide_mitglied_typ(const Wert wert)
+  {
+    WertTyp[] andere_typ = [];
+
+    if (wert.typ == WertTyp.LISTE)
+    {
+      Liste andere_liste = *cast(Liste*) wert.wert;
+      andere_typ = WertTyp.LISTE ~ andere_liste.fix_wert_typ;
+    }
+    else
+      andere_typ ~= wert.typ;
+
+    return andere_typ == this.fix_wert_typ;
+  }
+
+  void typisiere(WertTyp[] liste)
+  {
+    this.fix_wert_typ = liste;
+
+    if (this.werte.length == 0)
+      return;
+
+    if (this.fix_wert_typ.length == 0)
+      return;
+
+    foreach (Wert wert; werte)
+    {
+      if (!ist_valide_mitglied_typ(wert))
+        throw new Fehler("Kann nicht typisiert werden zu: ");
     }
   }
 
@@ -56,9 +89,9 @@ struct Liste
       throw new Fehler("Out of Bounds");
     }
 
-    if (!variabel && neuer_wert.typ != fix_wert_typ)
+    if (this.fix_wert_typ.length != 0 && !ist_valide_mitglied_typ(neuer_wert))
     {
-      throw new Liste_TypenFehler(this.fix_wert_typ, neuer_wert.typ);
+      throw new Liste_TypenFehler(this.fix_wert_typ[0], neuer_wert.typ);
     }
 
     werte[index] = neuer_wert;
@@ -82,7 +115,8 @@ struct Liste
 
     str ~= "]";
 
+    str ~= fix_wert_typ.to!string;
+
     return str;
   }
 }
-

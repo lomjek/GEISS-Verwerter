@@ -106,10 +106,11 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
         Glied[] rohe_glied_linie = (matrix[depth])[1 .. $];
 
-        if (op_typ == OperatorenTyp.KLAMMER_ZU)
+        switch (op_typ)
         {
+        case OperatorenTyp.KLAMMER_ZU:
           if (matrix[depth - 1].length > 0 &&  // Wenn argumente für funktion
-              matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
+            matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
           {
             ListeWert_Glied argumente = generiere_liste(rohe_glied_linie);
 
@@ -124,24 +125,46 @@ Glied[] generiere_baum(Glied[] glieder_liste)
             // Der geparste Teil sollte theoretisch nur ein lang sein...
             matrix[depth - 1] ~= geparste_teil;
           }
-        }
-        else if (op_typ == OperatorenTyp.ECKIGE_KLAMMER_ZU)
-        {
+          break;
+
+        case OperatorenTyp.ECKIGE_KLAMMER_ZU:
+          //Typisierte Listen
+          if (rohe_glied_linie.length == 1 &&
+            rohe_glied_linie[0].instanceof!WT_Glied &&
+            matrix[depth - 1].length > 0 &&
+            matrix[depth - 1][$ - 1].instanceof!WT_Glied)
+          {
+            (cast(WT_Glied) matrix[depth - 1][$ - 1]).unter_wt =
+              new WT_Glied((cast(WT_Glied) rohe_glied_linie[0])
+                  .vt);
+            break;
+          }
+
           ListeWert_Glied geparste_teil = generiere_liste(rohe_glied_linie);
 
           if (geparste_teil.länge == 1 &&
-              matrix[depth - 1].length > 0 &&  // Wenn ein sucher für Listen
-              matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
+            matrix[depth - 1].length > 0 &&  // Wenn ein sucher für Listen
+            (matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied ||
+              matrix[depth - 1][$ - 1].instanceof!LiesListeElement_Glied))
           {
-            matrix[depth - 1][$ - 1] = new LiesListeElement_Glied(geparste_teil.werte[0], cast(Lese_Variable_Glied) matrix[depth - 1][$ - 1]);
+            if (matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
+              matrix[depth - 1][$ - 1] = new LiesListeElement_Glied(geparste_teil.werte[0],
+                cast(Lese_Variable_Glied) matrix[depth - 1][$ - 1]);
+
+            else if (matrix[depth - 1][$ - 1].instanceof!LiesListeElement_Glied)
+              break;
           }
           else
             matrix[depth - 1] ~= geparste_teil;
-        }
-        else if (op_typ == OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU)
-        {
+
+          break;
+        case OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU:
           Glied[] geparste_teil = generiere_linie(rohe_glied_linie);
-          matrix[depth - 1] ~= new BlockGlied(geparste_teil);
+          matrix[depth - 1] ~= new BlockGlied(
+            geparste_teil);
+          break;
+        default:
+          break;
         }
 
         matrix[depth] = []; // Leere das jetzt nicht mehr benötigte array.
@@ -157,18 +180,16 @@ Glied[] generiere_baum(Glied[] glieder_liste)
 
   if (depth != 0)
     throw new Parse_Fehler("Nicht alle Klammern wurden geschlossen.");
-
-  return generiere_linie(matrix[0]);
+  return generiere_linie(
+    matrix[0]);
 }
 
 //MARK: generiere_linie
 debug ulong encounters = 0;
-
 Glied[] generiere_linie(Glied[] glieder_liste)
 {
   uint _Op_wiederholungen = 0;
-  MPO wiederholtes_MPO = MPO();
-  // Diese Variable ist dazu da, dass wenn der Parser keine Aktion findet,
+  MPO wiederholtes_MPO = MPO(); // Diese Variable ist dazu da, dass wenn der Parser keine Aktion findet,
   // aber der Baum noch nich abgeschlossen ist, er sich nicht in einer
   // endlosen Schleife verhaddert. 
 
@@ -192,16 +213,15 @@ Glied[] generiere_linie(Glied[] glieder_liste)
       _Op_wiederholungen++;
     else
       _Op_wiederholungen = 0; // Wenn man keine Operation findet, macht man diese Zahl grösser.
-                              // Bei genug Wiederhloungen beendet man die Schleife mit einem Fehler.
-                              // Es sollte eigentlich nie passieren, aber jetzt in der BETA-Phase,
-                              // hilft mir das Extrem beim Debuggen. // TODO: Braucht es das am Schluss?
+    // Bei genug Wiederhloungen beendet man die Schleife mit einem Fehler.
+    // Es sollte eigentlich nie passieren, aber jetzt in der BETA-Phase,
+    // hilft mir das Extrem beim Debuggen. // TODO: Braucht es das am Schluss?
     if (_Op_wiederholungen >= 10)
     {
       throw new Parse_Fehler(
-          "Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen.");
+        "Schon zehn Mal hintereinander ist nichts gescheites geparst worden. Es sollte nie hierhin kommen.");
     }
     wiederholtes_MPO = mpo;
-
     debug
     {
       set_pen_trait(TextTrait.fgGrey);
@@ -225,17 +245,14 @@ Glied[] generiere_linie(Glied[] glieder_liste)
 ListeWert_Glied generiere_liste(Glied[] glieder_liste)
 {
   Glied[] werte;
-
   Glied[] roher_zwischenwert;
-
   foreach (Glied glied; glieder_liste)
   {
     if (glied.instanceof!OperationGlied && (cast(OperationGlied) glied)
-        .operationenTyp == OperatorenTyp.KOMMA)
+      .operationenTyp == OperatorenTyp.KOMMA)
     {
       if (roher_zwischenwert.length == 0)
         werte ~= new Wert_Glied(Wert(WertTyp.INVALID, null));
-
       else
       {
         Glied[] geparste_linie = generiere_linie(roher_zwischenwert);

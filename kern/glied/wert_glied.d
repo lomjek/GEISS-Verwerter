@@ -49,31 +49,44 @@ class Wert_Glied : Glied
 
 class WT_Glied : Glied
 {
-	public WertTyp vt;
+  public WertTyp vt;
+  public WT_Glied unter_wt;
 
-	override public Wert verwerte(uint bereich)
-	{
-		return Wert(WertTyp.INVALID, null);
-	}
+  override public Wert verwerte(uint bereich)
+  {
+    return Wert(WertTyp.INVALID, null);
+  }
 
-	override public void schreibe_baum()
-	{
-		write(vt.to!string);
-	}
+  override public void schreibe_baum()
+  {
+    write(vt.to!string);
+  }
 
-	override public bool ist_vollständig()
-	{
-		return false;
-	}
+  public pure nothrow @safe
+  WertTyp[] unroll()
+  {
+    if (unter_wt !is null)
+      return this.vt ~ unter_wt.unroll();
 
-	this(WertTyp vta)
-	{
-		this.vt = vta;
-	}
+    return [this.vt];
+  }
 
-	override string toString() const
-	{
-		return "G(VAR_TYP | " ~ this.vt.to!string ~ ")";
-	}
+  override public bool ist_vollständig()
+  {
+    return false;
+  }
+
+  this(WertTyp vta)
+  {
+    this.vt = vta;
+  }
+
+  override string toString() const
+  {
+    if (unter_wt is null)
+      return "G(WertTyp | " ~ this.vt.to!string ~ ")";
+
+    else
+      return "G(WertTyp | " ~ this.vt.to!string ~ ">" ~ unter_wt.toString() ~ ")";
+  }
 }
-

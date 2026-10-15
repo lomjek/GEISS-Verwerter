@@ -118,7 +118,7 @@ MPO finde_MPO(Glied[] glieder_liste)
     else if (glied.instanceof!WT_Glied)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.VARIABLE_ERSTELLEN, i);
     else if ((glied.instanceof!Erstelle_Variable_Glied) &&
-      (cast(Erstelle_Variable_Glied) glied).wert_typ == WertTyp.FUNKTION)
+      (cast(Erstelle_Variable_Glied) glied).wert_typ.vt == WertTyp.FUNKTION)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.FUNTKION_ERSTELLEN, i);
 
   }
