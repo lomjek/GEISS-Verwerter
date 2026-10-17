@@ -4,5 +4,9 @@ liste zahlen <- [2, 3, 5 + 2, , 8 / 0.5]
 
 simpson[0] <- "123"
 
-schreibe(simpsons[1])
-schreibe(simpson[0])
+liste hallo <- simpson + simpsons
+
+hallo
+
+schreibe(als_text(simpsons[1]))
+schreibe(als_text(simpson[0]))

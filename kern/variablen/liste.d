@@ -13,9 +13,9 @@ struct Liste
   WertTyp[] fix_wert_typ;
   Wert[] werte;
 
-  this(WertTyp[] fixer_wert_typ, Wert[] werte)
+  this(const WertTyp[] fixer_wert_typ, Wert[] werte)
   {
-    this.fix_wert_typ = fixer_wert_typ;
+    this.fix_wert_typ = fixer_wert_typ.dup;
     this.werte = werte;
   }
 
@@ -23,6 +23,12 @@ struct Liste
   {
     this.fix_wert_typ = list.fix_wert_typ;
     this.werte = list.werte;
+  }
+
+  pure nothrow
+  size_t länge() const
+  {
+    return this.werte.length;
   }
 
   void anfügen(Wert wert)
@@ -115,8 +121,73 @@ struct Liste
 
     str ~= "]";
 
-    str ~= fix_wert_typ.to!string;
-
     return str;
+  }
+
+  //MARK: opCmp
+  pure nothrow
+  int opCmp(const Liste other) const
+  {
+    if (this.länge != other.länge)
+    {
+      return this.länge > other.länge ? 1 : -1;
+    }
+
+    for (size_t i = 0; i < this.länge; i++)
+    {
+      if (this.werte[i] != other.werte[i]) //return this.werte[i] > other.werte[i] ? 1 : -1;
+        return -1; //TODO: Fix on merge
+    }
+
+    return 0;
+  }
+
+  pure nothrow
+  bool opEquals(const Liste other) const
+  {
+    return this.opCmp(other) == 0;
+  }
+
+  //MARK: opBinary
+  Liste opBinary(string op, R)(const R other)
+  {
+    static if (is(R == Liste))
+    {
+      switch (op)
+      {
+      case "+":
+        return addiere(other);
+
+      default:
+        debug
+        {
+          import std.stdio : write, writeln;
+
+          write("FEHLER: Der Operator kann nicht an Nzahl ausgeführt werden: ");
+          writeln(op);
+        }
+        throw new Fehler("Dieser Operator ist nicht toll für Listen: " ~ op);
+      }
+    }
+    else
+      throw new Parse_Fehler("Typen_Fehler, (Listen)");
+  }
+
+  Liste addiere(const Liste other)
+  {
+    Liste neu = Liste(this.fix_wert_typ, []);
+    neu.werte.reserve(this.länge + other.länge);
+
+    foreach (Wert wert; this.werte)
+    {
+      neu.anfügen(wert);
+    }
+
+    foreach (Wert wert; werte)
+    {
+      neu.anfügen(wert);
+    }
+
+    return neu;
   }
 }
