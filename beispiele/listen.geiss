@@ -1,6 +1,12 @@
 liste simpsons <- ["Homer", "Lisa", "Brian", , "-"]
-liste simpson <- ["Bart"]
+liste[text] simpson <- ["Bart"]
 liste zahlen <- [2, 3, 5 + 2, , 8 / 0.5]
 
-schreibe(simpsons)
-schreibe(simpson)
+simpson[0] <- "123"
+
+liste hallo <- simpson + simpsons
+
+hallo
+
+schreibe(als_text(simpsons[1]))
+schreibe(als_text(simpson[0]))

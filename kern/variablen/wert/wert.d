@@ -146,7 +146,7 @@ struct Wert
     return -2;
   }
 
-  bool opEquals(const Wert other)
+  bool opEquals(const Wert other) const
   {
     return this.opCmp(other) == 0;
   }

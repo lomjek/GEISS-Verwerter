@@ -44,12 +44,12 @@ void set_pen_trait(TextTrait tt = TextTrait.reset)
 	write(cast(string) tt);
 }
 
-void schreibe_schön_wert(Wert wert)
+void schreibe_schön_wert(const Wert wert)
 {
 	write(wert.als_schön_string);
 }
 
-string als_schön_string(Wert wert)
+string als_schön_string(const Wert wert)
 {
 	string str;
 
@@ -84,7 +84,7 @@ string als_schön_string(Wert wert)
 
 	case WertTyp.LISTE:
 		Liste li = *cast(Liste*) wert.wert;
-		str = li.als_string;
+		str = li.toString;
 		break;
 
 	default:
