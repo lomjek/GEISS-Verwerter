@@ -87,7 +87,7 @@ class ListeWert_Glied : Wert_Glied
 class LiesListeElement_Glied : Glied
 {
   Glied index;
-  Lese_Variable_Glied liste;
+  Glied liste;
 
   override public Wert verwerte(uint bereich)
   {
@@ -148,7 +148,7 @@ class LiesListeElement_Glied : Glied
   }
 
   public pure nothrow @safe @nogc
-  this(Glied nindex, Lese_Variable_Glied lvg)
+  this(Glied nindex, Glied lvg)
   {
     liste = lvg;
     index = nindex;
@@ -158,7 +158,7 @@ class LiesListeElement_Glied : Glied
 class SetzeListeElement_Glied : Glied
 {
   Glied index;
-  Lese_Variable_Glied liste;
+  Glied liste;
   Glied neuer_wert;
 
   override public Wert verwerte(uint bereich)
@@ -200,9 +200,6 @@ class SetzeListeElement_Glied : Glied
 
     Liste pliste = *cast(Liste*) tliste.wert;
 
-    import std.stdio : writeln;
-
-    writeln(pliste.fix_wert_typ);
     pliste.setzte_element_bei_index(array_index, neuer_wert.verwerte(bereich));
 
     return Wert();
@@ -227,7 +224,7 @@ class SetzeListeElement_Glied : Glied
   }
 
   public pure nothrow @safe @nogc
-  this(Glied nindex, Lese_Variable_Glied lvg, Glied neuer_nwert)
+  this(Glied nindex, Glied lvg, Glied neuer_nwert)
   {
     liste = lvg;
     index = nindex;

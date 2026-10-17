@@ -147,12 +147,9 @@ Glied[] generiere_baum(Glied[] glieder_liste)
             (matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied ||
               matrix[depth - 1][$ - 1].instanceof!LiesListeElement_Glied))
           {
-            if (matrix[depth - 1][$ - 1].instanceof!Lese_Variable_Glied)
-              matrix[depth - 1][$ - 1] = new LiesListeElement_Glied(geparste_teil.werte[0],
-                cast(Lese_Variable_Glied) matrix[depth - 1][$ - 1]);
-
-            else if (matrix[depth - 1][$ - 1].instanceof!LiesListeElement_Glied)
-              break;
+            matrix[depth - 1][$ - 1] = new LiesListeElement_Glied(
+              geparste_teil.werte[0],
+              matrix[depth - 1][$ - 1]);
           }
           else
             matrix[depth - 1] ~= geparste_teil;
