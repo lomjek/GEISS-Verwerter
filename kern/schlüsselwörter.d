@@ -2,7 +2,7 @@ module schlüsselwörter;
 
 import ext.string : strip;
 
-import glied.glied : SW_Glied, Glied;
+import glied.glied : SW_Glied, Glied, Nicht_Glied;
 import glied.block_glied : Falls_BlockGlied, Sonst_BlockGlied;
 import glied.schleife_glied : Solange_BlockGlied, Wiederhole_BlockGlied;
 import glied.signal_glied : Beende_Programm_Glied, Beende_Funktion_Glied;
@@ -47,7 +47,7 @@ immutable dstring[SchlüsselWort] schlüsselWort_dict = [
   SchlüsselWort.MAL: "mal"d,
 ];
 
-immutable (dstring[][SchlüsselWort]) multi_wort_sw = [
+immutable(dstring[][SchlüsselWort]) multi_wort_sw = [
   SchlüsselWort.BEENDE_FUNKTION: ["beende"d, "funktion"d],
   SchlüsselWort.BEENDE_PROGRAMM: ["beende"d, "programm"d],
 ];
@@ -68,32 +68,35 @@ Glied baue_richtiges_sw_glied(SchlüsselWort sw)
 {
   switch (sw)
   {
-    case SchlüsselWort.FALLS:
-      return new Falls_BlockGlied();
+  case SchlüsselWort.FALLS:
+    return new Falls_BlockGlied();
 
-    case SchlüsselWort.SONST:
-      return new Sonst_BlockGlied();
+  case SchlüsselWort.SONST:
+    return new Sonst_BlockGlied();
 
-    case SchlüsselWort.SOLANGE:
-      return new Solange_BlockGlied();
+  case SchlüsselWort.SOLANGE:
+    return new Solange_BlockGlied();
 
-    case SchlüsselWort.WIEDERHOLE:
-      return new Wiederhole_BlockGlied();
+  case SchlüsselWort.WIEDERHOLE:
+    return new Wiederhole_BlockGlied();
 
-    case SchlüsselWort.BEENDE_FUNKTION:
-      return new Beende_Funktion_Glied();
+  case SchlüsselWort.BEENDE_FUNKTION:
+    return new Beende_Funktion_Glied();
 
-    case SchlüsselWort.BEENDE_PROGRAMM:
-      return new Beende_Programm_Glied();
+  case SchlüsselWort.BEENDE_PROGRAMM:
+    return new Beende_Programm_Glied();
 
-    default:
-      return new SW_Glied(sw);
+  case SchlüsselWort.NICHT:
+    return new Nicht_Glied();
+
+  default:
+    return new SW_Glied(sw);
   }
 }
 
 bool wort_ist_sw(dstring wort)
 {
-  foreach(SchlüsselWort sw, dstring str; schlüsselWort_dict)
+  foreach (SchlüsselWort sw, dstring str; schlüsselWort_dict)
   {
     if (str == wort)
       return true;
@@ -108,7 +111,7 @@ bool wort_ist_sw(dstring wort)
   return false;
 }
 
-  private pure
+private pure
 SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* wort_index)
 {
   foreach (SchlüsselWort sw, immutable dstring[] strs; multi_wort_sw)
@@ -138,8 +141,7 @@ Glied wort_als_sw(dstring[] wort_liste, ulong* wort_index)
 
   if (sw == SchlüsselWort.INVALID)
     throw new Parse_Fehler(
-        "Das Wort ist kein valides SchlüsselWort: " ~ wort_liste[*wort_index].to!string);
+      "Das Wort ist kein valides SchlüsselWort: " ~ wort_liste[*wort_index].to!string);
 
   return baue_richtiges_sw_glied(sw);
 }
-

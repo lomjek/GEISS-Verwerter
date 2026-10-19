@@ -112,14 +112,19 @@ mehr. Von da an wird nur die lange Liste an Gliedern beachtet.
 = Datentypen
 <Datentypen>
 
+Es hat in GEISS wenige Datentypen, aber das ist absichtlich so. Es hat noch keine Structs, aber es hat noch keine Structs, was heisst, dass ich sie noch implementieren muss. Die Sprache ist dynamisch, sie hat aber überprüfungen während der Laufzeit, welche sicherstellen können, dass die Typen richtig sind. Es ist stark typisiert, was heisst, dass man nicht einfach so Variablen umcasten kann.
+
 == Zahlen
+
 == Text
+
+Man kann Text mit "text" definieren. Ein Text kann Text enthalten. Es gibt praktisch kein Limit für die Länge, welcher nicht durch das Hardware oder das Betriebssystem bedingt sind. Man kann Text mit einfachen oder doppelten Quotes benutzten " '. Man kann sie auch mit dem Backslash vorher definieren. 
+
 == Listen
 == Wahrheiten
 
-= Variablenspeicher
-
 = Methoden
+Hier ist noch eine Liste von allen Methoden, welche schon in der Sprache eigebaut sind. Ich gebe nur ihre Signature und beschreibe, was sie macht...
 
 = Zahlen und Listen
 

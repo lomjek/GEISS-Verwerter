@@ -40,6 +40,9 @@ Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
   else if (glied.is_class!Erstelle_Variable_Glied)
     return baue_glied_FunktionErstellen_Glied(cast(Erstelle_Variable_Glied) glied, glieder_liste, glied_index);
 
+  else if (glied.is_class!Nicht_Glied)
+    return baue_glied_Nicht_Glied(cast(Nicht_Glied) glied, glieder_liste, glied_index);
+
   writeln("WARNUNG: Nichts wurde geparst.");
   return glieder_liste;
 }
@@ -201,15 +204,16 @@ Glied[] baue_glied_Wiederhole_BlockGlied(Wiederhole_BlockGlied glied, Glied[] gl
   }
 
   if (!glieder_liste[glied_index + 2].is_class!SW_Glied ||
-      (cast(SW_Glied) glieder_liste[glied_index + 2]).sw != SchlüsselWort.MAL)
+    (cast(SW_Glied) glieder_liste[glied_index + 2]).sw != SchlüsselWort.MAL)
   {
     throw new Parse_Fehler("wiederhole <ANZAHL> mal { ... } <= Wort mal nicht gefunden");
   }
 
   glied.wiederholungen = glieder_liste[glied_index + 1];
 
-  if (glieder_liste[glied_index + 3].is_class!BlockGlied){
-   glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 3]).aktionen;
+  if (glieder_liste[glied_index + 3].is_class!BlockGlied)
+  {
+    glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 3]).aktionen;
   }
   else
     glied.aktionen ~= glieder_liste[glied_index + 3];
@@ -262,10 +266,11 @@ Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[
     throw new Parse_Fehler("Die deklaration der Funktion ist zu nahe am Ende... (3)");
 
   if (glieder_liste[glied_index + 1].is_class!ListeWert_Glied &&
-      glieder_liste[glied_index + 2].is_class!OperationGlied && 
-      (cast(OperationGlied)glieder_liste[glied_index + 2]).operationenTyp == OperatorenTyp.VOR_PFEIL &&
-      glieder_liste[glied_index + 3].is_class!Erstelle_Variable_Glied &&
-      glieder_liste[glied_index + 4].is_class!BlockGlied)
+    glieder_liste[glied_index + 2].is_class!OperationGlied &&
+    (cast(OperationGlied) glieder_liste[glied_index + 2])
+    .operationenTyp == OperatorenTyp.VOR_PFEIL &&
+    glieder_liste[glied_index + 3].is_class!Erstelle_Variable_Glied &&
+    glieder_liste[glied_index + 4].is_class!BlockGlied)
   {
     Glied[] parameter_liste = (cast(ListeWert_Glied) glieder_liste[glied_index + 1]).werte;
     Erstelle_Variable_Glied[] parameter;
@@ -281,8 +286,11 @@ Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[
     Erstelle_Variable_Glied das_return = cast(Erstelle_Variable_Glied) glieder_liste[glied_index + 3];
 
     glieder_liste[glied_index] = new FunktionErstellen_Glied(
-      cast(BlockGlied) glieder_liste[glied_index + 4], glied.var_name, parameter, [das_return]);
-    
+      cast(
+        BlockGlied) glieder_liste[glied_index + 4], glied.var_name, parameter, [
+        das_return
+      ]);
+
     glieder_liste = glieder_liste.remove(glied_index + 4);
     glieder_liste = glieder_liste.remove(glied_index + 3);
     glieder_liste = glieder_liste.remove(glied_index + 2);
@@ -291,4 +299,14 @@ Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[
   }
 
   throw new Fehler("Leider noch kein support für Returns");
+}
+
+Glied[] baue_glied_Nicht_Glied(Nicht_Glied glied, Glied[] glieder_liste, ulong glied_index)
+{
+  if ((glied_index + 1) >= glieder_liste.length)
+    throw new Parse_Fehler("Es gibt nichts, was man negieren könnte...");
+
+  glied.zu_negieren = glieder_liste[glied_index + 1];
+  glieder_liste = glieder_liste.remove(glied_index + 1);
+  return glieder_liste;
 }

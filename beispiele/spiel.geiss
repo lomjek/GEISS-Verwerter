@@ -1,16 +1,16 @@
 nzahl guess <- 0
 
 schreibe("Ich denke mir eine Zahl zwischen 1 und 100")
-ganze zahl zufällige_zahl <- zufällige_zahl(1, 100)
+ganze zahl zahl_zum_erraten <- zufällige_zahl(1, 100)
 
-solange nicht guess = zufällige_zahl {
+solange nicht guess = zahl_zum_erraten {
 	guess <- eingabe("Errate meine Zahl:")
 
-	falls guess = zufällige_zahl {
+	falls guess = zahl_zum_erraten {
 		schreibe("Du hast es geschafft!")
 	}
 
-	sonst falls guess < zufällige_zahl {
+	sonst falls guess < zahl_zum_erraten {
 		schreibe("Deine Zahl ist zu klein!")
 	}
 

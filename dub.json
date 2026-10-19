@@ -3,7 +3,7 @@
 		"lomjek"
 	],
 	"copyright": "Copyright © 2026, lomjek",
-	"description": "Ein Intepreter für meine Programmiersprache MÖWE",
+	"description": "Ein Intepreter für meine Programmiersprache GEISS",
 	"license": "LGPL-3.0-or-later",
 	"name": "interpreter",
 	"targetName": "geiss.dc",

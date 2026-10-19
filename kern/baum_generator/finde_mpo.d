@@ -25,6 +25,7 @@ enum Aktion_Gewicht
   SETZE_VARIABLE,
   VARIABLE_ERSTELLEN,
 
+  NICHT,
   GLEICH,
 
   GRÖSSER_ALS,
@@ -120,6 +121,8 @@ MPO finde_MPO(Glied[] glieder_liste)
     else if ((glied.instanceof!Erstelle_Variable_Glied) &&
       (cast(Erstelle_Variable_Glied) glied).wert_typ == WertTyp.FUNKTION)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.FUNTKION_ERSTELLEN, i);
+    else if (glied.is_class!Nicht_Glied)
+      (&current_mpo).passe_mpo_an(Aktion_Gewicht.NICHT, i);
 
   }
 
