@@ -130,8 +130,8 @@ struct Liste
 
     for (size_t i = 0; i < this.länge; i++)
     {
-      if (this.werte[i] != other.werte[i]) //return this.werte[i] > other.werte[i] ? 1 : -1;
-        return -1; //TODO: Fix on merge
+      if (this.werte[i] != other.werte[i])
+        return this.werte[i] > other.werte[i] ? 1 : -1;
     }
 
     return 0;
