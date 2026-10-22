@@ -33,16 +33,12 @@ struct Liste
 
   void anfügen(Wert wert)
   {
-    if (!ist_valide_mitglied_typ(wert))
+    if (this.fix_wert_typ.length != 0 && !ist_valide_mitglied_typ(wert))
     {
       throw new Liste_TypenFehler(this.fix_wert_typ[0], wert.typ);
     }
 
-    if (this.fix_wert_typ.length == 0)
-    {
-      this.werte ~= wert;
-      return;
-    }
+    this.werte ~= wert;
   }
 
   private
@@ -147,7 +143,7 @@ struct Liste
   }
 
   //MARK: opBinary
-  Liste opBinary(string op, R)(const R other)
+  Liste opBinary(string op, R)(R other)
   {
     static if (is(R == Liste))
     {
@@ -171,7 +167,7 @@ struct Liste
       throw new Parse_Fehler("Typen_Fehler, (Listen)");
   }
 
-  Liste addiere(const Liste other)
+  Liste addiere(Liste other)
   {
     Liste neu = Liste(this.fix_wert_typ, []);
     neu.werte.reserve(this.länge + other.länge);
@@ -181,7 +177,7 @@ struct Liste
       neu.anfügen(wert);
     }
 
-    foreach (Wert wert; werte)
+    foreach (Wert wert; other.werte)
     {
       neu.anfügen(wert);
     }

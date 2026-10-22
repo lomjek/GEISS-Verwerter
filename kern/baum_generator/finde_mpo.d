@@ -24,6 +24,7 @@ enum Aktion_Gewicht
 
   SETZE_VARIABLE,
   VARIABLE_ERSTELLEN,
+  LISTE_ANFÜGEN,
 
   GLEICH, // GLEICH SOLL TROTZDEM GETRENNT SEIN
   KOMPARATOR,
@@ -44,6 +45,7 @@ Aktion_Gewicht[OperatorenTyp] operatoren_Gewicht = [
   OperatorenTyp.GETEILT: Aktion_Gewicht.MAL_DURCH,
 
   OperatorenTyp.HOCH: Aktion_Gewicht.HOCH,
+  OperatorenTyp.ANFÜGEN: Aktion_Gewicht.LISTE_ANFÜGEN,
 
   OperatorenTyp.GLEICH: Aktion_Gewicht.GLEICH,
 

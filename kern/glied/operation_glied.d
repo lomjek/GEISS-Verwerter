@@ -81,6 +81,15 @@ class OperationGlied : Glied
       resultat = Wert(new bool(wert1 <= wert2));
       break ots;
 
+    case OperatorenTyp.ANFÜGEN:
+      if (wert1.typ != WertTyp.LISTE)
+        throw new Fehler("Man kann nur Listen Elemente anfügen.");
+
+      Liste* l = wert1.liste;
+
+      (*l).anfügen(wert2);
+      break ots;
+
     default:
       throw new Fehler(
         "Dieser Operator wurde nicht implementiert..." ~ operationenTyp.to!string);
