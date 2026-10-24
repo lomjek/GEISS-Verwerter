@@ -24,110 +24,25 @@ import std.traits : EnumMembers;
 
 // @ {} [] # \ || != ~
 
-private enum Verifizierung
-{
-  ja,
-  nein,
-  nicht_ganz
-}
-
 // MARK: Wert - ist?
-dstring[] string_delims = [
-  "\\\'"d, "\\\""d, "\'"d, "\""d
-];
-
-private nothrow Verifizierung ist_text(dstring wort)
+private bool ist_wert_wahrheit(dstring wort)
 {
-  foreach (dstring delim; string_delims)
-  {
-    if (wort.strip.startsWith(delim) && wort.length == delim.length)
-    {
-      return Verifizierung.nicht_ganz;
-    }
-
-    if (wort.strip.startsWith(delim) && wort.strip.endsWith(delim))
-    {
-      return Verifizierung.ja;
-    }
-    else if (wort.strip.startsWith(delim))
-    {
-      return Verifizierung.nicht_ganz;
-    }
-  }
-
-  return Verifizierung.nein;
-}
-
-private nothrow Verifizierung ist_wert(dstring wort)
-{
-  if (wort.ist_zahl)
-  {
-    return Verifizierung.ja;
-  }
-  else if (wort.ist_text != Verifizierung.nein)
-  {
-    return wort.ist_text;
-  }
-  else if (wort == "wahr"d || wort == "falsch"d)
-  {
-    return Verifizierung.ja;
-  }
-
-  return Verifizierung.nein;
+  return wort == "wahr"d || wort == "falsch"d;
 }
 
 //MARK: Wert - als!
 private Wert als_wert_wahrheit(dstring wort)
 {
-  bool* wahr = new bool;
   if (wort == "wahr"d)
   {
-    *wahr = true;
+    return Wert(new bool(true));
   }
   else if (wort == "falsch"d)
   {
-    *wahr = false;
-  }
-  else
-  {
-    return Wert(WertTyp.INVALID, null);
-  }
-  return Wert(WertTyp.WAHRHEIT, wahr);
-}
-
-private Wert als_wert(dstring wort)
-{
-  if (wort.ist_text == Verifizierung.ja)
-  {
-    return als_wert_text(wort);
-  }
-  else if (wort == "wahr"d || wort == "falsch"d)
-  {
-    return als_wert_wahrheit(wort);
+    return Wert(new bool(false));
   }
 
   return Wert(WertTyp.INVALID, null);
-}
-
-// MARK: operatoren
-private OperatorenTyp als_operator(dstring wort)
-{
-  if (wort.length > 1)
-  {
-    return OperatorenTyp.INVALID;
-  }
-
-  dchar chr = wort[0];
-
-  foreach (OperatorenTyp op, dchar op_char; operatoren_chars)
-  {
-    if (op_char == chr)
-    {
-      return op;
-    }
-  }
-
-  return OperatorenTyp.INVALID;
 }
 
 // MARK: lese_linie
@@ -144,7 +59,7 @@ Glied[] lese_linie(dstring linie)
   Glied[] token_liste;
 
   dstring[] wort_liste = linie.split(" ");
-  wort_liste = wort_liste.filter!(s => s.length > 0).array;
+  //wort_liste = wort_liste.filter!(s => s.length > 0).array;
 
   ulong wort_liste_length = wort_liste.length;
   dstring wort_präfix;
@@ -204,20 +119,22 @@ Glied[] lese_linie(dstring linie)
       continue;
     }
 
+    // Werte
     if (wort.ist_zahl)
     {
       token_liste ~= new Wert_Glied(Wert(WertTyp.ZAHL, new Zahl(als_zahl(wort))));
       continue;
     }
 
-    if (wort.ist_wert == Verifizierung.ja)
+    if (wort.beginnt_text)
     {
-      token_liste ~= new Wert_Glied(wort.als_wert);
+      token_liste ~= new Wert_Glied(Wert(new Text(als_wert_text(wort_liste, &i))));
       continue;
     }
-    else if (wort.ist_wert == Verifizierung.nicht_ganz)
+
+    if (wort.ist_wert_wahrheit)
     {
-      wort_präfix = wort ~ " ";
+      token_liste ~= new Wert_Glied(wort.als_wert_wahrheit);
       continue;
     }
 

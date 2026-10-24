@@ -10,50 +10,75 @@ import std.stdio : writeln;
 
 dchar[] replaceAll(dchar[] input, dchar to_replace, dchar[] with_replace)
 {
-	dchar[] result;
+  dchar[] result;
 
-	for (int i = 0; i < input.length; i++)
-	{
-		if (input[i] == to_replace)
-		{
-			result ~= with_replace;
-		}
-		else
-		{
-			result ~= input[i];
-		}
-	}
+  for (int i = 0; i < input.length; i++)
+  {
+    if (input[i] == to_replace)
+    {
+      result ~= with_replace;
+    }
+    else
+    {
+      result ~= input[i];
+    }
+  }
 
-	return result;
+  return result;
 }
 
 dstring replaceAll(dstring input, dchar to_replace, dstring with_replace)
 {
-	dchar[] result;
+  dchar[] result;
 
-	for (int i = 0; i < input.length; i++)
-	{
-		if (input[i] == to_replace)
-		{
-			result ~= with_replace;
-		}
-		else
-		{
-			result ~= input[i];
-		}
-	}
+  for (int i = 0; i < input.length; i++)
+  {
+    if (input[i] == to_replace)
+    {
+      result ~= with_replace;
+    }
+    else
+    {
+      result ~= input[i];
+    }
+  }
 
-	return result.to!dstring;
+  return result.to!dstring;
+}
+
+dstring replaceAll(dstring input, dstring to_replace, dstring with_replace)
+{
+  if (to_replace.length == 0)
+    return input;
+
+  dchar[] result;
+  size_t i = 0;
+
+  while (i < input.length)
+  {
+    if (i + to_replace.length <= input.length && input[i .. i + to_replace.length] == to_replace)
+    {
+      result ~= with_replace;
+      i += to_replace.length;
+    }
+    else
+    {
+      result ~= input[i];
+      i++;
+    }
+  }
+
+  return result.to!dstring;
 }
 
 dchar[] dchar_from_string(string input)
 {
-	dchar[] output;
+  dchar[] output;
 
-	for (uint i = 0; i < input.length; i++)
-	{
-		output ~= input[i].to!dchar;
-	}
+  for (uint i = 0; i < input.length; i++)
+  {
+    output ~= input[i].to!dchar;
+  }
 
-	return output;
+  return output;
 }
