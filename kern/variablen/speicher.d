@@ -5,7 +5,7 @@ import liste;
 import zahl;
 
 import variablen.variable;
-import variablen.wert;
+import wert;
 
 import glied.funktion_glied;
 
@@ -36,54 +36,54 @@ static this()
         "status_nummer"d,
         VariablenTyp.FIX,
         new Wert(WertTyp.NATÜRLICHE_ZAHL, new Nzahl())
-        ), // Exit code 
+      ), // Exit code 
       Variable(
         "std_wert_nzahl"d,
         VariablenTyp.FIX,
         new Wert(WertTyp.NATÜRLICHE_ZAHL, new Nzahl())
-        ), //Standard Wert, mit welchem nzahlen initialisiert werden.
+      ), //Standard Wert, mit welchem nzahlen initialisiert werden.
       Variable(
         "std_wert_gzahl"d,
         VariablenTyp.FIX,
         new Wert(WertTyp.GANZE_ZAHL, new Gzahl(Nzahl(), false))
-        ), //Standard Wert, mit welchem gzahlen initialisiert werden.
+      ), //Standard Wert, mit welchem gzahlen initialisiert werden.
       Variable(
         "std_wert_zahl"d,
         VariablenTyp.FIX,
         new Wert(WertTyp.ZAHL, new Zahl(Nzahl()))
-        ), //Standard Wert, mit welchem zahlen initialisiert werden.
+      ), //Standard Wert, mit welchem zahlen initialisiert werden.
       Variable(
-          "std_wert_wahrheit"d,
-          VariablenTyp.FIX,
-          new Wert(WertTyp.WAHRHEIT, new bool(true))
-          ), //Standard Wert, mit welchem wahrheiten initialisiert werden.
+        "std_wert_wahrheit"d,
+        VariablenTyp.FIX,
+        new Wert(WertTyp.WAHRHEIT, new bool(true))
+      ), //Standard Wert, mit welchem wahrheiten initialisiert werden.
       Variable(
-          "schreibe"d,
-          VariablenTyp.FUNKTION,
-          cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.PRINT))
-          ), // Schreibe geht momentan nur für strings.
+        "schreibe"d,
+        VariablenTyp.FUNKTION,
+        cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.PRINT))
+      ), // Schreibe geht momentan nur für strings.
       Variable(
-          "als_text"d,
-          VariablenTyp.FUNKTION,
-          cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ALS_TEXT))
-          ), // Zahl => Text
+        "als_text"d,
+        VariablenTyp.FUNKTION,
+        cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ALS_TEXT))
+      ), // Zahl => Text
       Variable(
-          "als_zahl"d,
-          VariablenTyp.FUNKTION,
-          cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ALS_ZAHL))
-          ),
+        "als_zahl"d,
+        VariablenTyp.FUNKTION,
+        cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ALS_ZAHL))
+      ),
       Variable(
-          "eingabe"d,
-          VariablenTyp.FUNKTION,
-          cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.EINGABE))
-          ),
+        "eingabe"d,
+        VariablenTyp.FUNKTION,
+        cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.EINGABE))
+      ),
 
       //Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
-      ]);
+    ]);
 }
 
 //MARK: BEREICH
-  nothrow
+nothrow
 uint initialisiere_bereich(dstring name)
 {
   uint bereich_level = 1;
@@ -108,7 +108,7 @@ uint initialisiere_bereich(dstring name)
   return bereich_level;
 }
 
-  nothrow @safe
+nothrow @safe
 bool bereich_existiert(uint bereich_num)
 {
   if (bereich_num >= bereiche.length)
@@ -120,7 +120,7 @@ bool bereich_existiert(uint bereich_num)
   return true;
 }
 
-  nothrow
+nothrow
 void lösche_bereich(uint bereich_num)
 {
   if (bereiche.length > bereich_num)
@@ -128,7 +128,7 @@ void lösche_bereich(uint bereich_num)
 }
 
 //MARK: VARIABLEN
-  nothrow
+nothrow
 private bool variable_existiert(uint bereich_num, dstring var_name)
 {
   if (!bereich_num.bereich_existiert)
@@ -192,39 +192,39 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
   {
     switch (init_wert.typ)
     {
-      case WertTyp.ZAHL:
-        Variable var = lies_variable(0, "std_wert_zahl");
-        init_wert = cast(Wert*) var.wert;
-        break;
+    case WertTyp.ZAHL:
+      Variable var = lies_variable(0, "std_wert_zahl");
+      init_wert = cast(Wert*) var.wert;
+      break;
 
-      case WertTyp.GANZE_ZAHL:
-        Variable var = lies_variable(0, "std_wert_gzahl");
-        init_wert = cast(Wert*) var.wert;
-        break;
+    case WertTyp.GANZE_ZAHL:
+      Variable var = lies_variable(0, "std_wert_gzahl");
+      init_wert = cast(Wert*) var.wert;
+      break;
 
-      case WertTyp.NATÜRLICHE_ZAHL:
-        Variable var = lies_variable(0, "std_wert_nzahl");
-        init_wert = cast(Wert*) var.wert;
-        break;
+    case WertTyp.NATÜRLICHE_ZAHL:
+      Variable var = lies_variable(0, "std_wert_nzahl");
+      init_wert = cast(Wert*) var.wert;
+      break;
 
-      case WertTyp.WAHRHEIT:
-        Variable var = lies_variable(0, "std_wert_wahrheit");
-        init_wert = cast(Wert*) var.wert;
-        break;
+    case WertTyp.WAHRHEIT:
+      Variable var = lies_variable(0, "std_wert_wahrheit");
+      init_wert = cast(Wert*) var.wert;
+      break;
 
-      case WertTyp.LISTE:
-        init_wert.wert = new Liste(true, WertTyp.INVALID, []);
-        break;
+    case WertTyp.LISTE:
+      init_wert.wert = new Liste([], []);
+      break;
 
-      case WertTyp.TEXT:
-        break;
+    case WertTyp.TEXT:
+      break;
 
-      case WertTyp.INVALID:
-        break;
+    case WertTyp.INVALID:
+      break;
 
-      default:
-        throw new Fehler(
-            "Dieser Typ sollte nicht existieren: " ~ init_wert.typ.to!string);
+    default:
+      throw new Fehler(
+        "Dieser Typ sollte nicht existieren: " ~ init_wert.typ.to!string);
     }
   }
   else if (init_wert.typ == WertTyp.FUNKTION && var_typ == VariablenTyp.FUNKTION)
@@ -240,7 +240,7 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
   if (bereiche[bereich_num] == null)
     throw new Error("Der Bereich für die Variable existiert nicht!");
   if (
-      !variable_existiert(bereich_num, var_name))
+    !variable_existiert(bereich_num, var_name))
     throw new Variable_Nicht_Existent_Fehler(var_name, bereich_num.variablen_namen);
 
   Bereich* bereich = bereiche[bereich_num];
@@ -255,19 +255,26 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
         WertTyp nw_typ = neuer_wert.typ; // Typen sind genau gleich
         if (vw_typ == nw_typ)
         {
+          if ((*cast(Wert*) var.wert).typ == WertTyp.LISTE)
+          {
+            Liste* nl = cast(Liste*) neuer_wert.wert;
+            (*nl).typisiere((*cast(Liste*)(*cast(Wert*) var.wert).wert).fix_wert_typ);
+          }
+
           var.wert = neuer_wert;
         }
 
         // Upcasting für Zahlen  
-        else if (nw_typ == WertTyp.GANZE_ZAHL && vw_typ == WertTyp.ZAHL)
+      else if (nw_typ == WertTyp.GANZE_ZAHL &&
+          vw_typ == WertTyp.ZAHL)
         {
           Gzahl nw_gzahl = *cast(Gzahl*) neuer_wert.wert;
           Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(nw_gzahl));
           var.wert = nw;
         }
 
-        else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL && vw_typ == WertTyp
-            .ZAHL)
+        else if (nw_typ == WertTyp.NATÜRLICHE_ZAHL &&
+          vw_typ == WertTyp.ZAHL)
         {
           Nzahl nw_nzahl = *cast(Nzahl*) neuer_wert.wert;
           Wert* nw = new Wert(WertTyp.ZAHL, new Zahl(nw_nzahl));
@@ -281,7 +288,7 @@ void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)
           var.wert = nw;
         }
         // Downcasting für Zahlen TODO:VIELLEICHT WARNUNG IMPLEMENTIEREN
-        else if (nw_typ == WertTyp.ZAHL && vw_typ == WertTyp.NATÜRLICHE_ZAHL)
+      else if (nw_typ == WertTyp.ZAHL && vw_typ == WertTyp.NATÜRLICHE_ZAHL)
         {
           Zahl nw_zahl = *cast(Zahl*) neuer_wert.wert;
           Wert* nw = new Wert(WertTyp.NATÜRLICHE_ZAHL, new Nzahl(nw_zahl.grösse));
@@ -320,7 +327,7 @@ int bekomme_return_status()
 {
   Variable var = lies_variable(0, "status_nummer");
   Wert wert = *cast(
-      Wert*) var.wert;
+    Wert*) var.wert;
   Nzahl zahl = *cast(Nzahl*) wert
     .wert;
   return als_int(zahl);

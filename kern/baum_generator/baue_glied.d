@@ -4,7 +4,7 @@ import ext.klasse;
 import ext.algorithm : remove;
 
 import glied;
-import variablen.wert;
+import wert;
 import fehler;
 
 import schlüsselwörter : SchlüsselWort;
@@ -94,6 +94,14 @@ Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste
     glieder_liste = glieder_liste.remove(glied_index + 1);
     glieder_liste = glieder_liste.remove(glied_index - 1);
   }
+  else if (vorher_glied.instanceof!LiesListeElement_Glied)
+  {
+    LiesListeElement_Glied lleg = cast(LiesListeElement_Glied) vorher_glied;
+    glieder_liste[glied_index] = new SetzeListeElement_Glied(lleg.index, lleg.liste, naher_glied);
+
+    glieder_liste = glieder_liste.remove(glied_index + 1);
+    glieder_liste = glieder_liste.remove(glied_index - 1);
+  }
   else
   {
     writeln(vorher_glied);
@@ -179,7 +187,7 @@ Glied[] baue_glied_Erstelle_Variable_Glied(WT_Glied glied, Glied[] glieder_liste
   if (glieder_liste[glied_index + 1].is_class!Lese_Variable_Glied)
   {
     dstring var_name = (cast(Lese_Variable_Glied) glieder_liste[glied_index + 1]).var_name;
-    glieder_liste[glied_index] = new Erstelle_Variable_Glied(var_name, glied.vt);
+    glieder_liste[glied_index] = new Erstelle_Variable_Glied(var_name, glied);
     glieder_liste = glieder_liste.remove(glied_index + 1);
 
     return glieder_liste;

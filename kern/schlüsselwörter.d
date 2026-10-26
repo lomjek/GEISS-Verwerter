@@ -35,7 +35,7 @@ enum SchlüsselWort
 
 immutable dstring[SchlüsselWort] schlüsselWort_dict = [
   SchlüsselWort.PRO: "pro"d,
-  SchlüsselWort.DER: "der"d,
+  SchlüsselWort.DER: "von"d,
 
   SchlüsselWort.FALLS: "falls"d,
   SchlüsselWort.SONST: "sonst"d,
@@ -117,14 +117,22 @@ SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* w
   foreach (SchlüsselWort sw, immutable dstring[] strs; multi_wort_sw)
   {
     dstring[] ganzer_sw = [];
+    size_t liste_index = *wort_index;
+
     for (ulong i = 0; i < multi_wort_sw.length; i++)
     {
-      ganzer_sw ~= wort_liste[*wort_index + i].strip;
+      while (liste_index < wort_liste.length && wort_liste[liste_index].length == 0)
+      {
+        liste_index++;
+      }
+
+      ganzer_sw ~= wort_liste[liste_index].strip;
+      liste_index++;
     }
 
     if (ganzer_sw == strs)
     {
-      *wort_index += ganzer_sw.length - 1;
+      *wort_index += liste_index;
       return sw;
     }
   }

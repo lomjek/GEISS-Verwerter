@@ -8,7 +8,7 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
-enum OperatorenTyp
+enum OperatorenTyp : ubyte
 {
   INVALID,
 
@@ -30,6 +30,8 @@ enum OperatorenTyp
 
   KLEINER_ALS,
   GRÖSSER_ALS,
+  GRÖSSER_GLEICH,
+  KLEINER_GLEICH,
 
   GESCHWUNGENE_KLAMMER_AUF,
   GESCHWUNGENE_KLAMMER_ZU,
@@ -46,6 +48,8 @@ enum OperatorenTyp
   ANFANG_KOMMENTAR,
   ENDE_KOMMENTAR,
   ANFANG_LINIE_KOMMENTAR,
+
+  ANFÜGEN,
 }
 
 immutable dchar[OperatorenTyp] operatoren_chars = [
@@ -69,6 +73,8 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
 
   OperatorenTyp.KLEINER_ALS: '<',
   OperatorenTyp.GRÖSSER_ALS: '>',
+  OperatorenTyp.GRÖSSER_GLEICH: '≥',
+  OperatorenTyp.KLEINER_GLEICH: '≤',
 
   OperatorenTyp.GESCHWUNGENE_KLAMMER_AUF: '{',
   OperatorenTyp.GESCHWUNGENE_KLAMMER_ZU: '}',
@@ -85,6 +91,8 @@ immutable dchar[OperatorenTyp] operatoren_chars = [
   OperatorenTyp.ANFANG_KOMMENTAR: '«',
   OperatorenTyp.ENDE_KOMMENTAR: '»',
   OperatorenTyp.ANFANG_LINIE_KOMMENTAR: '¶',
+
+  OperatorenTyp.ANFÜGEN: '↤',
 ];
 
 /// Das sind Operatoren, welche keine andere Funktion haben, als dass sie separieren
@@ -120,6 +128,11 @@ immutable(dstring[OperatorenTyp]) mehrteilige_operatoren = [
   OperatorenTyp.ANFANG_KOMMENTAR: "/*",
   OperatorenTyp.ENDE_KOMMENTAR: "*/",
   OperatorenTyp.ANFANG_LINIE_KOMMENTAR: "//",
+
+  OperatorenTyp.GRÖSSER_GLEICH: ">=",
+  OperatorenTyp.KLEINER_GLEICH: "<=",
+
+  OperatorenTyp.ANFÜGEN: "<+",
 ];
 
 //MARK: FUNKTIONEN
@@ -156,18 +169,28 @@ OperatorenTyp erstelle_multi_char_op(dstring[] wort_liste, ulong* wort_index)
   foreach (OperatorenTyp opt, dstring multi_char_op; mehrteilige_operatoren)
   {
     dstring ganzer_operator = "";
+    size_t liste_index = *wort_index;
+
     for (ulong i = 0; i < multi_char_op.length; i++)
     {
-      if (*wort_index + i >= wort_liste.length)
+      while (liste_index < wort_liste.length && wort_liste[liste_index].length == 0)
+      {
+        liste_index++;
+      }
+
+      if (liste_index >= wort_liste.length)
         return OperatorenTyp.INVALID;
-      if (wort_liste[*wort_index + i].length != 1)
+
+      if (wort_liste[liste_index].length != 1)
         return OperatorenTyp.INVALID;
-      ganzer_operator ~= wort_liste[*wort_index + i];
+
+      ganzer_operator ~= wort_liste[liste_index];
+      liste_index++;
     }
 
     if (ganzer_operator == multi_char_op)
     {
-      *wort_index += ganzer_operator.length - 1;
+      *wort_index = liste_index - 1;
       return opt;
     }
   }

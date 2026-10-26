@@ -3,7 +3,7 @@ module baum_generator.finde_mpo;
 import glied;
 import fehler.parse_fehler;
 import operatoren;
-import variablen.wert;
+import wert;
 import ext.klasse : instanceof, is_class;
 
 import std.conv : to;
@@ -24,12 +24,11 @@ enum Aktion_Gewicht
 
   SETZE_VARIABLE,
   VARIABLE_ERSTELLEN,
+  LISTE_ANFÜGEN,
 
   NICHT,
-  GLEICH,
-
-  GRÖSSER_ALS,
-  GRÖSSER_GLEICH,
+  GLEICH, // GLEICH SOLL TROTZDEM GETRENNT SEIN
+  KOMPARATOR,
 
   KLEINER_ALS,
   KLEINER_GLEICH,
@@ -47,14 +46,14 @@ Aktion_Gewicht[OperatorenTyp] operatoren_Gewicht = [
   OperatorenTyp.GETEILT: Aktion_Gewicht.MAL_DURCH,
 
   OperatorenTyp.HOCH: Aktion_Gewicht.HOCH,
+  OperatorenTyp.ANFÜGEN: Aktion_Gewicht.LISTE_ANFÜGEN,
 
   OperatorenTyp.GLEICH: Aktion_Gewicht.GLEICH,
 
-  OperatorenTyp.GRÖSSER_ALS: Aktion_Gewicht.GRÖSSER_ALS,
-  //TODO: GRÖSSER GLEICH
-
-  OperatorenTyp.KLEINER_ALS: Aktion_Gewicht.KLEINER_ALS,
-  //TODO: KLEINER_GLEICH
+  OperatorenTyp.GRÖSSER_ALS: Aktion_Gewicht.KOMPARATOR,
+  OperatorenTyp.GRÖSSER_GLEICH: Aktion_Gewicht.KOMPARATOR,
+  OperatorenTyp.KLEINER_ALS: Aktion_Gewicht.KOMPARATOR,
+  OperatorenTyp.KLEINER_GLEICH: Aktion_Gewicht.KOMPARATOR,
 ];
 
 nothrow @safe @nogc
@@ -119,7 +118,7 @@ MPO finde_MPO(Glied[] glieder_liste)
     else if (glied.instanceof!WT_Glied)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.VARIABLE_ERSTELLEN, i);
     else if ((glied.instanceof!Erstelle_Variable_Glied) &&
-      (cast(Erstelle_Variable_Glied) glied).wert_typ == WertTyp.FUNKTION)
+      (cast(Erstelle_Variable_Glied) glied).wert_typ.vt == WertTyp.FUNKTION)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.FUNTKION_ERSTELLEN, i);
     else if (glied.is_class!Nicht_Glied)
       (&current_mpo).passe_mpo_an(Aktion_Gewicht.NICHT, i);

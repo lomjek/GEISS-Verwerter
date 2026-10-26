@@ -4,7 +4,7 @@ import repl;
 import interpreter;
 
 import variablen.speicher;
-import variablen.wert;
+import wert;
 import zahl;
 
 import ext.prints;

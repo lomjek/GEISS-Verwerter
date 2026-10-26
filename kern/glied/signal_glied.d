@@ -1,7 +1,7 @@
 module glied.signal_glied;
 
 import glied.glied;
-import variablen.wert;
+import wert;
 
 import std.stdio : write, writeln;
 

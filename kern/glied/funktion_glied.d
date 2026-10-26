@@ -5,7 +5,7 @@ import glied.variablen_glied : Erstelle_Variable_Glied;
 import glied.block_glied;
 import glied.signal_glied : Beende_Funktion_Signal;
 
-import variablen.wert;
+import wert;
 import variablen.speicher;
 import variablen.variable;
 

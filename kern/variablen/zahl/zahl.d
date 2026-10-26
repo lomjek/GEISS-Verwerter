@@ -8,25 +8,31 @@ import zahl.gzahl;
 import zahl.nzahl;
 import zahl.helfer : dup;
 
+import fehler.parse_fehler;
+
 // @ {} [] # \ || != ~
 
 struct Zahl
 {
   Gzahl vor_komma = Gzahl();
 
-  bool positiv() const {
+  bool positiv() const
+  {
     return vor_komma.positiv;
   }
 
-  size_t länge() const {
+  size_t länge() const
+  {
     return vor_komma.grösse.länge;
   }
 
-  const (ubyte)* werte() const {
+  const(ubyte)* werte() const
+  {
     return vor_komma.grösse.werte;
   }
 
-  const(Nzahl) grösse() const {
+  const(Nzahl) grösse() const
+  {
     return vor_komma.grösse;
   }
 
@@ -48,7 +54,8 @@ struct Zahl
     this(Gzahl(nz), Bruch());
   }
 
-  this(const Nzahl nz, const Bruch b){
+  this(const Nzahl nz, const Bruch b)
+  {
     this(Gzahl(nz), b);
   }
 
@@ -70,19 +77,19 @@ struct Zahl
 
   //MARK: opCmp
   pure nothrow
-    int opCmp(const Zahl other) const
-    {
-      if (this.vor_komma.opCmp(other.vor_komma) != 0)
-        return this.vor_komma.opCmp(other.vor_komma);
+  int opCmp(const Zahl other) const
+  {
+    if (this.vor_komma.opCmp(other.vor_komma) != 0)
+      return this.vor_komma.opCmp(other.vor_komma);
 
-      return this.nach_komma.opCmp(other.nach_komma);
-    }
+    return this.nach_komma.opCmp(other.nach_komma);
+  }
 
   pure nothrow
-    bool opEquals(const Zahl other) const
-    {
-      return this.opCmp(other) == 0;
-    }
+  bool opEquals(const Zahl other) const
+  {
+    return this.opCmp(other) == 0;
+  }
 
   //MARK: opBinary
   Zahl opBinary(string op, R)(const R other) const
@@ -91,27 +98,27 @@ struct Zahl
     {
       switch (op)
       {
-        case "+":
-          return addiere(other);
+      case "+":
+        return addiere(other);
 
-        case "-":
-          return subtrahiere(other);
+      case "-":
+        return subtrahiere(other);
 
-        case "*":
-          return multipliziere(other);
+      case "*":
+        return multipliziere(other);
 
-        case "/":
-          return dividiere(other);
+      case "/":
+        return dividiere(other);
 
-        default:
-          debug
-          {
-            import std.stdio : write, writeln;
+      default:
+        debug
+        {
+          import std.stdio : write, writeln;
 
-            write("FEHLER: Der Operator kann nicht an Zahl ausgeführt werden: ");
-            writeln(op);
-          }
-          return Zahl();
+          write("FEHLER: Der Operator kann nicht an Zahl ausgeführt werden: ");
+          writeln(op);
+        }
+        return Zahl();
       }
     }
     else static if (is(R == Gzahl))
@@ -123,94 +130,96 @@ struct Zahl
       return this.opBinary!op(Zahl(other));
     }
     else
-      throw new Parse_Fehler("Typen_Fehler, (Zahl)");
+      throw new Parse_Fehler("Typen_Fehler, (Zahl), " ~ R.stringof);
 
   }
 
-  private 
-    Bruch als_bruch() const
-    {
-      Nzahl nenner = this.nach_komma.nenner.länge == 0 ? Nzahl([1]) : Nzahl(this.nach_komma.nenner);
-      Nzahl abs_vor = Nzahl(this.vor_komma.grösse);
-      Nzahl zähler_abs = (abs_vor * nenner) + this.nach_komma.zähler;
+  private
+  Bruch als_bruch() const
+  {
+    Nzahl nenner = this.nach_komma.nenner.länge == 0 ? Nzahl([1]) : Nzahl(this.nach_komma.nenner);
+    Nzahl abs_vor = Nzahl(this.vor_komma.grösse);
+    Nzahl zähler_abs = (abs_vor * nenner) + this.nach_komma.zähler;
 
-      return Bruch(zähler_abs, nenner);
-    }
+    return Bruch(zähler_abs, nenner);
+  }
 
   private
-    Zahl addiere(const Zahl other) const
+  Zahl addiere(const Zahl other) const
+  {
+    Bruch resultat;
+    bool presultat;
+
+    if (this.positiv == other.positiv)
     {
-      Bruch resultat;
-      bool presultat;
-
-      if (this.positiv == other.positiv)
-      {
-        resultat = this.als_bruch + other.als_bruch;
-        presultat = this.positiv;
-      }
-      else if (this.als_bruch == other.als_bruch)
-      {
-        presultat = true;
-        resultat = Bruch();
-      }
-      else if (this.als_bruch > other.als_bruch)
-      {
-        resultat = this.als_bruch - other.als_bruch;
-        presultat = this.positiv;
-      }
-      else
-      {
-        resultat = other.als_bruch - this.als_bruch;
-        presultat = other.positiv;
-      }
-
-      return Zahl(Gzahl([], presultat), resultat);
+      resultat = this.als_bruch + other.als_bruch;
+      presultat = this.positiv;
     }
+    else if (this.als_bruch == other.als_bruch)
+    {
+      presultat = true;
+      resultat = Bruch();
+    }
+    else if (this.als_bruch > other.als_bruch)
+    {
+      resultat = this.als_bruch - other.als_bruch;
+      presultat = this.positiv;
+    }
+    else
+    {
+      resultat = other.als_bruch - this.als_bruch;
+      presultat = other.positiv;
+    }
+
+    return Zahl(Gzahl([], presultat), resultat);
+  }
 
   private
-    Zahl subtrahiere(const Zahl other) const
-    {
-      if (this == other)
-        return Zahl();
+  Zahl subtrahiere(const Zahl other) const
+  {
+    if (this == other)
+      return Zahl();
 
-      Zahl negiertesOther = Zahl(Gzahl(other.grösse, !other.positiv), other.nach_komma);
-      return addiere(negiertesOther);
-    }
-
-  private
-    Zahl multipliziere(const Zahl other) const
-    {
-      Gzahl z1_zähler = Gzahl(this.vor_komma);
-      Gzahl z2_zähler = Gzahl(other.vor_komma);
-
-      Bruch b1 = Bruch(z1_zähler.grösse, Nzahl([1])) + this.nach_komma;
-      Bruch b2 = Bruch(z2_zähler.grösse, Nzahl([1])) + other.nach_komma;
-
-      if (!this.positiv)
-        b1.zähler = b1.zähler;
-
-      if (!other.positiv)
-        b2.zähler = b2.zähler;
-
-      Bruch produkt = b1 * b2;
-
-      return Zahl(Gzahl(), produkt);
-    }
+    Zahl negiertesOther = Zahl(Gzahl(other.grösse, !other.positiv), other.nach_komma);
+    return addiere(negiertesOther);
+  }
 
   private
-    Zahl dividiere(const Zahl other) const
-    {
-      Gzahl z1_zähler = Gzahl(this.vor_komma);
-      Gzahl z2_zähler = Gzahl(other.vor_komma);
+  Zahl multipliziere(const Zahl other) const
+  {
+    Gzahl z1_zähler = Gzahl(this.vor_komma);
+    Gzahl z2_zähler = Gzahl(other.vor_komma);
 
-      Bruch b1 = Bruch(z1_zähler.grösse, Nzahl([1])) + this.nach_komma;
-      Bruch b2 = Bruch(z2_zähler.grösse, Nzahl([1])) + other.nach_komma;
+    Bruch b1 = Bruch(z1_zähler.grösse, Nzahl([1])) + this.nach_komma;
+    Bruch b2 = Bruch(z2_zähler.grösse, Nzahl([1])) + other.nach_komma;
 
-      if (!this.positiv) b1.zähler = b1.zähler;
-      if (!other.positiv) b2.zähler = b2.zähler;
+    if (!this.positiv)
+      b1.zähler = b1.zähler;
 
-      Bruch quotient = b1 / b2;
+    if (!other.positiv)
+      b2.zähler = b2.zähler;
 
-      return Zahl(Gzahl(), quotient);
-    }
+    Bruch produkt = b1 * b2;
+
+    return Zahl(Gzahl(), produkt);
+  }
+
+  private
+  Zahl dividiere(const Zahl other) const
+  {
+    Gzahl z1_zähler = Gzahl(this.vor_komma);
+    Gzahl z2_zähler = Gzahl(other.vor_komma);
+
+    Bruch b1 = Bruch(z1_zähler.grösse, Nzahl([1])) + this.nach_komma;
+    Bruch b2 = Bruch(z2_zähler.grösse, Nzahl([1])) + other.nach_komma;
+
+    if (!this.positiv)
+      b1.zähler = b1.zähler;
+    if (!other.positiv)
+      b2.zähler = b2.zähler;
+
+    Bruch quotient = b1 / b2;
+
+    return Zahl(Gzahl(), quotient);
+  }
 }

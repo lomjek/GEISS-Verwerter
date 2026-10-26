@@ -3,7 +3,7 @@ module tests.glied.operation_glied;
 import glied.operation_glied;
 
 import glied.wert_glied;
-import variablen.wert;
+import wert;
 import zahl;
 import operatoren;
 

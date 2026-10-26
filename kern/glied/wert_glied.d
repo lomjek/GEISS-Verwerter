@@ -3,7 +3,7 @@ module glied.wert_glied;
 import std.stdio : write;
 import std.conv : to;
 
-import variablen.wert;
+import wert;
 import zahl;
 import liste;
 import glied.glied;
@@ -33,7 +33,7 @@ class Wert_Glied : Glied
 
   override public string toString() const
   {
-    return "G(WERT | " ~ wert.toString ~ ")";
+    return "G(WERT | " ~ wert.als_string(Str_conv_typ.INTERNAL) ~ ")";
   }
 
   this(Wert neuer_wert)
@@ -49,95 +49,44 @@ class Wert_Glied : Glied
 
 class WT_Glied : Glied
 {
-	public WertTyp vt;
-
-	override public Wert verwerte(uint bereich)
-	{
-		return Wert(WertTyp.INVALID, null);
-	}
-
-	override public void schreibe_baum()
-	{
-		write(vt.to!string);
-	}
-
-	override public bool ist_vollständig()
-	{
-		return false;
-	}
-
-	this(WertTyp vta)
-	{
-		this.vt = vta;
-	}
-
-	override string toString() const
-	{
-		return "G(VAR_TYP | " ~ this.vt.to!string ~ ")";
-	}
-}
-
-//MARK: Glied Liste 
-class ListeWert_Glied : Wert_Glied
-{
-  Glied[] werte;
+  public WertTyp vt;
+  public WT_Glied unter_wt;
 
   override public Wert verwerte(uint bereich)
   {
-    Wert*[] liste;
-
-    foreach (Glied glied; this.werte)
-    {
-      liste ~= new Wert(glied.verwerte(bereich));
-    }
-
-    return Wert(WertTyp.LISTE, new Liste(true, WertTyp.INVALID, liste));
-  }
-
-  override public bool ist_vollständig()
-  {
-    return true;
+    return Wert(WertTyp.INVALID, null);
   }
 
   override public void schreibe_baum()
   {
-    write("[LISTE]{");
-
-    bool first_run = true;
-    foreach (Glied glied; this.werte)
-    {
-      if (!first_run)
-        write(", ");
-
-      glied.schreibe_baum;
-
-      first_run = false;
-    }
-    write("}");
+    write(vt.to!string);
   }
 
-  override public string toString() const
+  public pure nothrow @safe
+  WertTyp[] unroll()
   {
-    string str = "G(LISTE | [";
+    if (unter_wt !is null)
+      return this.vt ~ unter_wt.unroll();
 
-    bool first_run = true;
-
-    foreach (glied; werte)
-    {
-      if (!first_run)
-        str ~= ", ";
-
-      str ~= to!string(glied);
-
-      first_run = false;
-    }
-
-    str ~= "]";
-    return str;
+    return [this.vt];
   }
 
-  this(Glied[] init_liste)
+  override public bool ist_vollständig()
   {
-    this.werte = init_liste;
+    return false;
+  }
+
+  this(WertTyp vta)
+  {
+    this.vt = vta;
+  }
+
+  override string toString() const
+  {
+    if (unter_wt is null)
+      return "G(WertTyp | " ~ this.vt.to!string ~ ")";
+
+    else
+      return "G(WertTyp | " ~ this.vt.to!string ~ ">" ~ unter_wt.toString() ~ ")";
   }
 }

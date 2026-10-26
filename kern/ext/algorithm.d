@@ -96,3 +96,18 @@ bool endsWith(T)(const const(T)[] array, const T needle)
 {
   return array[$ - 1] == needle;
 }
+
+//RETURNS fresh ARRAY!
+pure nothrow @safe
+T[] filter(T)(const T[] arr, T target)
+{
+  T[] result;
+  foreach (item; arr)
+  {
+    if (item == target)
+    {
+      result ~= item;
+    }
+  }
+  return result;
+}

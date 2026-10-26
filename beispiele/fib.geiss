@@ -1,0 +1,11 @@
+funktion fib(nzahl x) -> nzahl y {
+  falls x <= 1 {
+    y <- 1
+  }
+  sonst {
+    y <- fib(x - 1) + fib(x - 2)
+  }
+}
+
+zahl a <- fib(20)
+schreibe(als_text(a))
