@@ -1,0 +1,24 @@
+liste[liste[text]] feld <- [
+	["ts", "ks", "ds", "ts"],
+	["bs", "bs", "bs", "bs"],
+	["bw", "bw", "bw", "bw"],
+	["tw", "dw", "kw", "tw"]
+]
+
+funktion tausche_felder (
+	natürliche zahl von_feld_x,
+	natürliche zahl von_feld_y,
+	natürliche zahl zu_feld_x,
+	natürliche zahl zu_feld_y
+)
+{
+	ausdruck zwischenspeicher <-
+		feld[von_feld_y][von_feld_x]
+
+	feld[von_feld_y][von_feld_x] <-
+		feld[zu_feld_y][zu_feld_x]
+
+	feld[zu_feld_y][zu_feld_x] <- zwischenspeicher
+}
+
+tausche_felder(0, 0, 3, 3)

@@ -10,6 +10,7 @@ import variablen.speicher;
 import variablen.variable;
 
 import ext.prints;
+import ext.algorithm : random_zahl;
 
 import fehler;
 import zahl;
@@ -28,10 +29,10 @@ class Funktion_Abrufen_Glied : Glied
 
   override public void schreibe_baum()
   {
-    write("[FUNKTION]{");
+    write("[FUNKTION ");
     write(identifier);
-    write(", ");
-    argumente.to!string;
+    write("]{");
+    write(argumente.to!string);
     write("}");
   }
 
@@ -66,8 +67,8 @@ class Funktion_Abrufen_Glied : Glied
 
     if (argumente.length != arg_namen.length)
     {
-      throw new Fehler("Die Anzahl Argumenten ist nicht richtg: Wollte " ~ arg_namen.length.to!string ~ ", habe aber " ~ argumente
-          .length.to!string ~ ".");
+      throw new Fehler("Die Anzahl Argumenten ist nicht richtg: Wollte " ~
+          arg_namen.length.to!string ~ ", habe aber " ~ argumente.length.to!string ~ ".");
     }
 
     for (ulong i = 0; i < argumente.length; i++)
@@ -79,28 +80,31 @@ class Funktion_Abrufen_Glied : Glied
     //RETURNS (für jetzt nur eins)
     dstring[] ret_namen;
 
-    foreach(Erstelle_Variable_Glied evg; fg.return_values)
+    foreach (Erstelle_Variable_Glied evg; fg.return_values)
     {
       evg.verwerte(neuer_bereich);
       ret_namen ~= evg.var_name;
     }
 
-    try {
+    try
+    {
       fg.verwerte(neuer_bereich);
     }
     catch (Beende_Funktion_Signal)
-    { ;}
+    {
+    }
 
     Wert resultat;
     if (ret_namen.length == 1)
     {
       resultat = *(cast(Wert*) lies_variable(neuer_bereich, ret_namen[0]).wert); // Muss geändert werden.
     }
-    else if (ret_namen.length == 0) 
+    else if (ret_namen.length == 0)
     {
-      resultat  = Wert(WertTyp.INVALID, null);
+      resultat = Wert(WertTyp.INVALID, null);
     }
-    else{
+    else
+    {
       debug writeln("Mehrere argumente noch nicht implementiert");
     }
 
@@ -115,10 +119,10 @@ class Funktion_Abrufen_Glied : Glied
   }
 
   override public
-    string toString() const
-    {
-      return "G(FUNKTION_ABRUFEN | " ~ identifier.to!string ~ ")";
-    }
+  string toString() const
+  {
+    return "G(FUNKTION_ABRUFEN | " ~ identifier.to!string ~ ")";
+  }
 
   this(dstring funk_name, Glied[] argumente)
   {
@@ -170,6 +174,7 @@ enum MethodenTyp : ubyte
   ALS_TEXT,
   ALS_ZAHL,
   EINGABE,
+  ZUFÄLLIGE_ZAHL,
 }
 
 class EingebauteFunktion_Glied : Funktion_Glied
@@ -180,49 +185,80 @@ class EingebauteFunktion_Glied : Funktion_Glied
   {
     switch (typ)
     {
-      case MethodenTyp.PRINT:
-        Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
-        schreibe_schön_wert(text);
-        writeln;
-        return Wert();
+    case MethodenTyp.PRINT:
+      Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+      schreibe_schön_wert(text);
+      writeln;
+      return Wert();
 
-      case MethodenTyp.ALS_TEXT:
-        Wert zahl = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
-        Zahl z;
-        if (zahl.typ == WertTyp.ZAHL)
-          z = *cast(Zahl*) zahl.wert;
-        else if (zahl.typ == WertTyp.GANZE_ZAHL)
-          z = Zahl(*cast(Gzahl*) zahl.wert);
-        else if (zahl.typ == WertTyp.NATÜRLICHE_ZAHL)
-          z = Zahl(*cast(Nzahl*) zahl.wert);
-        else
-          throw new Fehler("Funktion als_text benötigt eine Zahl als Eingabe");
+    case MethodenTyp.ALS_TEXT:
+      Wert zahl = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+      Zahl z;
+      if (zahl.typ == WertTyp.ZAHL)
+        z = *cast(Zahl*) zahl.wert;
+      else if (zahl.typ == WertTyp.GANZE_ZAHL)
+        z = Zahl(*cast(Gzahl*) zahl.wert);
+      else if (zahl.typ == WertTyp.NATÜRLICHE_ZAHL)
+        z = Zahl(*cast(Nzahl*) zahl.wert);
+      else
+        throw new Fehler("Funktion als_text benötigt eine Zahl als Eingabe");
 
-        string str = z.als_string;
+      string str = z.als_string;
 
-        setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(str)));
-        return Wert();
+      setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(str)));
+      return Wert();
 
-      case MethodenTyp.ALS_ZAHL:
-        Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
-        if (text.typ != WertTyp.TEXT)
-          throw new Fehler("Ich kann nicht anderes als Text in eine Zahl umwandeln.");
+    case MethodenTyp.ALS_ZAHL:
+      Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+      if (text.typ != WertTyp.TEXT)
+        throw new Fehler("Ich kann nicht anderes als Text in eine Zahl umwandeln.");
 
-        string str = (*cast(Text*) text.wert).str;
-        Zahl z = als_zahl(str.to!dstring);
+      string str = (*cast(Text*) text.wert).str;
+      Zahl z = als_zahl(str.to!dstring);
 
-        setze_variable(bereich, "ausgabe", new Wert(WertTyp.ZAHL, new Zahl(z)));
-        return Wert();
+      setze_variable(bereich, "ausgabe", new Wert(WertTyp.ZAHL, new Zahl(z)));
+      return Wert();
 
-      case MethodenTyp.EINGABE:
-        string eingabe = readln();
-        eingabe = eingabe[0 .. eingabe.length - 1];
-        setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(eingabe)));
-        return Wert();
+    case MethodenTyp.EINGABE:
+      string eingabe = readln();
+      eingabe = eingabe[0 .. eingabe.length - 1];
+      setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(eingabe)));
+      return Wert();
 
-      default:
-        writeln("Noch nicht implementiert");
-        return Wert();
+    case MethodenTyp.ZUFÄLLIGE_ZAHL:
+      Wert ul = *cast(Wert*) lies_variable(bereich, "unteres_limit").wert;
+      Wert ol = *cast(Wert*) lies_variable(bereich, "oberes_limit").wert;
+
+      Gzahl ulimit;
+      Gzahl olimit;
+
+      if (ul.typ == WertTyp.GANZE_ZAHL)
+        ulimit = Gzahl(*cast(Gzahl*) ul.wert);
+
+      else if (ul.typ == WertTyp.NATÜRLICHE_ZAHL)
+        ulimit = Gzahl(*cast(Nzahl*) ul.wert);
+
+      else if (ul.typ == WertTyp.ZAHL)
+        ulimit = Gzahl((*cast(Zahl*) ul.wert).vor_komma);
+
+      if (ol.typ == WertTyp.GANZE_ZAHL)
+        olimit = Gzahl(*cast(Gzahl*) ol.wert);
+
+      else if (ol.typ == WertTyp.NATÜRLICHE_ZAHL)
+        olimit = Gzahl(*cast(Nzahl*) ol.wert);
+
+      else if (ol.typ == WertTyp.ZAHL)
+        olimit = Gzahl((*cast(Zahl*) ol.wert).vor_komma);
+
+      Gzahl* random = new Gzahl(random_zahl(ulimit, olimit));
+
+      setze_variable(bereich, "rzahl", new Wert(random));
+
+      return Wert();
+
+    default:
+      writeln("Noch nicht implementiert");
+      return Wert();
     }
   }
 
@@ -248,11 +284,11 @@ class EingebauteFunktion_Glied : Funktion_Glied
     Erstelle_Variable_Glied[] parameter;
     Erstelle_Variable_Glied[] return_values;
 
-    if (typ == MethodenTyp.PRINT){
-      Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.TEXT);
-      parameter ~= evg;
-    }
-    else if (typ == MethodenTyp.ALS_TEXT){
+    if (typ == MethodenTyp.PRINT)
+      parameter ~= new Erstelle_Variable_Glied("eingabe", WertTyp.INVALID);
+
+    else if (typ == MethodenTyp.ALS_TEXT)
+    {
       // Parameter
       Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.ZAHL);
       parameter ~= evg;
@@ -261,17 +297,26 @@ class EingebauteFunktion_Glied : Funktion_Glied
       Erstelle_Variable_Glied rvg = new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
       return_values ~= rvg;
     }
-    else if (typ == MethodenTyp.EINGABE){
+    else if (typ == MethodenTyp.EINGABE)
+    {
       Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
       return_values ~= evg;
     }
-    else if (typ == MethodenTyp.ALS_ZAHL){
+    else if (typ == MethodenTyp.ALS_ZAHL)
+    {
       Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.TEXT);
       parameter ~= evg;
 
       // Return Value
       Erstelle_Variable_Glied rvg = new Erstelle_Variable_Glied("ausgabe", WertTyp.ZAHL);
       return_values ~= rvg;
+    }
+    else if (typ == MethodenTyp.ZUFÄLLIGE_ZAHL)
+    {
+      parameter ~= new Erstelle_Variable_Glied("unteres_limit", WertTyp.GANZE_ZAHL);
+      parameter ~= new Erstelle_Variable_Glied("oberes_limit", WertTyp.GANZE_ZAHL);
+
+      return_values ~= new Erstelle_Variable_Glied("rzahl", WertTyp.GANZE_ZAHL);
     }
 
     super(parameter, return_values, new BlockGlied());
@@ -304,10 +349,10 @@ class FunktionErstellen_Glied : Glied
   }
 
   override public
-    string toString() const
-    {
-      return "G(ERSTELLE_FUNKTION | " ~ var_name.to!string ~ ")";
-    }
+  string toString() const
+  {
+    return "G(ERSTELLE_FUNKTION | " ~ var_name.to!string ~ ")";
+  }
 
   this(BlockGlied körper, dstring variable)
   {
@@ -315,9 +360,9 @@ class FunktionErstellen_Glied : Glied
     this.var_name = variable;
   }
 
-  this(BlockGlied körper, dstring variable, 
-      Erstelle_Variable_Glied[] parameter = [], 
-      Erstelle_Variable_Glied[] returns = [])
+  this(BlockGlied körper, dstring variable,
+    Erstelle_Variable_Glied[] parameter = [],
+    Erstelle_Variable_Glied[] returns = [])
   {
     this.körper = new Funktion_Glied(parameter, returns, körper);
     this.var_name = variable;

@@ -55,7 +55,9 @@ unittest
     assert(ubyte_max_neg + eins == Gzahl([0xFE], false));
 
     writeln("        -600 + (-255) = -855");
-    assert(Gzahl(sechs_hundert.grösse, false) + ubyte_max_neg == Gzahl([0x57, 0x03], false));
+    assert(Gzahl(sechs_hundert.grösse, false) + ubyte_max_neg == Gzahl([
+        0x57, 0x03
+      ], false));
 
     writeln("        -255 + 600 = 345");
     assert(ubyte_max_neg + sechs_hundert == Gzahl([0x59, 0x01], true));
@@ -75,7 +77,9 @@ unittest
 
     //MAL
     writeln("        -255 * 600 = -153000");
-    assert(ubyte_max_neg * sechs_hundert == Gzahl(cast(ubyte[])[0xA8, 0x55, 0x02], false));
+    assert(ubyte_max_neg * sechs_hundert == Gzahl(cast(ubyte[])[
+          0xA8, 0x55, 0x02
+        ], false));
 
     writeln("        1 * (-255) = -255");
     assert(eins * ubyte_max_neg == Gzahl([0xFF], false));

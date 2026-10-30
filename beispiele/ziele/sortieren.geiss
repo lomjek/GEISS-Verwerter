@@ -1,0 +1,42 @@
+liste[ganze zahl] durcheinander <- [-4, 5, -6, 2, 0, 10]
+
+funktion ist_sortiert(liste<ganze zahl] test) ->
+	wahrheit ausgabe
+{
+	//Die indizes funktion gibt dir eine Liste mit
+	//natürlichen Zahlen (nicht fix)
+	pro natürliche zahl index der liste indizes(test)
+	{
+		falls index = länge(test) {
+			beende schleife
+		}
+
+		falls test[index] > test[index + 1]
+		{
+			ausgabe <- falsch
+			beende funktion
+		}
+	}
+
+	ausgabe <- wahr
+}
+
+funktion tausche_felder(natürliche zahl index_1, natürliche zahl index_2) {
+	ganze zahl zwischenspeicher <- durcheinander[index_1]
+	durcheinander[index_1] <- durcheinander[index_2]
+	durcheinander[index_2] <- zwischenspeicher
+}
+
+solange nicht ist_sortiert(durcheinander){
+	pro natürliche zahl index der liste indizes(test)
+	{
+		falls index = länge(test) {
+			beende schleife //Nur die innere
+		}
+
+		falls test[index] > test[index + 1]
+		{
+			tausche_felder(index, index + 1)
+		}
+	}
+}
