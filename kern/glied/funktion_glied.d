@@ -67,7 +67,7 @@ class Funktion_Abrufen_Glied : Glied
 
     if (argumente.length != arg_namen.length)
     {
-      throw new Fehler("Die Anzahl Argumenten ist nicht richtg: Wollte " ~
+      throw new Fehler("Die Anzahl Argumenten ist nicht richtg für '" ~ identifier.to!string ~ "'': Wollte " ~
           arg_namen.length.to!string ~ ", habe aber " ~ argumente.length.to!string ~ ".");
     }
 
@@ -220,6 +220,9 @@ class EingebauteFunktion_Glied : Funktion_Glied
       return Wert();
 
     case MethodenTyp.EINGABE:
+      Wert text = *cast(Wert*) lies_variable(bereich, "Aufforderung").wert;
+      schreibe_schön_wert(text);
+
       string eingabe = readln();
       eingabe = eingabe[0 .. eingabe.length - 1];
       setze_variable(bereich, "ausgabe", new Wert(WertTyp.TEXT, new Text(eingabe)));
@@ -290,15 +293,14 @@ class EingebauteFunktion_Glied : Funktion_Glied
     else if (typ == MethodenTyp.ALS_TEXT)
     {
       // Parameter
-      Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("eingabe", WertTyp.ZAHL);
-      parameter ~= evg;
+      parameter ~= new Erstelle_Variable_Glied("eingabe", WertTyp.ZAHL);
 
       // Return Value
-      Erstelle_Variable_Glied rvg = new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
-      return_values ~= rvg;
+      return_values ~= new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
     }
     else if (typ == MethodenTyp.EINGABE)
     {
+      parameter ~= new Erstelle_Variable_Glied("Aufforderung", WertTyp.TEXT);
       Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
       return_values ~= evg;
     }
