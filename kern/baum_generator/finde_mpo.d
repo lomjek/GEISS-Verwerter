@@ -4,6 +4,8 @@ import glied;
 import fehler.parse_fehler;
 import operatoren;
 import wert;
+
+import ext.algorithm : contains;
 import ext.klasse : instanceof, is_class;
 
 import std.conv : to;
@@ -56,6 +58,11 @@ Aktion_Gewicht[OperatorenTyp] operatoren_Gewicht = [
   OperatorenTyp.KLEINER_GLEICH: Aktion_Gewicht.KOMPARATOR,
 ];
 
+immutable Aktion_Gewicht[] links_gebunden = [
+  Aktion_Gewicht.PLUS_MINUS,
+  Aktion_Gewicht.MAL_DURCH,
+];
+
 nothrow @safe @nogc
 private uint get_op_prio_length()
 {
@@ -73,14 +80,20 @@ struct MPO
   {
     return "MPO(" ~ value.to!string ~ " at index " ~ index.to!string ~ ")";
   }
-}
 
-void passe_mpo_an(MPO* mpo, Aktion_Gewicht op, ulong index)
-{
-  if (mpo.value < op)
+  void passe_an(Aktion_Gewicht op, ulong index)
   {
-    mpo.value = op;
-    mpo.index = index;
+    if (links_gebunden.contains(op) && this.value <= op)
+    {
+      this.value = op;
+      this.index = index;
+    }
+
+    if (this.value < op)
+    {
+      this.value = op;
+      this.index = index;
+    }
   }
 }
 
@@ -103,25 +116,25 @@ MPO finde_MPO(Glied[] glieder_liste)
     {
       OperationGlied op_glied = cast(OperationGlied) glied;
       if (op_glied.operationenTyp in operatoren_Gewicht)
-        (&current_mpo).passe_mpo_an(operatoren_Gewicht[op_glied.operationenTyp], i);
+        current_mpo.passe_an(operatoren_Gewicht[op_glied.operationenTyp], i);
     }
     else if (glied.instanceof!Setze_Variable_Glied)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.SETZE_VARIABLE, i);
+      current_mpo.passe_an(Aktion_Gewicht.SETZE_VARIABLE, i);
     else if (glied.instanceof!Falls_BlockGlied)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
+      current_mpo.passe_an(Aktion_Gewicht.FALLS_SONST, i);
     else if (glied.instanceof!Sonst_BlockGlied)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.FALLS_SONST, i);
+      current_mpo.passe_an(Aktion_Gewicht.FALLS_SONST, i);
     else if (glied.instanceof!Solange_BlockGlied)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.SOLANGE, i);
+      current_mpo.passe_an(Aktion_Gewicht.SOLANGE, i);
     else if (glied.is_class!Wiederhole_BlockGlied)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.WIEDERHOLE, i);
+      current_mpo.passe_an(Aktion_Gewicht.WIEDERHOLE, i);
     else if (glied.instanceof!WT_Glied)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.VARIABLE_ERSTELLEN, i);
+      current_mpo.passe_an(Aktion_Gewicht.VARIABLE_ERSTELLEN, i);
     else if ((glied.instanceof!Erstelle_Variable_Glied) &&
       (cast(Erstelle_Variable_Glied) glied).wert_typ.vt == WertTyp.FUNKTION)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.FUNTKION_ERSTELLEN, i);
+      current_mpo.passe_an(Aktion_Gewicht.FUNTKION_ERSTELLEN, i);
     else if (glied.is_class!Nicht_Glied)
-      (&current_mpo).passe_mpo_an(Aktion_Gewicht.NICHT, i);
+      current_mpo.passe_an(Aktion_Gewicht.NICHT, i);
 
   }
 
