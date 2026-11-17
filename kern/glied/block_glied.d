@@ -1,13 +1,13 @@
 module glied.block_glied;
 
 import glied.glied;
-import glied.signal_glied : Beende_Programm_Signal;
+import glied.signal_glied : Signal, SignalTyp;
 
 import wert;
 
 import interpreter : repl_mode;
 
-import ext.prints;
+import ext.prints : Str_conv_typ;
 
 import std.stdio : writeln, write;
 import std.conv : to;
@@ -52,8 +52,7 @@ class BlockGlied : Glied
       debug
       {
         write("Rückgabewert: ");
-        schreibe_schön_wert(resultat);
-        writeln("");
+        writeln(resultat.als_string(Str_conv_typ.INTERNAL));
       }
     }
   }
@@ -83,16 +82,19 @@ class Programm_BlockGlied : BlockGlied
   override public Wert verwerte(uint bereich = 0)
   {
     Wert resultat;
-    try{
-      resultat = super.verwerte(0);
-    } 
-    catch (Beende_Programm_Signal)
+    try
     {
-      resultat = Wert(WertTyp.INVALID, null);
-
-      if (repl_mode){
-        throw new Beende_Programm_Signal();
+      resultat = super.verwerte(0);
+    }
+    catch (Signal s)
+    {
+      if (repl_mode)
+      {
+        throw s;
       }
+      resultat = Wert(WertTyp.INVALID, null);
+      if (s.signal_typ != SignalTyp.BEENDE_PROGRAMM)
+        writeln("WARNUNG: Das Programm wurde mit einem invalidem Signal beendet.");
     }
 
     return resultat;
@@ -219,4 +221,3 @@ class Falls_Sonst_BlockGlied : Falls_BlockGlied
       .to!string ~ "/" ~ (sonst_aktionen.length).to!string ~ ")";
   }
 }
-

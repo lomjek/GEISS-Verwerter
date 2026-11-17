@@ -1,7 +1,7 @@
 module variablen.variable;
 
 import wert;
-import ext.prints;
+import ext.prints : Str_conv_typ;
 import ext.algorithm : contains;
 
 import std.conv : to;
@@ -31,7 +31,7 @@ public string als_string(Variable var)
 
   if ([VariablenTyp.VARIABEL, VariablenTyp.FIX].contains(var.var_typ))
   {
-    str ~= als_schön_string(*cast(Wert*) var.wert);
+    str ~= wert.wandel.als_string((*cast(Wert*) var.wert), Str_conv_typ.AUSGABE); //TODO: Muss parameter werden
   }
   else
   {

@@ -3,7 +3,7 @@ module glied.funktion_glied;
 import glied.glied;
 import glied.variablen_glied : Erstelle_Variable_Glied;
 import glied.block_glied;
-import glied.signal_glied : Beende_Funktion_Signal;
+import glied.signal_glied : Signal, SignalTyp;
 
 import wert;
 import variablen.speicher;
@@ -90,8 +90,10 @@ class Funktion_Abrufen_Glied : Glied
     {
       fg.verwerte(neuer_bereich);
     }
-    catch (Beende_Funktion_Signal)
+    catch (Signal s)
     {
+      if (s.signal_typ != SignalTyp.BEENDE_FUNKTION)
+        throw s;
     }
 
     Wert resultat;
@@ -187,8 +189,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
     {
     case MethodenTyp.PRINT:
       Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
-      schreibe_schön_wert(text);
-      writeln;
+      writeln(text.als_string(Str_conv_typ.AUSGABE));
       return Wert();
 
     case MethodenTyp.ALS_TEXT:
@@ -221,7 +222,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
 
     case MethodenTyp.EINGABE:
       Wert text = *cast(Wert*) lies_variable(bereich, "Aufforderung").wert;
-      schreibe_schön_wert(text);
+      write(text.als_string(Str_conv_typ.AUSGABE));
 
       string eingabe = readln();
       eingabe = eingabe[0 .. eingabe.length - 1];

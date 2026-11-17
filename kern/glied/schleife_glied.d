@@ -2,6 +2,7 @@ module glied.schleife_glied;
 
 import glied.block_glied;
 import glied.glied : Glied;
+import glied.signal_glied : Signal, SignalTyp;
 import wert;
 import zahl;
 
@@ -13,41 +14,49 @@ import std.conv : to;
 //MARK: SOLANGE
 class Solange_BlockGlied : BlockGlied
 {
-	Glied bedingung;
+  Glied bedingung;
 
-	override public void schreibe_baum()
-	{
-		write("[SOLANGE ");
-		bedingung.schreibe_baum();
-		write("]{");
-		schreibe_glied_liste(this.aktionen);
-		write("}");
-	}
+  override public void schreibe_baum()
+  {
+    write("[SOLANGE ");
+    bedingung.schreibe_baum();
+    write("]{");
+    schreibe_glied_liste(this.aktionen);
+    write("}");
+  }
 
-	private bool erfüllt(uint bereich)
-	{
-		Wert wert_bedingung = bedingung.verwerte(bereich);
-		return wert_bedingung.ist_wahr;
-	}
+  private bool erfüllt(uint bereich)
+  {
+    Wert wert_bedingung = bedingung.verwerte(bereich);
+    return wert_bedingung.ist_wahr;
+  }
 
-	override public Wert verwerte(uint bereich)
-	{
-		while (erfüllt(bereich))
-		{
-			verwerte_glieder_liste(bereich, aktionen);
-		}
-		return Wert(WertTyp.INVALID, null);
-	}
+  override public Wert verwerte(uint bereich)
+  {
+    try
+    {
+      while (erfüllt(bereich))
+      {
+        verwerte_glieder_liste(bereich, aktionen);
+      }
+    }
+    catch (Signal s)
+    {
+      if (s.signal_typ != SignalTyp.BEENDE_SCHLEIFE)
+        throw s;
+    }
+    return Wert(WertTyp.INVALID, null);
+  }
 
-	override public bool ist_vollständig()
-	{
-		return (bedingung !is null) && (aktionen.length !is 0);
-	}
+  override public bool ist_vollständig()
+  {
+    return (bedingung !is null) && (aktionen.length !is 0);
+  }
 
-	override string toString() const
-	{
-		return "G(SOLANGE | " ~ aktionen.length.to!string ~ ")";
-	}
+  override string toString() const
+  {
+    return "G(SOLANGE | " ~ aktionen.length.to!string ~ ")";
+  }
 }
 
 //MARK: WIEDERHOLE
@@ -59,44 +68,56 @@ class Wiederhole_BlockGlied : BlockGlied
   private Nzahl gemachte_wiederholungen = Nzahl();
 
   override public void schreibe_baum()
-	{
-		write("[WIEDERHOLE ");
-		wiederholungen.schreibe_baum();
-		write("]{");
-		schreibe_glied_liste(this.aktionen);
-		write("}");
-	}
+  {
+    write("[WIEDERHOLE ");
+    wiederholungen.schreibe_baum();
+    write("]{");
+    schreibe_glied_liste(this.aktionen);
+    write("}");
+  }
 
   override public Wert verwerte(uint bereich)
-	{
+  {
     Wert wdh = wiederholungen.verwerte(bereich);
 
-    if (wdh.typ == WertTyp.NATÜRLICHE_ZAHL){
+    if (wdh.typ == WertTyp.NATÜRLICHE_ZAHL)
+    {
       gebrauchte_wiederholungen = Nzahl(*cast(Nzahl*) wdh.wert);
     }
-    else if (wdh.typ == WertTyp.GANZE_ZAHL){
+    else if (wdh.typ == WertTyp.GANZE_ZAHL)
+    {
       gebrauchte_wiederholungen = Nzahl((*cast(Gzahl*) wdh.wert).grösse);
     }
-    else if (wdh.typ == WertTyp.ZAHL){
+    else if (wdh.typ == WertTyp.ZAHL)
+    {
       gebrauchte_wiederholungen = Nzahl((*cast(Zahl*) wdh.wert).grösse);
     }
 
-		while (gebrauchte_wiederholungen > gemachte_wiederholungen)
-		{
-      gemachte_wiederholungen = gemachte_wiederholungen + Nzahl([1]);
+    try
+    {
+      while (gebrauchte_wiederholungen > gemachte_wiederholungen)
+      {
+        gemachte_wiederholungen = gemachte_wiederholungen + Nzahl([1]);
 
-			verwerte_glieder_liste(bereich, aktionen);
-		}
-		return Wert(WertTyp.INVALID, null);
-	}
+        verwerte_glieder_liste(bereich, aktionen);
+      }
+    }
+    catch (Signal s)
+    {
+      if (s.signal_typ != SignalTyp.BEENDE_SCHLEIFE)
+        throw s;
+    }
+
+    return Wert(WertTyp.INVALID, null);
+  }
 
   override public bool ist_vollständig()
-	{
-		return (wiederholungen !is null) && (aktionen.length !is 0);
-	}
-	
+  {
+    return (wiederholungen !is null) && (aktionen.length !is 0);
+  }
+
   override string toString() const
-	{
-		return "G(WIEDERHOLE | " ~ aktionen.length.to!string ~ ")";
-	}
+  {
+    return "G(WIEDERHOLE | " ~ aktionen.length.to!string ~ ")";
+  }
 }

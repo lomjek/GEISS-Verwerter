@@ -31,6 +31,7 @@ enum SchlüsselWort
 
   BEENDE_FUNKTION,
   BEENDE_PROGRAMM,
+  BEENDE_SCHLEIFE,
 }
 
 immutable dstring[SchlüsselWort] schlüsselWort_dict = [
@@ -50,6 +51,7 @@ immutable dstring[SchlüsselWort] schlüsselWort_dict = [
 immutable(dstring[][SchlüsselWort]) multi_wort_sw = [
   SchlüsselWort.BEENDE_FUNKTION: ["beende"d, "funktion"d],
   SchlüsselWort.BEENDE_PROGRAMM: ["beende"d, "programm"d],
+  SchlüsselWort.BEENDE_SCHLEIFE: ["beende"d, "schleife"d],
 ];
 
 //region Leser_Funktionen
@@ -116,10 +118,13 @@ SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* w
 {
   foreach (SchlüsselWort sw, immutable dstring[] strs; multi_wort_sw)
   {
+    if (*wort_index + strs.length > wort_liste.length)
+      continue; // Wenn das multi_wort_sw länger ist als restliche Glieder, beende früher.
+
     dstring[] ganzer_sw = [];
     size_t liste_index = *wort_index;
 
-    for (ulong i = 0; i < multi_wort_sw.length; i++)
+    for (ulong i = 0; i < strs.length; i++)
     {
       while (liste_index < wort_liste.length && wort_liste[liste_index].length == 0)
       {
@@ -132,7 +137,7 @@ SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* w
 
     if (ganzer_sw == strs)
     {
-      *wort_index += liste_index;
+      *wort_index = liste_index - 1;
       return sw;
     }
   }
@@ -149,7 +154,8 @@ Glied wort_als_sw(dstring[] wort_liste, ulong* wort_index)
 
   if (sw == SchlüsselWort.INVALID)
     throw new Parse_Fehler(
-      "Das Wort ist kein valides SchlüsselWort: " ~ wort_liste[*wort_index].to!string);
+      "Das Wort ist kein valides SchlüsselWort: " ~ wort_liste[*wort_index].to!string ~ wort_liste[*wort_index .. $]
+        .to!string);
 
   return baue_richtiges_sw_glied(sw);
 }

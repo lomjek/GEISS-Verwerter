@@ -6,13 +6,11 @@ liste[liste[text]] feld <- [
 ]
 
 funktion tausche_felder (
-	natürliche zahl von_feld_x,
-	natürliche zahl von_feld_y,
-	natürliche zahl zu_feld_x,
-	natürliche zahl zu_feld_y
+	nzahl von_feld_x, nzahl von_feld_y,
+	nzahl zu_feld_x, nzahl zu_feld_y
 )
 {
-	ausdruck zwischenspeicher <-
+	text zwischenspeicher <-
 		feld[von_feld_y][von_feld_x]
 
 	feld[von_feld_y][von_feld_x] <-
@@ -21,4 +19,6 @@ funktion tausche_felder (
 	feld[zu_feld_y][zu_feld_x] <- zwischenspeicher
 }
 
+schreibe(feld);
 tausche_felder(0, 0, 3, 3)
+schreibe(feld);

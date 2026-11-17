@@ -86,8 +86,11 @@ WertTyp erstelle_multi_wort_wert_typ(dstring[] wort_liste, ulong* wort_index)
 {
   foreach (WertTyp wt, immutable dstring[] strs; multi_wort_wert_typ)
   {
+    if (*wort_index + strs.length > wort_liste.length)
+      continue; // Wenn das multi_wort_wt länger ist als restliche Glieder, beende früher.
+
     dstring[] ganzer_wt = [];
-    for (ulong i = 0; i < multi_wort_wert_typ.length; i++)
+    for (ulong i = 0; i < strs.length; i++)
     {
       ganzer_wt ~= wort_liste[*wort_index + i];
     }

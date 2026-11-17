@@ -210,7 +210,8 @@ struct Wert
     if (this.typ != other.typ)
     {
       throw new Fehler(
-        "TypenFehler: Man kann nicht Wert mit typ " ~ this.typ.to!string ~ " und " ~ other.typ.to!string ~ " vergleichen");
+        "TypenFehler: Man kann nicht Wert mit typ " ~ this.typ.to!string ~
+          " und " ~ other.typ.to!string ~ " vergleichen");
     }
 
     return Wert();

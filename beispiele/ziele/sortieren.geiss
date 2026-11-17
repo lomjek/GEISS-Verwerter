@@ -1,6 +1,6 @@
 liste[ganze zahl] durcheinander <- [-4, 5, -6, 2, 0, 10]
 
-funktion ist_sortiert(liste<ganze zahl] test) ->
+funktion ist_sortiert(liste[ganze zahl] test) ->
 	wahrheit ausgabe
 {
 	//Die indizes funktion gibt dir eine Liste mit

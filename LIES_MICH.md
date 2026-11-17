@@ -1,4 +1,4 @@
-# GEISS, eine interessante, sichere Programmiersprache!
+# GEISS, eine imperative, starke Programmiersprache!
 
 Dateien beginnend mit _ut sind unit tests. Sie sind weder wichtig noch ge-
 winnerbringend für das Projekt. Sie sind einfach dazu da, damit ich weiss,

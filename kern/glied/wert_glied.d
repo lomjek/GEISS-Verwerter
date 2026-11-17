@@ -28,7 +28,7 @@ class Wert_Glied : Glied
 
   override public void schreibe_baum()
   {
-    schreibe_schön_wert(wert);
+    write(wert.als_string(Str_conv_typ.AST));
   }
 
   override public string toString() const

@@ -1,8 +1,11 @@
 module liste;
 
 import fehler;
-import ext.prints;
-import wert;
+import wert.wert : Wert;
+import wert.wert_typ : WertTyp;
+import wert.wandel : als_string;
+
+import ext.prints : Str_conv_typ;
 
 import std.conv : to;
 
@@ -110,7 +113,7 @@ struct Liste
       if (!first_run)
         str ~= ", ";
 
-      str ~= als_schön_string(wert);
+      str ~= wert.als_string(Str_conv_typ.AUSGABE);
 
       first_run = false;
     }

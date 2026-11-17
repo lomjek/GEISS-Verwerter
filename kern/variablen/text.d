@@ -112,7 +112,6 @@ Text als_wert_text(dstring[] wort_liste, ulong* wort_index)
   if (rest_erstes.endsWith(delim))
   {
     dstring inhalt = rest_erstes[0 .. $ - delim.length];
-    (*wort_index)++;
     return Text(inhalt.to!string);
   }
 

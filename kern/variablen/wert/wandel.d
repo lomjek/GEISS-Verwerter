@@ -14,26 +14,28 @@ import std.conv : to;
 
 // @ {} [] # \ || != ~
 
+public
 string als_string(const ref Wert w, Str_conv_typ sct)
 {
   string wert_str;
-  if (w.typ == WertTyp.NATÜRLICHE_ZAHL)
+  final switch (w.typ)
   {
+  case WertTyp.NATÜRLICHE_ZAHL:
     const Nzahl nz = *w.nzahl;
     wert_str = zahl.wandel.als_string(nz, sct);
-  }
-  else if (w.typ == WertTyp.GANZE_ZAHL)
-  {
+    break;
+
+  case WertTyp.GANZE_ZAHL:
     const Gzahl gz = *w.gzahl;
     wert_str = zahl.wandel.als_string(gz, sct);
-  }
-  else if (w.typ == WertTyp.ZAHL)
-  {
+    break;
+
+  case WertTyp.ZAHL:
     const Zahl z = *w.zahl;
     wert_str = zahl.wandel.als_string(z, sct);
-  }
-  else if (w.typ == WertTyp.TEXT)
-  {
+    break;
+
+  case WertTyp.TEXT:
     if (sct != Str_conv_typ.AUSGABE)
       wert_str = "\"";
 
@@ -41,15 +43,28 @@ string als_string(const ref Wert w, Str_conv_typ sct)
 
     if (sct != Str_conv_typ.AUSGABE)
       wert_str ~= "\"";
-  }
-  else if (w.typ == WertTyp.WAHRHEIT)
-  {
+
+    break;
+
+  case WertTyp.WAHRHEIT:
     bool wahrheit = *w.wahrheit;
     wert_str = wahrheit ? "wahr" : "falsch";
-  }
-  else {
+    break;
+
+  case WertTyp.LISTE:
+    const Liste li = *w.liste;
+    wert_str = li.toString; //TODO: ANDERE FUNKTION REINFETZEN
+    break;
+
+  case WertTyp.FUNKTION:
     if (sct != Str_conv_typ.AUSGABE)
       return "W(" ~ w.typ.to!string ~ ")";
+    break;
+
+  case WertTyp.INVALID:
+    if (sct != Str_conv_typ.AUSGABE)
+      return "W(" ~ w.typ.to!string ~ ")";
+    break;
   }
 
   if (sct == Str_conv_typ.AUSGABE)
@@ -57,4 +72,3 @@ string als_string(const ref Wert w, Str_conv_typ sct)
 
   return "W(" ~ w.typ.to!string ~ " | " ~ wert_str ~ ")";
 }
-

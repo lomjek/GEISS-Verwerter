@@ -4,7 +4,7 @@ schreibe("Ich denke mir eine Zahl zwischen 1 und 100")
 ganze zahl zu_erraten <- zufällige_zahl(1, 100)
 
 solange nicht guess = zu_erraten {
-	guess <- als_zahl(eingabe("Errate meine Zahl:"))
+	guess <- als_zahl(eingabe("Errate meine Zahl: "))
 
 	falls guess = zu_erraten {
 		schreibe("Du hast es geschafft!")
