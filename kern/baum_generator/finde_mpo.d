@@ -19,6 +19,7 @@ enum Aktion_Gewicht
   FUNKTION_ABRUFEN,
   FUNTKION_ERSTELLEN,
 
+  PRO_VON,
   SOLANGE,
   WIEDERHOLE,
 
@@ -76,11 +77,13 @@ struct MPO
   ulong value = 0;
   ulong index = 0;
 
-  string toString() const @safe pure nothrow
+  pure nothrow @safe
+  string toString() const
   {
     return "MPO(" ~ value.to!string ~ " at index " ~ index.to!string ~ ")";
   }
 
+  pure nothrow @safe @nogc
   void passe_an(Aktion_Gewicht op, ulong index)
   {
     if (links_gebunden.contains(op) && this.value <= op)
@@ -135,6 +138,8 @@ MPO finde_MPO(Glied[] glieder_liste)
       current_mpo.passe_an(Aktion_Gewicht.FUNTKION_ERSTELLEN, i);
     else if (glied.is_class!Nicht_Glied)
       current_mpo.passe_an(Aktion_Gewicht.NICHT, i);
+    else if (glied.is_class!Pro_Von_BlockGlied)
+      current_mpo.passe_an(Aktion_Gewicht.PRO_VON, i);
 
   }
 

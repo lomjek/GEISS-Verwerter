@@ -11,3 +11,5 @@ schreibe(simpsons[1])
 schreibe(simpson[0])
 schreibe(hallo)
 schreibe(indizes(hallo));
+
+pro nzahl i von indizes(hallo) schreibe(i)

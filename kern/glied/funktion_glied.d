@@ -223,7 +223,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
       return Wert();
 
     case MethodenTyp.EINGABE:
-      Wert text = *cast(Wert*) lies_variable(bereich, "Aufforderung").wert;
+      Wert text = *cast(Wert*) lies_variable(bereich, "aufforderung").wert;
       write(text.als_string(Str_conv_typ.AUSGABE));
 
       string eingabe = readln();
@@ -263,10 +263,10 @@ class EingebauteFunktion_Glied : Funktion_Glied
       return Wert();
 
     case MethodenTyp.INDIZES:
-      Wert orig_liste = *cast(Wert*) lies_variable(bereich, "liste").wert;
+      Wert orig_liste = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
 
       if (orig_liste.typ != WertTyp.LISTE)
-        throw new Fehler("Die Funktion 'inidzes' braucht eine Liste als Eingabe!");
+        throw new Fehler("Die Funktion 'indizes' braucht eine Liste als Eingabe!");
 
       Liste l = *orig_liste.liste;
       Liste indizes = Liste([], new Wert[](l.länge));
@@ -274,7 +274,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
       for (size_t i = 0; i < l.länge; i++)
         indizes.werte[i] = Wert(new Nzahl(i));
 
-      setze_variable(bereich, "indizes", new Wert(&indizes));
+      setze_variable(bereich, "indizes", new Wert(new Liste(indizes)));
 
       return Wert();
     }
@@ -315,7 +315,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
     }
     else if (typ == MethodenTyp.EINGABE)
     {
-      parameter ~= new Erstelle_Variable_Glied("Aufforderung", WertTyp.TEXT);
+      parameter ~= new Erstelle_Variable_Glied("aufforderung", WertTyp.TEXT);
       Erstelle_Variable_Glied evg = new Erstelle_Variable_Glied("ausgabe", WertTyp.TEXT);
       return_values ~= evg;
     }
@@ -337,7 +337,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
     }
     else if (typ == MethodenTyp.INDIZES)
     {
-      parameter ~= new Erstelle_Variable_Glied("liste", WertTyp.LISTE);
+      parameter ~= new Erstelle_Variable_Glied("eingabe", WertTyp.LISTE);
       return_values ~= new Erstelle_Variable_Glied("indizes", WertTyp.LISTE);
     }
 

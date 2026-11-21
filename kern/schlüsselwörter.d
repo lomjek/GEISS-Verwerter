@@ -4,7 +4,7 @@ import ext.string : strip;
 
 import glied.glied : SW_Glied, Glied, Nicht_Glied;
 import glied.block_glied : Falls_BlockGlied, Sonst_BlockGlied;
-import glied.schleife_glied : Solange_BlockGlied, Wiederhole_BlockGlied;
+import glied.schleife_glied : Solange_BlockGlied, Wiederhole_BlockGlied, Pro_Von_BlockGlied;
 import glied.signal_glied : Beende_Programm_Glied, Beende_Funktion_Glied;
 
 import fehler.parse_fehler : Parse_Fehler;
@@ -18,7 +18,7 @@ enum SchlüsselWort
   INVALID,
 
   PRO,
-  DER,
+  VON,
 
   FALLS,
   SONST,
@@ -36,7 +36,7 @@ enum SchlüsselWort
 
 immutable dstring[SchlüsselWort] schlüsselWort_dict = [
   SchlüsselWort.PRO: "pro"d,
-  SchlüsselWort.DER: "von"d,
+  SchlüsselWort.VON: "von"d,
 
   SchlüsselWort.FALLS: "falls"d,
   SchlüsselWort.SONST: "sonst"d,
@@ -90,6 +90,9 @@ Glied baue_richtiges_sw_glied(SchlüsselWort sw)
 
   case SchlüsselWort.NICHT:
     return new Nicht_Glied();
+
+  case SchlüsselWort.PRO:
+    return new Pro_Von_BlockGlied();
 
   default:
     return new SW_Glied(sw);

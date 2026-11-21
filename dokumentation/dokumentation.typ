@@ -41,18 +41,65 @@
   }
 }
 
+//geiss
+#let geiss(code) = box(
+  fill: rgb("f1f3f5"),
+  inset: (x: 4pt, y: 0pt),
+  outset: (y: 3pt),
+  radius: 3pt,
+  text(font: "DejaVu Sans Mono", size: 0.8em)[
+    #show regex("\b(variable|zahl|nzahl|natürliche|gzahl|ganze|text|liste)\b"): it => text(fill: rgb("#01007b"), it)
+
+    #show regex("(<-|->|\b(falls|sonst|solange|nicht)\b)"): it => text(fill: rgb("#4f003d"), it, weight: "bold")
+
+    #show regex("\"[^\"]*\"|\b[a-zA-Z_]\w*\b"): it => {
+      let s = it.text
+      if s.starts-with("\"") {
+        text(fill: rgb("#3c7800"), it)
+      } else {
+        text(fill: rgb("#007d84"), it)
+      }
+    }
+
+    #code
+  ]
+)
+
+#let geiss_g(code) = block(
+  fill: rgb("f1f3f5"),
+  inset: (x: 4pt, y: 0pt),
+  outset: (y: 3pt),
+  radius: 3pt,
+  width: 100%,
+  text(font: "DejaVu Sans Mono", size: 1.2em)[
+    #show regex("\b(funktion|variable|zahl|nzahl|natürliche|gzahl|ganze|text|liste)\b"): it => text(fill: rgb("#01007b"), it)
+
+    #show regex("(<-|->|\b(falls|sonst|solange|nicht)\b)"): it => text(fill: rgb("#4f003d"), it, weight: "bold")
+
+    #show regex("\"[^\"]*\"|\b[a-zA-Z_]\w*\b"): it => {
+      let s = it.text
+      if s.starts-with("\"") {
+        text(fill: rgb("#3c7800"), it)
+      } else {
+        text(fill: rgb("#007d84"), it)
+      }
+    }
+
+    #code
+  ]
+)
+
 // Titel
 #align(center)[
   #text(size: 2em, weight: "extrabold")[Dokumentation für]\
   #text(size: 2em, weight: "bold")[GEISS,] \
-  #text(size: 1.5em)[eine interessante, sichere Sprache] \
+  #text(size: 1.5em)[eine imperative, starke Sprache] \
 ]
 
 // Einleitung
-GEISS ist eine Programmiersprache, welche ich für meine Maturaarbeit implementiert habe. Es ist eine interpretierte Sprache. Die Variablen werden wie in Lisp#sub[1] 
-gespeichert. Anderes Dokument, etc...
+GEISS ist eine Programmiersprache, welche ich für meine Maturaarbeit implementiert habe. Es ist eine interpretierte Sprache.
 
-Diese Dokumentation ist die eigentliche, offizielle Dokumentation, welche ich führe. Sie sollte immer für den Release aktuell sein und mit dem Code übereinstimmen. Falls das nicht der Fall ist, dann 
+Diese Dokumentation ist die eigentliche, offizielle Dokumentation, welche ich führe. Sie sollte immer für den Release aktuell sein und mit dem Code übereinstimmen. Falls das nicht der Fall ist, dann schreiben Sie mir bitte.
 
 // Table of Contents
 #outline(indent: auto)
@@ -124,7 +171,43 @@ Man kann Text mit "text" definieren. Ein Text kann Text enthalten. Es gibt prakt
 == Wahrheiten
 
 = Methoden
-Hier ist noch eine Liste von allen Methoden, welche schon in der Sprache eigebaut sind. Ich gebe nur ihre Signature und beschreibe, was sie macht...
+Es gibt einige Funktionen, welche schon vom Beginn des Programmes benutztbar sind. In meiner Sprache werden sie "Methoden" genannt. Es folgt eine Liste, welche die Funktionsweisen aller Methoden beschreibt.
+
+#geiss_g[```geiss
+funktion schreibe(variable eingabe)
+```]
+
+Diese Funktion schreibt die Variable, welche eingegeben wurde auf eine schön formatierte Art in die Ausgabe.
+
+#geiss_g[```geiss
+funktion als_text(zahl eingabe) -> text ausgabe
+```]
+
+Wandelt eine Zahl (es kann auch eine natürliche oder ganze Zahl sein) in einen Text um. Für die Umwandlung wird das Dezimalsystem benutzt.
+
+#geiss_g[```geiss
+funktion als_zahl(text eingabe) -> zahl ausgabe
+```]
+
+Liest einen Text und wandelt ihn in eine Zahl um. Falls der Text keine gültige Zahl enthält, stürzt das Programm ab.
+
+#geiss_g[```geiss
+funktion eingabe(text aufforderung) -> text ausgabe
+```]
+
+Schreibt die Aufforderung in die Ausgabe und wartet dann, bis der Nutzer seinen Text eingegeben hat und anschliessend ENTER gedrückt hat. Man kann noch nicht mit Pfeilen den Zeiger verschieben.
+
+#geiss_g[```geiss
+funktion zufällige_zahl(ganze zahl unteres_limit, ganze zahl oberes_limit) -> ganze zahl rzahl
+```]
+
+Erzeugt eine zufällige ganze Zahl im Bereich zwischen dem unteren und dem oberen Limit.
+
+#geiss_g[```geiss
+funktion indizes(liste liste) -> liste indizes
+```]
+
+Gibt eine Liste mit den Indizes der übergebenen Liste zurück. (Es ist nütztlich für pro/von-Schleifen)
 
 = Zahlen und Listen
 
@@ -137,19 +220,40 @@ als sehr nützlich auszeichnen.
 <liste_operatoren>
 
 Unten finden Sie eine Tabelle mit allen Operatoren mit ihrem internen
-Namen, ihrem Charakter und ihrem Nutzten.
+Namen, ihrem Charakter und ihrem Nutzen in der Reihenfolge ihrer Definition im Quelltext.
 #figure(
   align(center)[#table(
     columns: (auto,) * 2 + (1fr,),
     inset: 6pt,
-    [PUNKT], [`.`], [Nachkommastellen bei Zahlen],
-    [KOMMA], [`,`], [Aufzählungen bei Listen],
     [PLUS], [`+`], [Addition von Werten], 
     [MINUS], [`-`], [Subtraktion von Werten],
     [MAL], [`*`], [Multiplikation von Werten],
-    [DURCH], [`/`], [Division von Werten], 
-    [RÜCK_PFEIL], [`←` _oder_ `<-`], [Setzen von Variablen], 
-    [VOR_PFEIL], [`→` _oder_ `->`], [Deklaration von Rückgabe der Funktionen], 
+    [GETEILT], [`/`], [Division von Werten], 
+    [HOCH], [`^`], [Potenzierung von Werten], 
+    [GLEICH], [`=`], [Vergleich auf Gleichheit], 
+    [RÜCK_PFEIL], [`←` _oder_ `<-`], [Zuweisung / Setzen von Variablen], 
+    [VOR_PFEIL], [`→` _oder_ `->`], [Deklaration von Rückgabewerten bei Funktionen], 
+    [KLAMMER_AUF], [`(`], [Öffnende runde Klammer (Gruppierung, Funktionsaufrufe)], 
+    [KLAMMER_ZU], [`)`], [Schliessende runde Klammer], 
+    [ECKIGE_KLAMMER_AUF], [`[`], [Öffnende eckige Klammer (Listen, Indexzugriff, Typisierung)], 
+    [ECKIGE_KLAMMER_ZU], [`]`], [Schliessende eckige Klammer], 
+    [KLEINER_ALS], [`<`], [Vergleich: kleiner als], 
+    [GRÖSSER_ALS], [`>`], [Vergleich: grösser als], 
+    [GRÖSSER_GLEICH], [`≥` _oder_ `>=`], [Vergleich: grösser oder gleich], 
+    [KLEINER_GLEICH], [`≤` _oder_ `<=`], [Vergleich: kleiner oder gleich], 
+    [GESCHWUNGENE_KLAMMER_AUF], [`{`], [Öffnende geschweifte Klammer (Codeblöcke)], 
+    [GESCHWUNGENE_KLAMMER_ZU], [`}`], [Schliessende geschweifte Klammer], 
+    [PUNKT], [`.`], [Dezimaltrennzeichen bei Zahlen],
+    [KOMMA], [`,`], [Trennzeichen bei Aufzählungen (Listen, Parameter)],
+    [DOPPELPUNKT], [`:`], [Doppelpunkt], 
+    [SEMIKOLON], [`;`], [Trennzeichen / Befehlsabschluss], 
+    [NEUE_LINIE], [`\n`], [Zeilenumbruch (Separator)], 
+    [ANFANG_LINIE], [`\r`], [Wagenrücklauf (Separator)], 
+    [TAB], [`\t`], [Tabulator (Separator)], 
+    [ANFANG_KOMMENTAR], [`«` _oder_ `/*`], [Beginn eines mehrzeiligen Kommentars], 
+    [ENDE_KOMMENTAR], [`»` _oder_ `*/`], [Ende eines mehrzeiligen Kommentars], 
+    [ANFANG_LINIE_KOMMENTAR], [`¶` _oder_ `//`], [Einzeiliger Kommentar bis zum Zeilenende], 
+    [ANFÜGEN], [`↤` _oder_ `<+`], [Anfügen eines Elements an eine Liste], 
   )], 
   caption: [Liste der Operatoren und ihrem Nutzen in GEISS.\
     Quelle: Quellencode des Interpreters: /kern/operatoren.d]
@@ -157,4 +261,27 @@ Namen, ihrem Charakter und ihrem Nutzten.
 
 == Liste der Schlüsselwörter
 <liste_schlusselworter>
+
+Unten finden Sie eine Tabelle mit allen Schlüsselwörtern mit ihrem internen
+Namen, ihrer Syntax und ihrem Nutzen.
+#figure(
+  align(center)[#table(
+    columns: (auto,) * 2 + (1fr,),
+    inset: 6pt,
+    [FALLS], [`falls`], [Bedingte Verzweigung],
+    [SONST], [`sonst`], [Alternativzweig einer Verzweigung],
+    [SOLANGE], [`solange`], [Bedingungsgesteuerte Schleife (while)],
+    [WIEDERHOLE], [`wiederhole`], [Zählschleife: Wiederholt einen Block N Mal],
+    [MAL], [`mal`], [Zusatzwort für die Zählschleife (`wiederhole N mal`)],
+    [NICHT], [`nicht`], [Logische Negation einer Bedingung],
+    [PRO], [`pro`], [Iterieren über Elemente oder Indizes],
+    [VON], [`von`], [Herkunftsangabe für Iterationen],
+    [BEENDE_FUNKTION], [`beende funktion`], [Vorzeitiges Beenden einer Funktion],
+    [BEENDE_SCHLEIFE], [`beende schleife`], [Vorzeitiges Abbrechen einer Schleife (break)],
+    [BEENDE_PROGRAMM], [`beende programm`], [Beendet das gesamte Programm bzw. die REPL-Sitzung],
+  )], 
+  caption: [Liste der Schlüsselwörter und ihrem Nutzen in GEISS.\
+    Quelle: Quellencode des Interpreters: /kern/schlüsselwörter.d]
+)
+
 

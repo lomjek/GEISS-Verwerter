@@ -12,6 +12,8 @@ import operatoren;
 
 import std.stdio : write, writeln;
 
+// @ {} [] # \ || != ~
+
 Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
 {
   Glied glied = glieder_liste[glied_index];
@@ -42,6 +44,9 @@ Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
 
   else if (glied.is_class!Nicht_Glied)
     return baue_glied_Nicht_Glied(cast(Nicht_Glied) glied, glieder_liste, glied_index);
+
+  else if (glied.is_class!Pro_Von_BlockGlied)
+    return baue_glied_Pro_Von_Glied(cast(Pro_Von_BlockGlied) glied, glieder_liste, glied_index);
 
   writeln("WARNUNG: Nichts wurde geparst.");
   return glieder_liste;
@@ -236,7 +241,7 @@ Glied[] baue_glied_Wiederhole_BlockGlied(Wiederhole_BlockGlied glied, Glied[] gl
 Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[] glieder_liste, ulong glied_index)
 {
   if ((glied_index + 1) >= glieder_liste.length)
-    throw new Parse_Fehler("Die deklaration der Funktion ist zu nahe am Ende...");
+    throw new Parse_Fehler("Die deklaration der Funktion ist zu nahe am Ende... (1)");
 
   if (glieder_liste[glied_index + 1].is_class!BlockGlied)
   {
@@ -315,6 +320,35 @@ Glied[] baue_glied_Nicht_Glied(Nicht_Glied glied, Glied[] glieder_liste, ulong g
     throw new Parse_Fehler("Es gibt nichts, was man negieren könnte...");
 
   glied.zu_negieren = glieder_liste[glied_index + 1];
+  glieder_liste = glieder_liste.remove(glied_index + 1);
+  return glieder_liste;
+}
+
+Glied[] baue_glied_Pro_Von_Glied(Pro_Von_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+{
+  if (glied_index + 4 >= glieder_liste.length)
+  {
+    throw new Parse_Fehler("PRO/VON Block zu nahe am Ende");
+  }
+
+  SW_Glied sw_glied = cast(SW_Glied) glieder_liste[glied_index + 2];
+  if (sw_glied is null || sw_glied.sw != SchlüsselWort.VON)
+    throw new Parse_Fehler("Es braucht ein VON zwei stellen nach dem Pro");
+
+  if (!glieder_liste[glied_index + 1].is_class!Erstelle_Variable_Glied)
+    throw new Parse_Fehler("Nach dem Wort PRO muss man eine Variable erstellen.");
+
+  glied.variable = cast(Erstelle_Variable_Glied) glieder_liste[glied_index + 1];
+  glied.liste = glieder_liste[glied_index + 3];
+
+  if (glieder_liste[glied_index + 4].instanceof!BlockGlied)
+    glied.aktionen = (cast(BlockGlied) glieder_liste[glied_index + 4]).aktionen;
+  else
+    glied.aktionen ~= glieder_liste[glied_index + 4];
+
+  glieder_liste = glieder_liste.remove(glied_index + 4);
+  glieder_liste = glieder_liste.remove(glied_index + 3);
+  glieder_liste = glieder_liste.remove(glied_index + 2);
   glieder_liste = glieder_liste.remove(glied_index + 1);
   return glieder_liste;
 }
