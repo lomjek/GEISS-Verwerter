@@ -9,5 +9,5 @@ liste hallo <- simpson + simpsons
 
 schreibe(simpsons[1])
 schreibe(simpson[0])
-hallo
-simpson
+schreibe(hallo)
+schreibe(indizes(hallo));

@@ -30,6 +30,11 @@ unittest
 
 		writeln("        Nzahl(arr).werte != arr.ptr (dup)");
 		assert(Nzahl(arr).werte != arr.ptr);
+
+		writeln("        Nzahl(size_t)");
+		assert(Nzahl(size_t(0)) == Nzahl([0x00]));
+		assert(Nzahl(size_t(300)) == Nzahl([0x2C, 0x01]));
+		assert(Nzahl(size_t(1000)) == Nzahl([0xE8, 0x03]));
 	}
 	{ // opCmp
 		writeln("    opCmp");

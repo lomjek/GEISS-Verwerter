@@ -14,6 +14,7 @@ import ext.algorithm : random_zahl;
 
 import fehler;
 import zahl;
+import liste;
 import text;
 
 import std.stdio : writeln, write, readln;
@@ -177,6 +178,7 @@ enum MethodenTyp : ubyte
   ALS_ZAHL,
   EINGABE,
   ZUFÄLLIGE_ZAHL,
+  INDIZES,
 }
 
 class EingebauteFunktion_Glied : Funktion_Glied
@@ -185,7 +187,7 @@ class EingebauteFunktion_Glied : Funktion_Glied
 
   override public Wert verwerte(uint bereich)
   {
-    switch (typ)
+    final switch (typ)
     {
     case MethodenTyp.PRINT:
       Wert text = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
@@ -260,8 +262,20 @@ class EingebauteFunktion_Glied : Funktion_Glied
 
       return Wert();
 
-    default:
-      writeln("Noch nicht implementiert");
+    case MethodenTyp.INDIZES:
+      Wert orig_liste = *cast(Wert*) lies_variable(bereich, "liste").wert;
+
+      if (orig_liste.typ != WertTyp.LISTE)
+        throw new Fehler("Die Funktion 'inidzes' braucht eine Liste als Eingabe!");
+
+      Liste l = *orig_liste.liste;
+      Liste indizes = Liste([], new Wert[](l.länge));
+
+      for (size_t i = 0; i < l.länge; i++)
+        indizes.werte[i] = Wert(new Nzahl(i));
+
+      setze_variable(bereich, "indizes", new Wert(&indizes));
+
       return Wert();
     }
   }
@@ -320,6 +334,11 @@ class EingebauteFunktion_Glied : Funktion_Glied
       parameter ~= new Erstelle_Variable_Glied("oberes_limit", WertTyp.GANZE_ZAHL);
 
       return_values ~= new Erstelle_Variable_Glied("rzahl", WertTyp.GANZE_ZAHL);
+    }
+    else if (typ == MethodenTyp.INDIZES)
+    {
+      parameter ~= new Erstelle_Variable_Glied("liste", WertTyp.LISTE);
+      return_values ~= new Erstelle_Variable_Glied("indizes", WertTyp.LISTE);
     }
 
     super(parameter, return_values, new BlockGlied());

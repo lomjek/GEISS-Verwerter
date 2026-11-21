@@ -13,7 +13,7 @@ import std.conv : to;
 
 struct Liste
 {
-  WertTyp[] fix_wert_typ;
+  WertTyp[] fix_wert_typ; //rekursiver typ für das Fixieren von wertTypen
   Wert[] werte;
 
   this(const WertTyp[] fixer_wert_typ, Wert[] werte)

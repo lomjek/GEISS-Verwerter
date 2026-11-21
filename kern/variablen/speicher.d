@@ -81,7 +81,12 @@ static this()
         "zufällige_zahl"d,
         VariablenTyp.FUNKTION,
         cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.ZUFÄLLIGE_ZAHL))
-      ) //Hier müssten so Sachen sein wie name der Datei, eine exit Funktion, usw, usw...
+      ),
+      Variable(
+        "indizes"d,
+        VariablenTyp.FUNKTION,
+        cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.INDIZES))
+      )
     ]);
 }
 
