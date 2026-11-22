@@ -1,16 +1,44 @@
-# GEISS, eine imperative, starke Programmiersprache!
+# GEISS, eine imperative, starke (Programmier-)Sprache!
 
-Dateien beginnend mit _ut sind unit tests. Sie sind weder wichtig noch ge-
-winnerbringend für das Projekt. Sie sind einfach dazu da, damit ich weiss,
-dass ich keine Denkfehler gemacht habe.
+![GEISS](./kunst/GEISS-2.png)
 
-## Über das Projekt
+## Was ist GEISS?
 
-Ich gehe in Zürich zur Schule und hier mussten wir eine Maturaarbeit zum
-Abschluss der Schule schreiben. Man konnte wählen, was einem das Herz be-
-gehrte und ich hatte schön länger den Wunsch, einmal in meinem Leben eine
-Programmiersprache zu bauen. Also habe ich meine Maturaarbeit zum Anlass
-genommen, eine Programmiersprache zu erstellen.
+GEISS ist eine Programmiersprache, welche ich erfunden habe. Ich habe einen
+Interpreter geschrieben, welchen ich hier, auf GitHub veröffentlicht habe.
+Für den Interpreter habe ich die Sprache "D" benutzt. Grund dafür ist, dass
+sie schnell läuft, aber trotzdem sehr angenehm zu schreiben ist.
+
+Der Interpreter ist meine Maturitätsarbeit. Ich gehe an die Kantonsschule
+Zürich Nord und wir mussten zum Abschluss der Schule eine eigenständige
+grössere Arbeit schreiben. Das Projekt dauerte ein knappes Jahr.
+Ich hatte sehr viel Freude an diesem Projekt. Innerhalb der Maturitätsarbeit
+konnte ich die Version Alpha.1 fertigstellen.
+
+## Wie kann ich GEISS benutzten?
+
+Sie können sich entweder ein vorgebautes Release holen, auf der rechten
+Seite in GitHub, oder sich den Interpreter selber bauen. Wenn man diese
+Datei hat, kann man sie direkt ausführen. So kommt man in ein REPL, in
+welchem man sich mit der Sprache vertraut machen kann.
+
+Für grössere Projekte empfiehlt es sich, eine Datei zu erstellen
+(Es wäre toll, wenn sie auf ".geiss" endet).
+
+Man kann sie dann ausführen wie folgt: 
+
+```sh
+./geiss <Dateipfad>
+```
+
+## Hallo, Welt!
+
+```geiss
+schreibe("Hallo, Welt!") 
+```
+
+Für mehrere Beispiele und für eine Anleitung, schauen sie das PDF im 
+Ordner "dokumentation/" an.
 
 ## Bauen des Projektes
 

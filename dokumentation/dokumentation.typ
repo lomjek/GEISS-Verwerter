@@ -48,9 +48,9 @@
   outset: (y: 3pt),
   radius: 3pt,
   text(font: "DejaVu Sans Mono", size: 0.8em)[
-    #show regex("\b(variable|zahl|nzahl|natürliche|gzahl|ganze|text|liste)\b"): it => text(fill: rgb("#01007b"), it)
+    #show regex("\b(variable|zahl|nzahl|natürliche|gzahl|ganze|text|liste|wahrheit)\b"): it => text(fill: rgb("#01007b"), it)
 
-    #show regex("(<-|->|\b(falls|sonst|solange|nicht)\b)"): it => text(fill: rgb("#4f003d"), it, weight: "bold")
+    #show regex("(<-|->|\b(falls|sonst|solange|nicht|wiederhole|mal|pro|von|beende|programm|schleife)\b)"): it => text(fill: rgb("#4f003d"), it, weight: "bold")
 
     #show regex("\"[^\"]*\"|\b[a-zA-Z_]\w*\b"): it => {
       let s = it.text
@@ -72,9 +72,9 @@
   radius: 3pt,
   width: 100%,
   text(font: "DejaVu Sans Mono", size: 1.2em)[
-    #show regex("\b(funktion|variable|zahl|nzahl|natürliche|gzahl|ganze|text|liste)\b"): it => text(fill: rgb("#01007b"), it)
+    #show regex("\b(funktion|variable|zahl|nzahl|natürliche|gzahl|ganze|text|liste|wahrheit)\b"): it => text(fill: rgb("#01007b"), it)
 
-    #show regex("(<-|->|\b(falls|sonst|solange|nicht)\b)"): it => text(fill: rgb("#4f003d"), it, weight: "bold")
+    #show regex("(<-|->|\b(falls|sonst|solange|nicht|wiederhole|mal|pro|von|beende|programm|schleife)\b)"): it => text(fill: rgb("#4f003d"), it, weight: "bold")
 
     #show regex("\"[^\"]*\"|\b[a-zA-Z_]\w*\b"): it => {
       let s = it.text
@@ -92,83 +92,348 @@
 // Titel
 #align(center)[
   #text(size: 2em, weight: "extrabold")[Dokumentation für]\
+    #image("./Titelblatt.png");
   #text(size: 2em, weight: "bold")[GEISS,] \
   #text(size: 1.5em)[eine imperative, starke Sprache] \
 ]
 
+
 // Einleitung
-GEISS ist eine Programmiersprache, welche ich für meine Maturaarbeit implementiert habe. Es ist eine interpretierte Sprache.
+GEISS ist eine Programmiersprache, welche ich für meine Maturaarbeit an der Kantonsschule Zürich Nord implementiert habe.
+Es ist eine interpretierte Sprache.
 
 Diese Dokumentation ist die eigentliche, offizielle Dokumentation, welche ich führe. Sie sollte immer für den Release aktuell sein und mit dem Code übereinstimmen. Falls das nicht der Fall ist, dann schreiben Sie mir bitte.
+
+#pagebreak()
 
 // Table of Contents
 #outline(indent: auto)
 
 = Wie kann ich GEISS benützten?
 
-GEISS ist eine interpretierte Sprache. Um GEISS also ausführen zu können, braucht man den Interpreter. Der Interpreter ist erhältlich bei #link("https://github.com/lomjek/GEISS-Verwerter")[GitHub]. Man kann ihn aus dem Quellencode selber bauen (Anweisungen dazu sind auf GitHub).
+GEISS ist eine interpretierte Sprache. Um GEISS also ausführen zu können, braucht man den Interpreter.
+Der Interpreter ist erhältlich bei #link("https://github.com/lomjek/GEISS-Verwerter")[GitHub].
+Man kann ihn aus dem Quellencode selber bauen (Anweisungen dazu sind auf GitHub).
+Es gibt auch unter dem Tab release kompilierte Interpreter.
 
-Wenn man den kompilierten Interpreter hat, kann man die entweder einfach laufen lassen. Das öffnet ein REPL, wo man Sachen austesten kann. Wenn man grössere Programme schreiben und auch speichern will, soll man eine Datei erstellen (präferiert wäre mit der Endung: "\*.geiss").
+Man kann die Datei durch Doppelklicken öffnen. Das startet ein sogenanntes REPL.
+Im REPL kann man sich mit der Sprache vertraut machen und Befehle ausprobieren.
+
+Für grössere Projekte wäre es empfehlenswert, deb Quellencode in einer Datei zu speichern.
+Es wäre toll, wenn die Datei mit ".geiss" endet.
+Um dieses Programm auszuführen, muss man in einem Terminal das Programm aufrufen und ihm als erstes und einziges Argument den Dateipfad zuschicken:
+
+
+```sh
+./geiss <Dateipfad>
+```
+
+Wenn man mehrere Argumente hineinschreibt, oder einen invaliden Pfad aufschreibt, stürtzt das Programm ab.
 
 == Hallo Welt!
 
-```geiss
+#geiss_g[```geiss
 schreibe("Hallo Welt!") 
-```
+```]
 
 Das ist der einfachste Weg, um "Hallo Welt" in die Ausgabe zu schreiben.
 Wenn man "Hallo Welt" zuerst in einer Variablen speicher möchte, bevor man es in 
 die Ausgabe schreibt, geht man wie folgt vor:
 
-```geiss
+#geiss_g[```geiss
 text gruss <- "Hallo Welt!"
 
 schreibe(gruss) 
-```
+```]
 
-= Verlauf des Interpreters
+= Kommentare
 
-Ein Interpreter liest den Quellencode und führt ihn sofort aus. 
-Um das zu erreichen, ist der Interpreter in mehrere Teile aufgetrennt.
-Die Unterkapitel erklären in der richtigen Reihenfolge, wie man vom Quellencode bis
-zum Ergebnis der Programms gelangt.  
+In Geiss funktionieren die Kommentare, wie in der Sprache "C":
 
-== Lesen der Dateien
-<lesen-der-dateien>
+#geiss_g[```geiss
+// Das hier ist ein Kommentar, welcher nur eine Linie lang geht...
 
-Da GEISS in D geschrieben wurde, weiss ich nicht alle Details des Lesen
-der Dateien, allerdings kann ich aber gut erklären, was passiert, wie
-eine Datei von meinem Interpreter verarbeitet wird.
-
-#strong[1.] Wenn dein Programm gelesen wird, weden zuerst alle
-Operatoren gesucht und es wird um sie ein Leerschlag eingefügt. \"2+3\"
-\=\> \"2 + 3\". Eine Liste von Operatoren findest du
-#link(<liste_operatoren>)[hier.]
-
-#strong[2.] Der lange Text wird in eine grosse Liste von Wörtern
-aufgeteilt.
-
-#strong[3.] Jedes der Wörter in der Liste wird zu einem Glied
-umfunktioniert. Ab diesem Punkt hat man mit dem Text keine Berührung
-mehr. Von da an wird nur die lange Liste an Gliedern beachtet.
-
-== Parsen
-
-== Ausführen
+/*
+Das hier ist ein Kommentar, welcher sich über mehrere Linien ausbreiten kann.
+*/
+```]
 
 = Datentypen
 <Datentypen>
 
-Es hat in GEISS wenige Datentypen, aber das ist absichtlich so. Es hat noch keine Structs, aber es hat noch keine Structs, was heisst, dass ich sie noch implementieren muss. Die Sprache ist dynamisch, sie hat aber überprüfungen während der Laufzeit, welche sicherstellen können, dass die Typen richtig sind. Es ist stark typisiert, was heisst, dass man nicht einfach so Variablen umcasten kann.
+Es hat in GEISS wenige Datentypen, aber das ist absichtlich so.
+Ich möchte noch Structs und Wörterbücher (Dictionaries) implementieren, aber sonst keine weiteren Datentypen. 
+Die Sprache ist dynamisch, sie hat aber Überprüfungen während der Laufzeit, welche sicherstellen können, dass die Typen richtig sind.
+Es ist stark typisiert, was heisst, dass man nicht einfach so Variablen umcasten kann (mit der Ausnahme von Zahlen).
 
 == Zahlen
 
+Für Zahlen hat es drei Datentypen: "zahl", welche alle rationale Zahlen enthalten kann; "gzahl", welche alle ganzen Zahlen enthalten kann und "nzahl" für natürliche Zahlen.
+
+#geiss_g[```geiss
+zahl z <- -1234.465
+gzahl g <- -9
+nzahl n <- 42
+```]
+
+Zahlentypen sind speziell, weil der Interpreter sie automatisch umändert, wenn er einen anderen Zahlentyp braucht.
+Es gilt für diese erste Version, aber ich habe vor, es in weiteren Versionen rückgängig zu machen.
+
+Wenn man eine rationale Zahl eingibt, aber eine ganze Zahl braucht, verwirft der Interpreter den Bruch.
+Wenn man eine ganze Zahl eingibt und eine natürliche Zahl braucht, nimmt man den Betrag der Zahl.
+
+#geiss_g[```geiss
+gzahl gz <- -1234.465 // gz ist jetzt -1234
+nzahl nz <- -42 // nz ist jetzt 42
+```]
+
+Für die Zahlen funktionieren die mathematischen Operationen +, -, \*, /.
+Den Operator Hoch ("x hoch y") habe ich noch nicht implementiert.
+
 == Text
 
-Man kann Text mit "text" definieren. Ein Text kann Text enthalten. Es gibt praktisch kein Limit für die Länge, welcher nicht durch das Hardware oder das Betriebssystem bedingt sind. Man kann Text mit einfachen oder doppelten Quotes benutzten " '. Man kann sie auch mit dem Backslash vorher definieren. 
+Man kann Text mit "text" definieren. Ein Text kann Text enthalten.
+Es gibt praktisch kein Limit für die Länge, welcher nicht durch das Hardware oder das Betriebssystem bedingt sind.
+Man kann Text mit einfachen oder doppelten Quotes definieren, man kann auch Backslashes benutzten: #geiss[`"`], #geiss[`'`], #geiss[`\"`], #geiss[`\'`].
+
+#geiss_g[```geiss
+text var1 <- "Hallo"
+text var2 <- 'Hallo'
+text var3 <- \"Hallo\"
+text var4 <- \'Hallo\' 
+```]
+Alle diese definitionen sind gütlig und gleich.
+
+#geiss_g[```geiss
+text var5 <- "Hallo\' // Nicht geschlossener String...
+```]
+
+Wenn man zwei Texte addiert, dann klebt man sie einfach zusammen:
+
+#geiss_g[```geiss
+"Hallo" + 'Hallo' = "HalloHallo" //Diese Aussage ist wahr...
+```]
 
 == Listen
+
+Listen sind in meiner Sprache sehr flexibel:
+
+#geiss_g[```geiss
+liste sammlung <- [123, 345, 456, "Hallo", wahr]
+```]
+
+Solange eine Liste nicht typisiert ist, kann sie alle Datentypen enthalten. Eine Liste kann man typisieren wie folgt: 
+
+#geiss_g[```geiss
+liste[liste[text]] feld <- [
+	["ts", "ks", "ds", "ts"],
+	["bs", "bs", "bs", "bs"],
+	["bw", "bw", "bw", "bw"],
+	["tw", "dw", "kw", "tw"]
+]
+```]
+
+Das Typisieren funktioniert auch rekursiv. 
+Der Interpreter garantiert jetzt, dass alle Elemente die in der Liste "feld" sind, listen sind, welche text enthalten.
+
+Wenn man zwei Listen addiert, dann werden die zwei Listen nacheinander zusammengefügt.
+
+#geiss_g[```geiss
+liste sammlung2 <- [123, 345] + [456, "Hallo", wahr]
+```]
+
+Die Liste "sammlung2" ist jetzt identisch zur Liste "sammlung" von weiter oben.
+
+Um einer Liste ein Element hinzuzufügen, kann man den Operator "<+" benutzten.
+
+#geiss_g[```geiss
+[123, 345] <+ 456 // wird zu [123, 345, 456]
+```]
+
 == Wahrheiten
+
+Wahrheiten können entweder "wahr" oder "falsch" sein. Man definiert sie so:
+
+#geiss_g[```geiss
+wahrheit x <- wahr
+wahrheit y <- falsch
+```]
+
+Alle Operationen (wie +, - , \*, \/), welche man an Wahrheiten macht geben "falsch" zurück, weil man eigentlich an Wahrheiten keine Operationen machen soll.
+Um wahrheiten zu negieren, schreibt man ein nicht davor. 
+
+#geiss_g[```geiss
+nicht wahr // Gibt falsch zurück.
+```]
+
+== Funktionen
+
+Funktionen nehmen eine Eingabe, prozessieren diese und geben eine Ausgabe zurück.
+Man kann für eine Funktion mehrere Parameter definieren, allerdings nur eine Ausgabe.
+
+#geiss_g[```geiss
+funktion name(variable eingabe, variable eingabe2) -> variable ausgabe
+{ ... }
+```]
+
+Um eine Funktion abzurufen, schreibt man einfach
+
+#geiss_g[```geiss
+variable ret_val <- name(wahr, "y")
+```]
+
+Man kann Werte zurückgebe indem man sie in die Variable der Ausgabe schreibt:
+
+#geiss_g[```geiss
+funktion hallo() -> variable ausgabe
+{
+    ausgabe <- "Hallo"
+}
+```]
+Immer, wenn man die Funktion abruft, gibt sie den Text "Hallo" zurück.
+
+= Verzweigungen
+
+Um mit Bedingungen den Code unterschiedliche Wege einschlagen zu lassen, benutzt man das Schlüsselwort "falls":
+
+#geiss_g[```geiss
+wahrheit bedingung <- wahr
+
+falls bedingung {
+    schreibe("Hallo!")
+}
+```]
+
+Die Bedingung kann auch ein Vergleich sein, oder ein Funktionsaufruf, welcher eine Wahrheit zurückgibt.
+
+Dieses Programm schreibt "Hallo!" in die Ausgabe:
+#geiss_g[```geiss
+falls nicht 2 = 3 {
+    schreibe("Hallo!")
+}
+```]
+
+Man kann auch "sonst" benutzten, als Gegenstück zu "falls":
+
+#geiss_g[```geiss
+falls 2 = 3 {
+    schreibe("Mathe macht keinen Sinn!")
+}
+sonst {
+    schreibe("Mathe macht Sinn!")
+}
+```]
+
+Man kann auch "sonst" und "falls" kombinieren zu "sonst falls":
+
+#geiss_g[```geiss
+falls 2 > 3 {
+    schreibe("2 > 3")
+}
+sonst falls 2 < 3 {
+    schreibe("2 < 3")
+}
+sonst {
+    schreibe("2 = 3")
+}
+```]
+
+= Schleifen
+
+In  Geiss kann man je nach Problem unterschiedliche Schleifen benutzten.
+
+== Wiederhole
+
+Wenn man einen Block Code einfach n-Mal wiederholen will, dann kan man die wiederhole-Schleife nutzten:
+
+#geiss_g[```geiss
+wiederhole 2 mal {
+    schreibe("Hallo!")
+}
+```]
+
+Schreibt zwei Mal "Hallo!" in die Ausgabe.
+
+== Solange
+
+Die "Solange"-Schleife läuft so lange die Bedingung wahr ist. Sobald die Bedingung falsch wird, gibt es keinen nächsten Durchlauf mehr.
+
+#geiss_g[```geiss
+wahrheit mw <- wahr
+    
+solange mw {
+    schreibe("Hallo!")
+    mw <- falsch
+}
+```]
+
+Dieses Programm schreibt "Hallo!" in die Ausgabe, denn wen der Block zum ersten Mal fertig ausgeführt ist, ist die Bedingung nicht mehr wahr und die Schleife bricht ab.
+
+== Pro-Von
+
+Mit dieser Schlaufe kann man durch die Elemente einer Liste iterieren.
+
+#geiss_g[```geiss
+liste[nzahl] zahlen <- [12, 23, 34, 45, 56, 67, 78, 89]
+    
+pro nzahl nummer von zahlen {
+    schreibe(nummer)
+}
+```]
+
+Dieses Programm schreibt nacheinander alle Zahlen der Liste in die Ausgabe.
+
+Wichtiges Detail: pro/von Schleifen erstellen keinen neuen Bereich, also darf die neue Variable (im oberen Fall "nzahl nummer") nicht den gleichen Namen wie schon eine früher Erstellte.
+
+#geiss_g[```geiss
+liste[nzahl] zahlen <- [12, 23, 34, 45, 56, 67, 78, 89]
+
+nzahl nummer <- 0
+
+pro nzahl nummer von zahlen { // Produziert einen Fehler
+    schreibe(nummer)
+}
+```]
+
+Das Programm produziert einen Fehler, weil die Variable "nummer" schon existiert.
+
+= Signale
+
+Signale sind ein Weg, um gewisse Blöcke vorzeitig zu beenden.
+Es gibt drei Arten von Signalen:
+
+#geiss_g[```geiss
+beende programm
+beende funktion
+beende schleife
+```]
+
+Beende Programm beendet das Programm sofort und zwar egal, wo es aufgerufen wird.
+Die anderen Beiden Signale beenden den innersten jeweiligen Block.
+
+Wenn man "beende schleife" oder "beende programm" aufruft, man sich aber nicht in einer Schleife oder Funktion befindet, endet das Programm stumm.
+Das wird in Zukünftigen Versionen auch geändert.
+
+Ein kleines Beispiel:
+
+#geiss_g[```geiss
+funktion abc (text eingabe) -> wahrheit w
+{   
+    falls eingabe = "abc"
+    {
+        schreibe("abc!")
+        w <- wahr
+        beende funktion
+    }
+    
+    schreibe("nöd abc!") // eingabe = abc -> Fn. schon oben beendet.
+    w <- falsch
+}
+
+beende programm
+
+schreibe("Hallo!") // Wird nie ausgeführt...
+```]
 
 = Methoden
 Es gibt einige Funktionen, welche schon vom Beginn des Programmes benutztbar sind. In meiner Sprache werden sie "Methoden" genannt. Es folgt eine Liste, welche die Funktionsweisen aller Methoden beschreibt.
@@ -204,10 +469,16 @@ funktion zufällige_zahl(ganze zahl unteres_limit, ganze zahl oberes_limit) -> g
 Erzeugt eine zufällige ganze Zahl im Bereich zwischen dem unteren und dem oberen Limit.
 
 #geiss_g[```geiss
-funktion indizes(liste liste) -> liste indizes
+funktion indizes(liste eingabe) -> liste indizes
 ```]
 
 Gibt eine Liste mit den Indizes der übergebenen Liste zurück. (Es ist nütztlich für pro/von-Schleifen)
+
+#geiss_g[```geiss
+funktion indizes(liste eingabe) -> nzahl länge
+```]
+
+Gibt die Länge der eingegebenen Liste als natürliche Zahl zurück.
 
 = Zahlen und Listen
 
@@ -215,6 +486,8 @@ Vielleicht ist das nicht so spannend für nicht technische Leute, aber wenn jema
 mit GEISS programmiert und sich nicht sicher ist, ob der Fehler an ihm liegt, oder
 an meiner Implementation von GEISS, dann können sich folgende Listen möglicherweise
 als sehr nützlich auszeichnen.
+
+Der Interpreter für diese Version (Alpha.1) besteht aus 5'028 Zeilen Code.
 
 == Liste der Operatoren
 <liste_operatoren>

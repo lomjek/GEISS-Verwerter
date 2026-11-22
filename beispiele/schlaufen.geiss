@@ -6,4 +6,6 @@ schreibe(als_text(x))
 
 solange nicht x > 20  x <- x + 1 
 
+wiederhole 2 mal schreibe("Hallo")
+
 schreibe(als_text(x))

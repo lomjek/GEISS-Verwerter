@@ -197,9 +197,6 @@ struct Wert
         return Wert(); // TODO: Braucht es das?
 
       case WertTyp.WAHRHEIT:
-        if (*this.wahrheit || *other.wahrheit)
-          return Wert(new bool(true));
-
         return Wert(new bool(false));
 
       case WertTyp.INVALID:
