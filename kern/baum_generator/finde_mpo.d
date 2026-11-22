@@ -74,8 +74,8 @@ private uint get_op_prio_length()
 /// Hält den Wert und den index zum Glied, welches am dringendsten gebaut werden muss.
 struct MPO
 {
-  ulong value = 0;
-  ulong index = 0;
+  size_t value = 0;
+  size_t index = 0;
 
   pure nothrow @safe
   string toString() const
@@ -84,7 +84,7 @@ struct MPO
   }
 
   pure nothrow @safe @nogc
-  void passe_an(Aktion_Gewicht op, ulong index)
+  void passe_an(Aktion_Gewicht op, size_t index)
   {
     if (links_gebunden.contains(op) && this.value <= op)
     {
@@ -107,9 +107,9 @@ MPO finde_MPO(Glied[] glieder_liste)
   if (glieder_liste.length == 0)
     return current_mpo;
 
-  for (ulong idx = glieder_liste.length; idx > 0; idx--)
+  for (size_t idx = glieder_liste.length; idx > 0; idx--)
   {
-    ulong i = idx - 1;
+    size_t i = idx - 1;
     Glied glied = glieder_liste[i];
 
     if (glied.ist_vollständig)

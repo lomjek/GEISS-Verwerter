@@ -60,15 +60,14 @@ Glied[] lese_linie(dstring linie)
 
   dstring[] wort_liste = linie.split(" ");
 
-  ulong wort_liste_length = wort_liste.length;
+  size_t wort_liste_length = wort_liste.length;
   dstring wort_präfix;
 
-  for (ulong i = 0; i < wort_liste_length; i++)
+  for (size_t i = 0; i < wort_liste_length; i++)
   {
     dstring rohes_wort = wort_liste[i];
     dstring wort = (rohes_wort == "\n"d || rohes_wort == "\r"d || rohes_wort == "\t"d)
-      ? rohes_wort
-      : rohes_wort.strip([' ']).to!dstring;
+      ? rohes_wort : rohes_wort.strip([' ']).to!dstring;
 
     wort = wort_präfix ~ wort;
     wort_präfix = [];
@@ -158,10 +157,10 @@ Glied[] lese_linie(dstring linie)
     set_pen_trait();
   }
 
-  ulong length = token_liste.length;
+  size_t length = token_liste.length;
 
   //MARK: Aufräumen
-  for (ulong i = 1; i < length; i++) // Der erste Durchgang beachtet Minuszahlen
+  for (size_t i = 1; i < length; i++) // Der erste Durchgang beachtet Minuszahlen
   {
     if (token_liste[i].classinfo == Wert_Glied.classinfo &&
       token_liste[i - 1].classinfo == OperationGlied.classinfo)

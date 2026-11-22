@@ -14,7 +14,7 @@ import std.stdio : write, writeln;
 
 // @ {} [] # \ || != ~
 
-Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied(Glied[] glieder_liste, size_t glied_index)
 {
   Glied glied = glieder_liste[glied_index];
 
@@ -52,7 +52,7 @@ Glied[] baue_glied(Glied[] glieder_liste, ulong glied_index)
   return glieder_liste;
 }
 
-Glied[] baue_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_liste, size_t glied_index)
 {
   if (glied_index <= 0 || glied_index >= glieder_liste.length)
     throw new Parse_Fehler("Eine Operation kann nicht das erste oder letzte Glied sein.");
@@ -72,7 +72,7 @@ Glied[] baue_glied_OperationenGlied(OperationGlied op_glied, Glied[] glieder_lis
   return glieder_liste;
 }
 
-Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste, size_t glied_index)
 {
   if (glied_index < 1)
     throw new Position_Fehler(svg, glied_index);
@@ -116,7 +116,7 @@ Glied[] baue_glied_SetzeVarGlied(Setze_Variable_Glied svg, Glied[] glieder_liste
   return glieder_liste;
 }
 
-Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if ((glied_index + 2) >= glieder_liste.length)
   {
@@ -149,7 +149,7 @@ Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ul
   return glieder_liste;
 }
 
-Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if ((glied_index + 1) >= glieder_liste.length)
   {
@@ -166,7 +166,7 @@ Glied[] baue_glied_Sonst_Glied(Sonst_BlockGlied glied, Glied[] glieder_liste, ul
   return glieder_liste;
 }
 
-Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if ((glied_index + 2) >= glieder_liste.length)
     throw new Parse_Fehler("Das Wort SOLANGE ist zu nahe am Ende...");
@@ -185,7 +185,7 @@ Glied[] baue_Solange_Glied(Solange_BlockGlied glied, Glied[] glieder_liste, ulon
   return glieder_liste;
 }
 
-Glied[] baue_glied_Erstelle_Variable_Glied(WT_Glied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_Erstelle_Variable_Glied(WT_Glied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if ((glied_index + 1) >= glieder_liste.length)
     throw new Parse_Fehler("Das WT_Glied ist zu nahe am Ende...");
@@ -210,7 +210,7 @@ Glied[] baue_glied_Erstelle_Variable_Glied(WT_Glied glied, Glied[] glieder_liste
     throw new Parse_Fehler(glieder_liste[glied_index + 1].toString);
 }
 
-Glied[] baue_glied_Wiederhole_BlockGlied(Wiederhole_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_Wiederhole_BlockGlied(Wiederhole_BlockGlied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if (glied_index + 3 >= glieder_liste.length)
   {
@@ -239,7 +239,7 @@ Glied[] baue_glied_Wiederhole_BlockGlied(Wiederhole_BlockGlied glied, Glied[] gl
   return glieder_liste;
 }
 
-Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if ((glied_index + 1) >= glieder_liste.length)
     throw new Parse_Fehler("Die deklaration der Funktion ist zu nahe am Ende... (1)");
@@ -315,7 +315,7 @@ Glied[] baue_glied_FunktionErstellen_Glied(Erstelle_Variable_Glied glied, Glied[
   throw new Fehler("Leider noch kein support für Returns");
 }
 
-Glied[] baue_glied_Nicht_Glied(Nicht_Glied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_Nicht_Glied(Nicht_Glied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if ((glied_index + 1) >= glieder_liste.length)
     throw new Parse_Fehler("Es gibt nichts, was man negieren könnte...");
@@ -325,7 +325,7 @@ Glied[] baue_glied_Nicht_Glied(Nicht_Glied glied, Glied[] glieder_liste, ulong g
   return glieder_liste;
 }
 
-Glied[] baue_glied_Pro_Von_Glied(Pro_Von_BlockGlied glied, Glied[] glieder_liste, ulong glied_index)
+Glied[] baue_glied_Pro_Von_Glied(Pro_Von_BlockGlied glied, Glied[] glieder_liste, size_t glied_index)
 {
   if (glied_index + 4 >= glieder_liste.length)
   {

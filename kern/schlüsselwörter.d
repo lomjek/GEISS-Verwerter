@@ -120,7 +120,7 @@ bool wort_ist_sw(dstring wort)
 }
 
 private pure
-SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* wort_index)
+SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, size_t* wort_index)
 {
   foreach (SchlüsselWort sw, immutable dstring[] strs; multi_wort_sw)
   {
@@ -130,7 +130,7 @@ SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* w
     dstring[] ganzer_sw = [];
     size_t liste_index = *wort_index;
 
-    for (ulong i = 0; i < strs.length; i++)
+    for (size_t i = 0; i < strs.length; i++)
     {
       while (liste_index < wort_liste.length && wort_liste[liste_index].length == 0)
       {
@@ -151,7 +151,7 @@ SchlüsselWort erstelle_multi_wort_schlüsselwort(dstring[] wort_liste, ulong* w
   return SchlüsselWort.INVALID;
 }
 
-Glied wort_als_sw(dstring[] wort_liste, ulong* wort_index)
+Glied wort_als_sw(dstring[] wort_liste, size_t* wort_index)
 {
   SchlüsselWort sw = erstelle_multi_wort_schlüsselwort(wort_liste, wort_index);
 

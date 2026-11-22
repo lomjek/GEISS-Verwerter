@@ -38,8 +38,8 @@ private bool ist_fertig(Glied[] glieder_liste)
 //MARK: master_baum
 Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 {
-  ulong length = glieder_liste.length;
-  for (ulong i = 0; i < length; i++)
+  size_t length = glieder_liste.length;
+  for (size_t i = 0; i < length; i++)
   {
     Glied glied = glieder_liste[i];
 
@@ -75,9 +75,9 @@ Programm_BlockGlied generiere_master_baum(Glied[] glieder_liste)
 Glied[] generiere_baum(Glied[] glieder_liste)
 {
   Glied[][] matrix = [[]];
-  ulong depth = 0;
+  size_t depth = 0;
 
-  for (ulong i = 0; i < glieder_liste.length; i++)
+  for (size_t i = 0; i < glieder_liste.length; i++)
   {
     Glied glied = glieder_liste[i];
 
@@ -204,7 +204,7 @@ Glied[] generiere_linie(Glied[] glieder_liste)
     }
 
     MPO mpo = finde_MPO(glieder_liste);
-    ulong max_priority_index = mpo.index;
+    size_t max_priority_index = mpo.index;
 
     if (mpo == wiederholtes_MPO)
       _Op_wiederholungen++;

@@ -129,14 +129,14 @@ struct Nzahl
   private pure nothrow
   Nzahl addiere(const Nzahl other) const
   {
-    ulong max_len = this.länge > other.länge ? this.länge : other.länge;
+    size_t max_len = this.länge > other.länge ? this.länge : other.länge;
 
     ubyte[] resultat;
     resultat.reserve(max_len + 1);
     ubyte überschuss = 0;
     ushort summe = 0;
 
-    for (ulong i = 0; i < max_len; i++)
+    for (size_t i = 0; i < max_len; i++)
     {
       if (i < this.länge && i < other.länge)
         summe = cast(ushort)(this.werte[i] + other.werte[i] + überschuss);
@@ -174,7 +174,7 @@ struct Nzahl
 
     ushort buffer;
     ubyte carry_over = 0;
-    for (ulong i = 0; i < this.länge; i++)
+    for (size_t i = 0; i < this.länge; i++)
     {
       buffer = this.werte[i];
       ushort subtr = cast(ushort)((i < other.länge ? other.werte[i] : 0) + carry_over);
@@ -210,19 +210,19 @@ struct Nzahl
     if ((this.länge == 1 && this.werte[0] == 0) || (other.länge == 1 && other.werte[0] == 0))
       return Nzahl();
 
-    for (ulong i = 0; i < other.länge; i++)
+    for (size_t i = 0; i < other.länge; i++)
     {
       ubyte[] zwischenresultat = [];
       ubyte überschuss = 0;
 
-      ulong repeat = i;
+      size_t repeat = i;
       while (repeat != 0)
       {
         zwischenresultat ~= 0;
         repeat--;
       }
 
-      for (ulong j = 0; j < this.länge; j++)
+      for (size_t j = 0; j < this.länge; j++)
       {
         ushort ziffer = (this.werte[j] * other.werte[i]) + überschuss;
         überschuss = cast(ubyte)(ziffer >> 8); //oberer Byte des ushort, was übertragen wird...

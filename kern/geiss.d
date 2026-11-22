@@ -22,7 +22,7 @@ int main(string[] args)
     repl_mode = true;
 
     set_pen_trait(TextTrait.fgGreen);
-    writeln("Willkommen bei GEISS! Version: <-1>");
+    writeln("Willkommen bei GEISS! Version: <Alpha.1>");
     set_pen_trait(TextTrait.reset);
 
     enter_repl_loop();

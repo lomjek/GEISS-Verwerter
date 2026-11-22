@@ -164,7 +164,7 @@ bool wort_ist_op(dstring wort)
 
 /// Wir nehmen an, dass die dstring entries für die Operatoren aus einteiligen Teilen bestehen.
 private pure
-OperatorenTyp erstelle_multi_char_op(dstring[] wort_liste, ulong* wort_index)
+OperatorenTyp erstelle_multi_char_op(dstring[] wort_liste, size_t* wort_index)
 {
   foreach (OperatorenTyp opt, dstring multi_char_op; mehrteilige_operatoren)
   {
@@ -198,7 +198,7 @@ OperatorenTyp erstelle_multi_char_op(dstring[] wort_liste, ulong* wort_index)
   return OperatorenTyp.INVALID;
 }
 
-OperationGlied wort_als_op(dstring[] wort_liste, ulong* wort_index)
+OperationGlied wort_als_op(dstring[] wort_liste, size_t* wort_index)
 {
   if (!wort_ist_op(wort_liste[*wort_index]))
     throw new Parse_Fehler(

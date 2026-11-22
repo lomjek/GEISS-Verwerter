@@ -69,7 +69,7 @@ bool beginnt_text(dstring wort)
 }
 
 private pure nothrow
-bool braucht_space(const dstring[] wort_liste, ulong* wort_index, const dchar[] gesammelt)
+bool braucht_space(const dstring[] wort_liste, size_t* wort_index, const dchar[] gesammelt)
 {
   if (gesammelt.length == 0)
     return false;
@@ -90,7 +90,7 @@ bool braucht_space(const dstring[] wort_liste, ulong* wort_index, const dchar[] 
   return true;
 }
 
-Text als_wert_text(dstring[] wort_liste, ulong* wort_index)
+Text als_wert_text(dstring[] wort_liste, size_t* wort_index)
 {
   if (!wort_liste[*wort_index].beginnt_text)
     throw new Fehler("Das hier ist kein Text");

@@ -82,7 +82,7 @@ bool wort_ist_wert_typ(dstring wort)
 }
 
 private pure
-WertTyp erstelle_multi_wort_wert_typ(dstring[] wort_liste, ulong* wort_index)
+WertTyp erstelle_multi_wort_wert_typ(dstring[] wort_liste, size_t* wort_index)
 {
   foreach (WertTyp wt, immutable dstring[] strs; multi_wort_wert_typ)
   {
@@ -90,7 +90,7 @@ WertTyp erstelle_multi_wort_wert_typ(dstring[] wort_liste, ulong* wort_index)
       continue; // Wenn das multi_wort_wt länger ist als restliche Glieder, beende früher.
 
     dstring[] ganzer_wt = [];
-    for (ulong i = 0; i < strs.length; i++)
+    for (size_t i = 0; i < strs.length; i++)
     {
       ganzer_wt ~= wort_liste[*wort_index + i];
     }
@@ -105,7 +105,7 @@ WertTyp erstelle_multi_wort_wert_typ(dstring[] wort_liste, ulong* wort_index)
   return WertTyp.INVALID;
 }
 
-WT_Glied wort_als_wert_typ(dstring[] wort_liste, ulong* wort_index)
+WT_Glied wort_als_wert_typ(dstring[] wort_liste, size_t* wort_index)
 {
   WertTyp wt = erstelle_multi_wort_wert_typ(wort_liste, wort_index);
 

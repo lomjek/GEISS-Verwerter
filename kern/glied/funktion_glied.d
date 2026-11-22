@@ -72,7 +72,7 @@ class Funktion_Abrufen_Glied : Glied
           arg_namen.length.to!string ~ ", habe aber " ~ argumente.length.to!string ~ ".");
     }
 
-    for (ulong i = 0; i < argumente.length; i++)
+    for (size_t i = 0; i < argumente.length; i++)
     {
       Wert* argument = new Wert(argumente[i].verwerte(bereich));
       setze_variable(neuer_bereich, arg_namen[i], argument);

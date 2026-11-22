@@ -2,6 +2,7 @@
 **/*.o
 **/*.dc
 **/*.a
+**/*.exe
 
 # IDEs
 .vscode

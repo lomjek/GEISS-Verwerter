@@ -65,7 +65,7 @@
 				"-Os",
 				"-flto=full"
 			],
-			"lflags": [
+			"lflags-posix": [
 				"--gc-sections"
 			]
 		},

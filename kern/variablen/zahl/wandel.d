@@ -72,7 +72,8 @@ Zahl als_zahl(dstring wort)
   dstring nach_komma_stellen;
   bool positiv = true;
 
-  if (wort[0] == '-'){
+  if (wort[0] == '-')
+  {
     positiv = false;
     wort = wort[1 .. wort.length];
   }
@@ -129,7 +130,7 @@ int als_int(const Nzahl liste, bool throw_on_overflow = true)
   int resultat = cast(int) kurze_liste[0]
     | (cast(int) kurze_liste[1] << 8)
     | (
-        cast(int) kurze_liste[2] << 16)
+      cast(int) kurze_liste[2] << 16)
     | (cast(int) kurze_liste[3] << 24);
 
   return resultat;
@@ -163,7 +164,7 @@ size_t als_size_t(const Nzahl liste, bool throw_on_overflow = true)
 }
 
 //MARK: als_string
-string als_string(const (ubyte[]) num)
+string als_string(const(ubyte[]) num)
 {
   if (num.length == 0)
   {
@@ -192,7 +193,7 @@ string als_string(const (ubyte[]) num)
   result.length = digits.length;
   for (size_t i = 0; i < digits.length; i++)
   {
-    result[i] = cast(char)('0' + digits[digits.length.to!long - 1 - i]);
+    result[i] = cast(char)('0' + digits[digits.length - 1 - i]);
   }
 
   return cast(string) result;
@@ -204,11 +205,13 @@ string als_string_schön(const Nzahl n)
   return als_string(n.werte[0 .. n.länge]);
 }
 
-string als_string_internal(const Nzahl n){
-  return "Nz(" ~ n.länge.to!string ~ " | "  ~ n.werte.to!string ~ ")";
+string als_string_internal(const Nzahl n)
+{
+  return "Nz(" ~ n.länge.to!string ~ " | " ~ n.werte.to!string ~ ")";
 }
 
-string als_string(const Nzahl n, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+string als_string(const Nzahl n, Str_conv_typ typ = Str_conv_typ.AUSGABE)
+{
   if (typ == Str_conv_typ.INTERNAL)
     return als_string_internal(n);
 
@@ -224,11 +227,13 @@ string als_string_schön(const Gzahl g)
     return als_string(Nzahl(g.grösse.werte, g.grösse.länge));
 }
 
-string als_string_internal(const Gzahl g){
-  return "Gz(" ~ g.länge.to!string ~ " | " ~ g.positiv.to!string ~  " | "  ~ g.werte.to!string ~ ")";
+string als_string_internal(const Gzahl g)
+{
+  return "Gz(" ~ g.länge.to!string ~ " | " ~ g.positiv.to!string ~ " | " ~ g.werte.to!string ~ ")";
 }
 
-string als_string(const Gzahl g, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+string als_string(const Gzahl g, Str_conv_typ typ = Str_conv_typ.AUSGABE)
+{
   if (typ == Str_conv_typ.INTERNAL)
     return als_string_internal(g);
 
@@ -255,11 +260,14 @@ string als_string_schön(const Zahl zahl)
   return result;
 }
 
-string als_string_internal(const Zahl z){
-  return "Z(" ~ z.länge.to!string ~ " | " ~ z.positiv.to!string ~  " | "  ~ z.werte.to!string ~ " | " ~ z.nach_komma.als_string_internal ~ ")";
+string als_string_internal(const Zahl z)
+{
+  return "Z(" ~ z.länge.to!string ~ " | " ~ z.positiv.to!string ~ " | " ~ z
+    .werte.to!string ~ " | " ~ z.nach_komma.als_string_internal ~ ")";
 }
 
-string als_string(const Zahl z, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+string als_string(const Zahl z, Str_conv_typ typ = Str_conv_typ.AUSGABE)
+{
   if (typ == Str_conv_typ.INTERNAL)
     return als_string_internal(z);
 
@@ -275,7 +283,7 @@ ubyte[] floatToLittleEndianBytes(float value)
   size_t byteCount = 1;
 
   while (byteCount < ulong.sizeof &&
-      (integerPart >> (byteCount * 8)) != 0)
+    (integerPart >> (byteCount * 8)) != 0)
   {
     ++byteCount;
   }
@@ -290,7 +298,7 @@ ubyte[] floatToLittleEndianBytes(float value)
   return result;
 }
 
-  private pure nothrow @safe
+private pure nothrow @safe
 float littleEndianBytesToFloat(const(ubyte)[] bytes)
 {
   ulong integerPart = 0;
@@ -338,14 +346,15 @@ string als_string_schön(const Bruch b, size_t precision = 4)
   return resultat.to!string;
 }
 
-string als_string_internal(const Bruch b){
+string als_string_internal(const Bruch b)
+{
   return "B(" ~ b.zähler.als_string_internal ~ " | " ~ b.nenner.als_string_internal ~ ")";
 }
 
-string als_string(const Bruch b, Str_conv_typ typ = Str_conv_typ.AUSGABE){
+string als_string(const Bruch b, Str_conv_typ typ = Str_conv_typ.AUSGABE)
+{
   if (typ == Str_conv_typ.INTERNAL)
     return als_string_internal(b);
 
   return als_string_schön(b);
 }
-
