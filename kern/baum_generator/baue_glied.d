@@ -135,7 +135,8 @@ Glied[] baue_glied_Falls_Glied(Falls_BlockGlied glied, Glied[] glieder_liste, ul
   glieder_liste = glieder_liste.remove(glied_index + 2);
   glieder_liste = glieder_liste.remove(glied_index + 1);
 
-  if (glieder_liste[glied_index + 1].instanceof!Sonst_BlockGlied)
+  if (glied_index + 1 < glieder_liste.length &&
+    glieder_liste[glied_index + 1].instanceof!Sonst_BlockGlied)
   {
     Sonst_BlockGlied sbgl = cast(Sonst_BlockGlied) glieder_liste[glied_index + 1];
 
@@ -338,7 +339,11 @@ Glied[] baue_glied_Pro_Von_Glied(Pro_Von_BlockGlied glied, Glied[] glieder_liste
   if (!glieder_liste[glied_index + 1].is_class!Erstelle_Variable_Glied)
     throw new Parse_Fehler("Nach dem Wort PRO muss man eine Variable erstellen.");
 
-  glied.variable = cast(Erstelle_Variable_Glied) glieder_liste[glied_index + 1];
+  Erstelle_Variable_Glied evg = cast(Erstelle_Variable_Glied) glieder_liste[glied_index + 1];
+  glied.var_name = evg.var_name;
+  glied.var_typ = evg.var_typ;
+  glied.init_wert = Wert(evg.wert_typ.vt, null);
+
   glied.liste = glieder_liste[glied_index + 3];
 
   if (glieder_liste[glied_index + 4].instanceof!BlockGlied)

@@ -9,6 +9,7 @@ import wert;
 import zahl;
 import fehler;
 import variablen.speicher;
+import variablen.variable;
 import liste;
 
 import std.stdio : write, writeln;
@@ -113,6 +114,8 @@ class Wiederhole_BlockGlied : BlockGlied
         throw s;
     }
 
+    gemachte_wiederholungen = Nzahl();
+
     return Wert(WertTyp.INVALID, null);
   }
 
@@ -130,17 +133,21 @@ class Wiederhole_BlockGlied : BlockGlied
 //MARK: PRO VON
 class Pro_Von_BlockGlied : BlockGlied
 {
-  Erstelle_Variable_Glied variable;
+  dstring var_name;
+  Wert init_wert;
+  VariablenTyp var_typ;
+
   Glied liste;
 
   override public void schreibe_baum()
   {
     write("[PRO ");
-    if (variable !is null)
-      variable.schreibe_baum();
+    write(var_name);
     write(" VON ");
+
     if (liste !is null)
       liste.schreibe_baum();
+
     write("]{");
     schreibe_glied_liste(this.aktionen);
     write("}");
@@ -148,8 +155,12 @@ class Pro_Von_BlockGlied : BlockGlied
 
   override public Wert verwerte(uint bereich)
   {
-    dstring var_name = variable.var_name;
-    variable.verwerte(bereich); // TODO: Es wird in Zukunft ein neues System brauchen, falls der variablenname schon besetzt ist.
+    if (init_wert.typ != WertTyp.INVALID)
+      erstelle_variable(bereich, var_name, VariablenTyp.FIX, new Wert(init_wert)); // TODO: Es wird in Zukunft ein neues System mit dem Bereich brauchen, falls der variablenname schon besetzt ist.
+
+    else
+      erstelle_variable(bereich, var_name, VariablenTyp.VARIABEL, null);
+
     Wert list = liste.verwerte(bereich);
 
     if (list.typ != WertTyp.LISTE)
@@ -157,19 +168,32 @@ class Pro_Von_BlockGlied : BlockGlied
 
     Liste l = *list.liste;
 
-    foreach (Wert wert; l.werte)
+    try
     {
-      setze_variable(bereich, var_name, new Wert(wert));
+      foreach (Wert wert; l.werte)
+      {
+        setze_variable(bereich, var_name, new Wert(wert));
 
-      verwerte_glieder_liste(bereich, aktionen);
+        verwerte_glieder_liste(bereich, aktionen);
+      }
     }
+    catch (Signal s)
+    {
+      if (s.signal_typ != SignalTyp.BEENDE_SCHLEIFE)
+      {
+        lösche_variable(bereich, var_name);
+        throw s;
+      }
+    }
+
+    lösche_variable(bereich, var_name);
 
     return Wert(WertTyp.INVALID, null);
   }
 
   override public bool ist_vollständig()
   {
-    return (variable !is null) && (liste !is null);
+    return (var_name.length != 0) && (liste !is null);
   }
 
   override string toString() const

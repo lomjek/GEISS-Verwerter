@@ -1,12 +1,18 @@
-liste[ganze zahl] durcheinander <- [-4, 5, -6, 2, 0, 10]
+liste durcheinander <- [-4, 5, -6, 2, 0, 10]
 
-funktion ist_sortiert(liste[ganze zahl] test) -> wahrheit ausgabe
+funktion ist_sortiert(liste test) -> wahrheit ausgabe
 {
+  falls länge(test) <= 1
+  {
+    ausgabe <- wahr
+    beende funktion
+  }
+
 	//Die indizes funktion gibt dir eine Liste mit
 	//natürlichen Zahlen (nicht fix)
-	pro natürliche zahl index der liste indizes(test)
+	pro natürliche zahl index von indizes(test)
 	{
-		falls index = länge(test) {
+		falls index + 1 >= länge(test) {
 			beende schleife
 		}
 
@@ -20,24 +26,43 @@ funktion ist_sortiert(liste[ganze zahl] test) -> wahrheit ausgabe
 	ausgabe <- wahr
 }
 
-funktion tausche_felder(natürliche zahl index_1, natürliche zahl index_2) {
+funktion tausche_felder(natürliche zahl index_1, natürliche zahl index_2)
+{
+  falls index_1 >= länge(durcheinander)
+  {
+    beende funktion
+  }
+
+  falls index_2 >= länge(durcheinander)
+  {
+    beende funktion
+  }
+
 	ganze zahl zwischenspeicher <- durcheinander[index_1]
 	durcheinander[index_1] <- durcheinander[index_2]
 	durcheinander[index_2] <- zwischenspeicher
 }
 
 schreibe(durcheinander)
-solange nicht ist_sortiert(durcheinander){
-	pro natürliche zahl index der liste indizes(test)
-	{
-		falls index = länge(test) {
-			beende schleife //Nur die innere
-		}
 
-		falls test[index] > test[index + 1]
-		{
-			tausche_felder(index, index + 1)
+solange nicht ist_sortiert(durcheinander)
+{
+  falls länge(durcheinander) <= 1
+  {
+    beende schleife
+  }
+
+	pro nzahl i von indizes(durcheinander)
+	{
+		falls i + 1 >= länge(durcheinander)
+    {
+      beende schleife
+    }
+    falls durcheinander[i] > durcheinander[i + 1]
+    {
+			tausche_felder(i, i + 1)
 		}
 	}
 }
+
 schreibe(durcheinander)

@@ -10,6 +10,7 @@ import wert;
 import glied.funktion_glied;
 
 import ext.string;
+import ext.algorithm : remove;
 
 import std.conv : to;
 
@@ -86,6 +87,11 @@ static this()
         "indizes"d,
         VariablenTyp.FUNKTION,
         cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.INDIZES))
+      ),
+      Variable(
+        "länge"d,
+        VariablenTyp.FUNKTION,
+        cast(void*)(new EingebauteFunktion_Glied(MethodenTyp.LÄNGE))
       )
     ]);
 }
@@ -241,6 +247,28 @@ void erstelle_variable(uint bereich_num, dstring var_name, VariablenTyp var_typ,
   }
 
   bereiche[bereich_num].variablen ~= Variable(var_name, var_typ, init_wert);
+}
+
+void lösche_variable(uint bereich_num, dstring var_name)
+{
+  if (bereiche[bereich_num] == null)
+    throw new Error("Der Bereich für die Variable existiert nicht!");
+
+  if (!variable_existiert(bereich_num, var_name))
+    throw new Variable_Nicht_Existent_Fehler(var_name, bereich_num.variablen_namen);
+
+  Bereich* bereich = bereiche[bereich_num];
+
+  for (size_t i = 0; i < bereich.variablen.length; i++)
+  {
+    Variable var = bereich.variablen[i];
+
+    if (var.identifier == var_name)
+    {
+      bereich.variablen = bereich.variablen.remove(i);
+      return;
+    }
+  }
 }
 
 void setze_variable(uint bereich_num, dstring var_name, Wert* neuer_wert)

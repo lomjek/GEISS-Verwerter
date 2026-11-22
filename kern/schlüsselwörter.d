@@ -5,7 +5,7 @@ import ext.string : strip;
 import glied.glied : SW_Glied, Glied, Nicht_Glied;
 import glied.block_glied : Falls_BlockGlied, Sonst_BlockGlied;
 import glied.schleife_glied : Solange_BlockGlied, Wiederhole_BlockGlied, Pro_Von_BlockGlied;
-import glied.signal_glied : Beende_Programm_Glied, Beende_Funktion_Glied;
+import glied.signal_glied : Beende_Programm_Glied, Beende_Funktion_Glied, Beende_Schleife_Glied;
 
 import fehler.parse_fehler : Parse_Fehler;
 
@@ -87,6 +87,9 @@ Glied baue_richtiges_sw_glied(SchlüsselWort sw)
 
   case SchlüsselWort.BEENDE_PROGRAMM:
     return new Beende_Programm_Glied();
+
+  case SchlüsselWort.BEENDE_SCHLEIFE:
+    return new Beende_Schleife_Glied();
 
   case SchlüsselWort.NICHT:
     return new Nicht_Glied();

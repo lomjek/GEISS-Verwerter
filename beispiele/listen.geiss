@@ -2,14 +2,12 @@ liste simpsons <- ["Homer", "Lisa", "Brian", "-"]
 liste[text] simpson <- ["Bart"]
 liste zahlen <- [2, 3, 5 + 2, , 8 / 0.5]
 
-simpson[0] <- "123"
 simpson <+ "Bart"
 
 liste hallo <- simpson + simpsons
 
-schreibe(simpsons[1])
-schreibe(simpson[0])
 schreibe(hallo)
 schreibe(indizes(hallo));
 
+pro nzahl i von indizes(hallo) schreibe(i)
 pro nzahl i von indizes(hallo) schreibe(i)

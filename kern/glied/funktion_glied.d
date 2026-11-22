@@ -179,6 +179,7 @@ enum MethodenTyp : ubyte
   EINGABE,
   ZUFÄLLIGE_ZAHL,
   INDIZES,
+  LÄNGE,
 }
 
 class EingebauteFunktion_Glied : Funktion_Glied
@@ -277,6 +278,15 @@ class EingebauteFunktion_Glied : Funktion_Glied
       setze_variable(bereich, "indizes", new Wert(new Liste(indizes)));
 
       return Wert();
+
+    case MethodenTyp.LÄNGE:
+      Wert orig_liste = *cast(Wert*) lies_variable(bereich, "eingabe").wert;
+      if (orig_liste.typ != WertTyp.LISTE)
+        throw new Fehler("Die Funktion 'länge' braucht eine Liste als Eingabe!");
+
+      setze_variable(bereich, "länge", new Wert(new Nzahl((*orig_liste.liste).länge)));
+
+      return Wert();
     }
   }
 
@@ -339,6 +349,11 @@ class EingebauteFunktion_Glied : Funktion_Glied
     {
       parameter ~= new Erstelle_Variable_Glied("eingabe", WertTyp.LISTE);
       return_values ~= new Erstelle_Variable_Glied("indizes", WertTyp.LISTE);
+    }
+    else if (typ == MethodenTyp.LÄNGE)
+    {
+      parameter ~= new Erstelle_Variable_Glied("eingabe", WertTyp.LISTE);
+      return_values ~= new Erstelle_Variable_Glied("länge", WertTyp.NATÜRLICHE_ZAHL);
     }
 
     super(parameter, return_values, new BlockGlied());

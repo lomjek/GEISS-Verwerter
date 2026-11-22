@@ -65,7 +65,10 @@ Glied[] lese_linie(dstring linie)
 
   for (ulong i = 0; i < wort_liste_length; i++)
   {
-    dstring wort = wort_liste[i].strip;
+    dstring rohes_wort = wort_liste[i];
+    dstring wort = (rohes_wort == "\n"d || rohes_wort == "\r"d || rohes_wort == "\t"d)
+      ? rohes_wort
+      : rohes_wort.strip([' ']).to!dstring;
 
     wort = wort_präfix ~ wort;
     wort_präfix = [];
@@ -180,6 +183,16 @@ Glied[] lese_linie(dstring linie)
           Zahl* z = cast(Zahl*) var.wert;
           z.vor_komma.positiv = false;
           (cast(Wert_Glied) token_liste[i]).wert = Wert(WertTyp.ZAHL, new Zahl(*z));
+          token_liste = token_liste.remove(i - 1);
+          i--;
+          length--;
+          continue;
+        }
+        else if (var.typ == WertTyp.GANZE_ZAHL)
+        {
+          Gzahl* gz = cast(Gzahl*) var.wert;
+          gz.positiv = false;
+          (cast(Wert_Glied) token_liste[i]).wert = Wert(WertTyp.GANZE_ZAHL, new Gzahl(*gz));
           token_liste = token_liste.remove(i - 1);
           i--;
           length--;

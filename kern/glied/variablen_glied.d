@@ -18,7 +18,7 @@ import std.conv : to;
 class Erstelle_Variable_Glied : Glied
 {
   WT_Glied wert_typ;
-  private VariablenTyp var_typ;
+  VariablenTyp var_typ;
   public dstring var_name;
 
   override public Wert verwerte(uint bereich)
